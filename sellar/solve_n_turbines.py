@@ -6,7 +6,6 @@ u_far = 8.5
 
 
 def ct(v):
-    print "Called ct"
     if v < 4.0:
         return np.array([0.1])
     elif v <= 25.0:
@@ -17,7 +16,6 @@ def ct(v):
 
 def wake_deficit(x, Ct, k=0.04, r0=40.0):
     if x > 0.0:
-        print "Called wake"
         return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x) / r0) ** 2.0
     else:
         return 0.0
@@ -136,7 +134,7 @@ class SpeedDeficits(ExplicitComponent):
         outputs['U'] = u_far * (1.0 - dU)
 
 
-class TurbineArray(Group):
+class WakeModel(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
@@ -160,12 +158,12 @@ class TurbineArray(Group):
 
 
 if __name__ == '__main__':
-    from openmdao.api import NonlinearBlockGS
+    from openmdao.api import LinearBlockGS, DirectSolver, ScipyIterativeSolver, LinearBlockJac, LinearRunOnce
     prob = Problem()
 
-    prob.model = TurbineArray()
-    NS = prob.model.nonlinear_solver = NonlinearBlockGS()
-
+    prob.model = WakeModel()
+    NS = prob.model.linear_solver = LinearRunOnce()
+    NS.options['iprint'] = 1
     prob.setup()
     # view_model(prob)
 
