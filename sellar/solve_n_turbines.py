@@ -1,4 +1,4 @@
-from openmdao.api import Problem, Group, ExplicitComponent, view_model
+from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp
 from numpy import sqrt
 import numpy as np
 
@@ -44,10 +44,10 @@ def distance(a, b):
 n_turbines = 3
 
 
-class UnknownWindSpeed(ExplicitComponent):
+class ThrustCoefficient(ExplicitComponent):
 
     def __init__(self, number):
-        super(UnknownWindSpeed, self).__init__()
+        super(ThrustCoefficient, self).__init__()
         self.number = number
 
     def setup(self):
@@ -56,21 +56,37 @@ class UnknownWindSpeed(ExplicitComponent):
             if n != self.number:
                 self.add_input('U{}'.format(n), val=u_far)
 
-        self.add_output('dist', shape=n_turbines - 1, val=560.0)
         self.add_output('ct', shape=n_turbines - 1, val=0.79)
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
-        d = np.array([])
         c_t = np.array([])
         for n in range(n_turbines):
             if n != self.number:
-                d = np.append(d, [distance(self.number, n)])
                 c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
-        outputs['dist'] = d
         outputs['ct'] = c_t
+
+
+class DistanceComponent(ExplicitComponent):
+    def __init__(self, number):
+        super(DistanceComponent, self).__init__()
+        self.number = number
+
+    def setup(self):
+        # self.add_input('index')
+        self.add_output('dist', shape=n_turbines - 1, val=560.0)
+
+        # Finite difference all partials.
+        # self.declare_partials('*', '*', method='fd')
+
+    def compute(self, inputs, outputs):
+        d = np.array([])
+        for n in range(n_turbines):
+            if n != self.number:
+                d = np.append(d, [distance(self.number, n)])
+        outputs['dist'] = d
 
 
 class WakeDeficit(ExplicitComponent):
@@ -130,19 +146,23 @@ class TurbineArray(Group):
 
     def setup(self):
         for n in range(n_turbines):
-            self.add_subsystem('comp{}'.format(n), UnknownWindSpeed(n))
+            self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
+            # indep = self.add_subsystem('indep{}'.format(n), IndepVarComp())
+            # indep.add_output('index', val=n)
+            self.add_subsystem('dist{}'.format(n), DistanceComponent(n))
+            self.add_subsystem('deficits{}'.format(n), WakeDeficit())
             self.add_subsystem('sum{}'.format(n), SumComponent())
             self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
-            self.add_subsystem('deficits{}'.format(n), WakeDeficit())
-            self.connect('comp{}.dist'.format(n), 'deficits{}.dist'.format(n))
-            self.connect('comp{}.ct'.format(n), 'deficits{}.ct'.format(n))
+            self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
+            # self.connect('indep{}.index'.format(n), 'dist{}.index'.format(n))
+            self.connect('dist{}.dist'.format(n), 'deficits{}.dist'.format(n))
             self.connect('deficits{}.dU'.format(n), 'sum{}.all_deficits'.format(n))
             self.connect('sum{}.sos'.format(n), 'sqrt{}.summation'.format(n))
             self.connect('sqrt{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(n_turbines):
                 if m != n:
-                    self.connect('speed{}.U'.format(n), 'comp{}.U{}'.format(m, n))
+                    self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
 
 
 if __name__ == '__main__':
@@ -153,7 +173,7 @@ if __name__ == '__main__':
     NS = prob.model.nonlinear_solver = NonlinearBlockGS()
 
     prob.setup()
-    # view_model(prob)
+    view_model(prob)
 
     prob.run_model()
     for n in range(n_turbines):
