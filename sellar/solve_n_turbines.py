@@ -68,7 +68,17 @@ class UnknownWindSpeed(ExplicitComponent):
                 if d > 0.0:
                     suma += wake_deficit(d, ct(inputs['U{}'.format(n)])) ** 2.0
 
-        outputs['dU'] = sqrt(suma)
+        outputs['dU'] = suma
+
+
+class SqrtRSS(ExplicitComponent):
+
+    def setup(self):
+        self.add_input('summation')
+        self.add_output('sqrt')
+
+    def compute(self, inputs, outputs):
+        outputs['sqrt'] = sqrt(inputs['summation'])
 
 
 class SpeedDeficits(ExplicitComponent):
@@ -88,11 +98,10 @@ class TurbineArray(Group):
     def setup(self):
         for n in range(n_turbines):
             self.add_subsystem('comp{}'.format(n), UnknownWindSpeed(n))
-        for n in range(n_turbines):
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
-        for n in range(n_turbines):
-            self.connect('comp{}.dU'.format(n), 'speed{}.dU'.format(n))
-        for n in range(n_turbines):
+            self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
+            self.connect('comp{}.dU'.format(n), 'sqrt{}.summation'.format(n))
+            self.connect('sqrt{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(n_turbines):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'comp{}.U{}'.format(m, n))
