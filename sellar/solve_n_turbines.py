@@ -6,6 +6,7 @@ u_far = 8.5
 
 
 def ct(v):
+    print "Called ct"
     if v < 4.0:
         return np.array([0.1])
     elif v <= 25.0:
@@ -16,7 +17,7 @@ def ct(v):
 
 def wake_deficit(x, Ct, k=0.04, r0=40.0):
     if x > 0.0:
-        print x, Ct
+        print "Called wake"
         return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x) / r0) ** 2.0
     else:
         return 0.0
@@ -26,19 +27,11 @@ def speed(deficit):
     return u_far * (1.0 - deficit)
 
 
-def distance(a, b):
-    if a == 0:
+def distance(t1, t2):
+    if t2[0] < t1[0]:
+        return sqrt((t1[1] - t2[1]) ** 2.0 + (t1[2] - t2[2] ** 2.0))
+    else:
         return 0.0
-    elif a == 1:
-        if b == 0:
-            return 560.0
-        elif b == 2:
-            return 0.0
-    elif a == 2:
-        if b == 0:
-            return 560.0 * 2.0
-        elif b == 1:
-            return 560.0
 
 
 n_turbines = 3
@@ -75,16 +68,18 @@ class DistanceComponent(ExplicitComponent):
         self.number = number
 
     def setup(self):
-        self.add_output('dist', shape=n_turbines - 1, val=560.0)
+        self.add_input('layout', shape=(n_turbines, 3))
+        self.add_output('dist', shape=n_turbines - 1, val=1.0)
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
+        layout = inputs['layout']
         d = np.array([])
-        for n in range(n_turbines):
+        for n in range(len(layout)):
             if n != self.number:
-                d = np.append(d, [distance(self.number, n)])
+                d = np.append(d, [distance(layout[self.number], layout[n])])
         outputs['dist'] = d
 
 
@@ -144,6 +139,8 @@ class SpeedDeficits(ExplicitComponent):
 class TurbineArray(Group):
 
     def setup(self):
+        indep2 = self.add_subsystem('indep2', IndepVarComp())
+        indep2.add_output('layout', np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
             self.add_subsystem('dist{}'.format(n), DistanceComponent(n))
@@ -152,6 +149,7 @@ class TurbineArray(Group):
             self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
+            self.connect('indep2.layout', 'dist{}.layout'.format(n))
             self.connect('dist{}.dist'.format(n), 'deficits{}.dist'.format(n))
             self.connect('deficits{}.dU'.format(n), 'sum{}.all_deficits'.format(n))
             self.connect('sum{}.sos'.format(n), 'sqrt{}.summation'.format(n))
@@ -169,7 +167,7 @@ if __name__ == '__main__':
     NS = prob.model.nonlinear_solver = NonlinearBlockGS()
 
     prob.setup()
-    view_model(prob)
+    # view_model(prob)
 
     prob.run_model()
     for n in range(n_turbines):
