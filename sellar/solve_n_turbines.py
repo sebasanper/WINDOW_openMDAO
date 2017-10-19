@@ -99,7 +99,7 @@ class WakeDeficit(ExplicitComponent):
         outputs['dU'] = deficits
 
 
-class SumComponent(ExplicitComponent):
+class SumSquares(ExplicitComponent):
     def setup(self):
         self.add_input('all_deficits', shape=n_turbines - 1)
         self.add_output('sos')
@@ -112,7 +112,7 @@ class SumComponent(ExplicitComponent):
         outputs['sos'] = summation
 
 
-class SqrtRSS(ExplicitComponent):
+class Sqrt(ExplicitComponent):
 
     def setup(self):
         self.add_input('summation')
@@ -134,22 +134,24 @@ class SpeedDeficits(ExplicitComponent):
         outputs['U'] = u_far * (1.0 - dU)
 
 
+class WakeMergeRSS(Group):
+    def setup(self):
+        self.add_subsystem('sum', SumSquares(), promotes_inputs=['all_deficits'])
+        self.add_subsystem('sqrt', Sqrt(), promotes_outputs=['sqrt'])
+        self.connect('sum.sos', 'sqrt.summation')
+
+
 class WakeModel(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
             self.add_subsystem('dist{}'.format(n), DistanceComponent(n))
             self.add_subsystem('deficits{}'.format(n), WakeDeficit())
-            merge = self.add_subsystem('merge{}'.format(n), Group())
-            merge.add_subsystem('sum'.format(n), SumComponent(), promotes_inputs=['all_deficits'])
-            merge.add_subsystem('sqrt'.format(n), SqrtRSS(), promotes_outputs=['sqrt'])
-            # self.add_subsystem('sum{}'.format(n), SumComponent())
-            # self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
+            self.add_subsystem('merge{}'.format(n), WakeMergeRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
-            merge.connect('sum.sos'.format(n), 'sqrt.summation'.format(n))
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('indep2.layout', 'dist{}.layout'.format(n))
             self.connect('dist{}.dist'.format(n), 'deficits{}.dist'.format(n))
