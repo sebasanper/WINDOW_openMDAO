@@ -36,7 +36,7 @@ def distance(a, b):
             return 0.0
     elif a == 2:
         if b == 0:
-            return 1120.0
+            return 560.0 * 2.0
         elif b == 1:
             return 560.0
 
@@ -75,7 +75,6 @@ class DistanceComponent(ExplicitComponent):
         self.number = number
 
     def setup(self):
-        # self.add_input('index')
         self.add_output('dist', shape=n_turbines - 1, val=560.0)
 
         # Finite difference all partials.
@@ -147,15 +146,12 @@ class TurbineArray(Group):
     def setup(self):
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
-            # indep = self.add_subsystem('indep{}'.format(n), IndepVarComp())
-            # indep.add_output('index', val=n)
             self.add_subsystem('dist{}'.format(n), DistanceComponent(n))
             self.add_subsystem('deficits{}'.format(n), WakeDeficit())
             self.add_subsystem('sum{}'.format(n), SumComponent())
             self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
-            # self.connect('indep{}.index'.format(n), 'dist{}.index'.format(n))
             self.connect('dist{}.dist'.format(n), 'deficits{}.dist'.format(n))
             self.connect('deficits{}.dU'.format(n), 'sum{}.all_deficits'.format(n))
             self.connect('sum{}.sos'.format(n), 'sqrt{}.summation'.format(n))
