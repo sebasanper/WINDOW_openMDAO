@@ -88,10 +88,10 @@ class PlanesIntersection(Group):
 
 
 prob = Problem()
-
+from openmdao.api import LinearRunOnce
 prob.model = PlanesIntersection()
-a = prob.model.nonlinear_solver = NewtonSolver()
-a = prob.model.linear_solver = DirectSolver()
+# a = prob.model.nonlinear_solver = NewtonSolver()
+a = prob.model.linear_solver = LinearRunOnce()
 
 a.options['maxiter'] = 10
 

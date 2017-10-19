@@ -1,4 +1,4 @@
-from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp
+from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp, LinearRunOnce
 from numpy import sqrt
 import numpy as np
 
@@ -144,16 +144,14 @@ class WakeMergeRSS(Group):
 class WakeModel(Group):
 
     def setup(self):
-        indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
+        
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
-            self.add_subsystem('dist{}'.format(n), DistanceComponent(n))
+            self.add_subsystem('dist{}'.format(n), DistanceComponent(n), promotes_inputs=['layout'])
             self.add_subsystem('deficits{}'.format(n), WakeDeficit())
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
-            self.connect('indep2.layout', 'dist{}.layout'.format(n))
             self.connect('dist{}.dist'.format(n), 'deficits{}.dist'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
@@ -161,17 +159,26 @@ class WakeModel(Group):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
 
+        self.linear_solver = LinearRunOnce()
+
+
+class WorkingGroup(Group):
+    def setup(self):
+        indep2 = self.add_subsystem('indep2', IndepVarComp())
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
+        self.add_subsystem('wakemodel', WakeModel())
+        self.connect('indep2.layout', 'wakemodel.layout')
+
 
 if __name__ == '__main__':
-    from openmdao.api import LinearBlockGS, DirectSolver, ScipyIterativeSolver, LinearBlockJac, LinearRunOnce
     prob = Problem()
 
-    prob.model = WakeModel()
-    NS = prob.model.linear_solver = LinearRunOnce()
-    NS.options['iprint'] = 1
+    prob.model = WorkingGroup()
+    # NS = prob.model.linear_solver = LinearRunOnce()
+    # NS.options['iprint'] = 1
     prob.setup()
     # view_model(prob)
 
     prob.run_model()
     for n in range(n_turbines):
-        print(prob['speed{}.U'.format(n)])
+        print(prob['wakemodel.speed{}.U'.format(n)])
