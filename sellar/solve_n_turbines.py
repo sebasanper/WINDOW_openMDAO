@@ -1,16 +1,17 @@
 from openmdao.api import Problem, Group, ExplicitComponent, view_model
 from numpy import sqrt
+import numpy as np
 
 u_far = 8.5
 
 
 def ct(v):
     if v < 4.0:
-        return 0.1
+        return np.array([0.1])
     elif v <= 25.0:
         return 7.3139922126945e-7 * v ** 6.0 - 6.68905596915255e-5 * v ** 5.0 + 2.3937885e-3 * v ** 4.0 - 0.0420283143 * v ** 3.0 + 0.3716111285 * v ** 2.0 - 1.5686969749 * v + 3.2991094727
     else:
-        return 0.1
+        return np.array([0.1])
 
 
 def wake_deficit(x, Ct, k=0.04, r0=40.0):
@@ -55,20 +56,34 @@ class UnknownWindSpeed(ExplicitComponent):
             if n != self.number:
                 self.add_input('U{}'.format(n), val=u_far)
 
-        self.add_output('dU', val=u_far)
+        self.add_output('dU', shape=n_turbines - 1)
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
-        suma = 0.0
+        deficits = np.array([])
         for n in range(n_turbines):
             if n != self.number:
                 d = distance(self.number, n)
                 if d > 0.0:
-                    suma += wake_deficit(d, ct(inputs['U{}'.format(n)])) ** 2.0
+                    deficits = np.append(deficits, [wake_deficit(d, ct(inputs['U{}'.format(n)]))])
+                else:
+                    deficits = np.append(deficits, [0])
+        outputs['dU'] = deficits
 
-        outputs['dU'] = suma
+
+class SumComponent(ExplicitComponent):
+    def setup(self):
+        self.add_input('all_deficits', shape=n_turbines - 1)
+        self.add_output('sos')
+
+    def compute(self, inputs, outputs):
+        defs = inputs['all_deficits']
+        summation = 0.0
+        for item in defs:
+            summation += item ** 2.0
+        outputs['sos'] = summation
 
 
 class SqrtRSS(ExplicitComponent):
@@ -100,7 +115,9 @@ class TurbineArray(Group):
             self.add_subsystem('comp{}'.format(n), UnknownWindSpeed(n))
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
-            self.connect('comp{}.dU'.format(n), 'sqrt{}.summation'.format(n))
+            self.add_subsystem('sum{}'.format(n), SumComponent())
+            self.connect('comp{}.dU'.format(n), 'sum{}.all_deficits'.format(n))
+            self.connect('sum{}.sos'.format(n), 'sqrt{}.summation'.format(n))
             self.connect('sqrt{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(n_turbines):
                 if m != n:
