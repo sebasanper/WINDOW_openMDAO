@@ -56,20 +56,38 @@ class UnknownWindSpeed(ExplicitComponent):
             if n != self.number:
                 self.add_input('U{}'.format(n), val=u_far)
 
-        self.add_output('dU', shape=n_turbines - 1)
+        self.add_output('dist', shape=n_turbines - 1, val=560.0)
+        self.add_output('ct', shape=n_turbines - 1, val=0.79)
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
-        deficits = np.array([])
+        d = np.array([])
+        c_t = np.array([])
         for n in range(n_turbines):
             if n != self.number:
-                d = distance(self.number, n)
-                if d > 0.0:
-                    deficits = np.append(deficits, [wake_deficit(d, ct(inputs['U{}'.format(n)]))])
-                else:
-                    deficits = np.append(deficits, [0])
+                d = np.append(d, [distance(self.number, n)])
+                c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
+        outputs['dist'] = d
+        outputs['ct'] = c_t
+
+
+class WakeDeficit(ExplicitComponent):
+    def setup(self):
+        self.add_input('dist', shape=n_turbines - 1, val=560.0)
+        self.add_input('ct', shape=n_turbines - 1, val=0.79)
+        self.add_output('dU', shape=n_turbines - 1, val=0.3)
+
+    def compute(self, inputs, outputs):
+        deficits = np.array([])
+        d = inputs['dist']
+        c_t = inputs['ct']
+        for ind in range(len(d)):
+            if d[ind] > 0.0:
+                deficits = np.append(deficits, [wake_deficit(d[ind], c_t[ind])])
+            else:
+                deficits = np.append(deficits, [0])
         outputs['dU'] = deficits
 
 
@@ -113,10 +131,13 @@ class TurbineArray(Group):
     def setup(self):
         for n in range(n_turbines):
             self.add_subsystem('comp{}'.format(n), UnknownWindSpeed(n))
-            self.add_subsystem('speed{}'.format(n), SpeedDeficits())
-            self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
             self.add_subsystem('sum{}'.format(n), SumComponent())
-            self.connect('comp{}.dU'.format(n), 'sum{}.all_deficits'.format(n))
+            self.add_subsystem('sqrt{}'.format(n), SqrtRSS())
+            self.add_subsystem('speed{}'.format(n), SpeedDeficits())
+            self.add_subsystem('deficits{}'.format(n), WakeDeficit())
+            self.connect('comp{}.dist'.format(n), 'deficits{}.dist'.format(n))
+            self.connect('comp{}.ct'.format(n), 'deficits{}.ct'.format(n))
+            self.connect('deficits{}.dU'.format(n), 'sum{}.all_deficits'.format(n))
             self.connect('sum{}.sos'.format(n), 'sqrt{}.summation'.format(n))
             self.connect('sqrt{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(n_turbines):
