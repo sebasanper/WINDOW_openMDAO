@@ -55,7 +55,7 @@ class UnknownWindSpeed(ExplicitComponent):
             if n != self.number:
                 self.add_input('U{}'.format(n), val=u_far)
 
-        self.add_output('U{}'.format(self.number), val=u_far)
+        self.add_output('dU', val=u_far)
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
@@ -68,7 +68,19 @@ class UnknownWindSpeed(ExplicitComponent):
                 if d > 0.0:
                     suma += wake_deficit(d, ct(inputs['U{}'.format(n)])) ** 2.0
 
-        outputs['U{}'.format(self.number)] = speed(sqrt(suma))
+        outputs['dU'] = sqrt(suma)
+
+
+class SpeedDeficits(ExplicitComponent):
+
+    def setup(self):
+        self.add_input('dU', val=0.5)
+        self.add_output('U', val=8.0)
+
+    def compute(self, inputs, outputs):
+        dU = inputs['dU']
+
+        outputs['U'] = u_far * (1.0 - dU)
 
 
 class TurbineArray(Group):
@@ -77,9 +89,13 @@ class TurbineArray(Group):
         for n in range(n_turbines):
             self.add_subsystem('comp{}'.format(n), UnknownWindSpeed(n))
         for n in range(n_turbines):
+            self.add_subsystem('speed{}'.format(n), SpeedDeficits())
+        for n in range(n_turbines):
+            self.connect('comp{}.dU'.format(n), 'speed{}.dU'.format(n))
+        for n in range(n_turbines):
             for m in range(n_turbines):
                 if m != n:
-                    self.connect('comp{}.U{}'.format(n, n), 'comp{}.U{}'.format(m, n))
+                    self.connect('speed{}.U'.format(n), 'comp{}.U{}'.format(m, n))
 
 
 if __name__ == '__main__':
@@ -94,4 +110,4 @@ if __name__ == '__main__':
 
     prob.run_model()
     for n in range(n_turbines):
-        print(prob['comp1.U{}'.format(n)])
+        print(prob['speed{}.U'.format(n)])
