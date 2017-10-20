@@ -219,14 +219,11 @@ class WakeModel(Group):
 
     def setup(self):
         
-        angle = self.add_subsystem('angle', IndepVarComp())
-        angle.add_output('angle', val=180.0)
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
-            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['layout'])
+            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['layout', 'angle'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
-            self.connect('angle.angle', 'deficits{}.angle'.format(n))
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
@@ -238,13 +235,31 @@ class WakeModel(Group):
         # self.linear_solver = DirectSearch()
         # self.nonlinear_solver.options['maxiter'] = 20
 
+from order_layout import order
+class OrderLayout(ExplicitComponent):
+    def setup(self):
+        self.add_input('original', shape=(n_turbines, 3))
+        self.add_input('angle', val=90.0)
+        self.add_output('ordered', shape=(n_turbines, 3))
+
+    def compute(self, inputs, outputs):
+        original = inputs['original']
+        angle = inputs['angle']
+
+        outputs['ordered'] = order(original, angle)
+
 
 class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
+        indep2.add_output('angle', val=0.0)
+        self.add_subsystem('order', OrderLayout())
         self.add_subsystem('wakemodel', WakeModel())
-        self.connect('indep2.layout', 'wakemodel.layout')
+        self.connect('indep2.layout', 'order.original')
+        self.connect('indep2.angle', 'order.angle')
+        self.connect('indep2.angle', 'wakemodel.angle')
+        self.connect('order.ordered', 'wakemodel.layout')
         self.wakemodel.linear_solver = LinearRunOnce()
 
 
@@ -254,7 +269,15 @@ if __name__ == '__main__':
     prob.model = WorkingGroup()
     prob.setup()
     # view_model(prob)
-
-    prob.run_model()
-    for n in range(n_turbines):
-        print(prob['wakemodel.speed{}.U'.format(n)])
+    # prob['indep2.angle'] = 2.0
+    # prob.run_model()
+    # for n in range(n_turbines):
+    #     print(prob['wakemodel.speed{}.U'.format(n)])
+    with open("angle_windspeeds.dat", 'w') as out:
+        for ang in range(360):
+            prob['indep2.angle'] = ang
+            prob.run_model()
+            out.write('{}'.format(ang))
+            for n in range(n_turbines):
+                out.write(' {}'.format(prob['wakemodel.speed{}.U'.format(n)][0]))
+            out.write('\n')

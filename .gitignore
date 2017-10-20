@@ -6,3 +6,7 @@
 sellar/visualization/
 
 test\.py
+
+sellar/angle_windspeeds\.dat
+
+sellar/n2\.html
