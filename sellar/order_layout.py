@@ -7,14 +7,13 @@ def distance_to_front(x, y, theta):
 
 
 def order(layout_array, wind_direction):
-    wind_direction += 180
     distances = []
     for turbine in layout_array:
         distances.append([distance_to_front(turbine[1], turbine[2], wind_direction), turbine[0]])
     distances.sort()
     ordered_indices = [item[1] for item in distances]
     ordered_layout = [layout_array[int(i)] for i in ordered_indices]
-    print layout_array, ordered_layout
+    print ordered_layout
     return ordered_layout
 
 if __name__ == '__main__':

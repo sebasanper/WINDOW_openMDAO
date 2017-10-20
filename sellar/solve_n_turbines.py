@@ -145,7 +145,6 @@ class WakeDeficit(ExplicitComponent):
         for ind in range(len(d_down)):
             if fraction[ind] > 0.0:
                 deficits = np.append(deficits, [self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
-                print "called"
             else:
                 deficits = np.append(deficits, [0.0])
         outputs['dU'] = deficits
@@ -239,7 +238,7 @@ from order_layout import order
 class OrderLayout(ExplicitComponent):
     def setup(self):
         self.add_input('original', shape=(n_turbines, 3))
-        self.add_input('angle', val=90.0)
+        self.add_input('angle', val=1.0)
         self.add_output('ordered', shape=(n_turbines, 3))
 
     def compute(self, inputs, outputs):
@@ -258,8 +257,8 @@ class WorkingGroup(Group):
         self.add_subsystem('wakemodel', WakeModel())
         self.connect('indep2.layout', 'order.original')
         self.connect('indep2.angle', 'order.angle')
-        self.connect('indep2.angle', 'wakemodel.angle')
         self.connect('order.ordered', 'wakemodel.layout')
+        self.connect('indep2.angle', 'wakemodel.angle')
         self.wakemodel.linear_solver = LinearRunOnce()
 
 
@@ -269,15 +268,23 @@ if __name__ == '__main__':
     prob.model = WorkingGroup()
     prob.setup()
     # view_model(prob)
-    # prob['indep2.angle'] = 2.0
-    # prob.run_model()
-    # for n in range(n_turbines):
-    #     print(prob['wakemodel.speed{}.U'.format(n)])
-    with open("angle_windspeeds.dat", 'w') as out:
-        for ang in range(360):
-            prob['indep2.angle'] = ang
-            prob.run_model()
-            out.write('{}'.format(ang))
-            for n in range(n_turbines):
-                out.write(' {}'.format(prob['wakemodel.speed{}.U'.format(n)][0]))
-            out.write('\n')
+    prob['indep2.angle'] = 357.0
+    prob.run_model()
+    prob2 = Problem()
+
+    prob2.model = WorkingGroup()
+    prob2.setup()
+    # view_model(prob)
+    prob2['indep2.angle'] = 177.0
+    prob2.run_model()
+    for n in range(n_turbines):
+        print(prob['wakemodel.speed{}.U'.format(n)])
+        print(prob2['wakemodel.speed{}.U'.format(n)])
+    # with open("angle_windspeeds.dat", 'w') as out:
+    #     for ang in range(360):
+    #         prob['indep2.angle'] = ang
+    #         prob.run_model()
+    #         out.write('{}'.format(ang))
+    #         for n in range(n_turbines):
+    #             out.write(' {}'.format(prob['wakemodel.speed{}.U'.format(n)][0]))
+    #         out.write('\n')
