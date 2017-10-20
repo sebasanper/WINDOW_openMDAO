@@ -1,4 +1,4 @@
-from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp, LinearRunOnce, LinearBlockGS, NewtonSolver
+from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, DirectSolver
 from numpy import sqrt, deg2rad, tan
 import numpy as np
 from jensen import determine_if_in_wake, wake_radius, wake_deficit1
@@ -145,7 +145,7 @@ class WakeDeficit(ExplicitComponent):
         for ind in range(len(d_down)):
             if fraction[ind] > 0.0:
                 deficits = np.append(deficits, [self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
-                print d_down[ind], d_cross[ind], c_t[ind], k, r, self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)
+                print "called"
             else:
                 deficits = np.append(deficits, [0.0])
         outputs['dU'] = deficits
@@ -234,8 +234,8 @@ class WakeModel(Group):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
 
-        # self.nonlinear_solver = NewtonSolver()
-        self.linear_solver = LinearBlockGS()
+        # self.nonlinear_solver = NonlinearBlockGS()
+        # self.linear_solver = DirectSearch()
         # self.nonlinear_solver.options['maxiter'] = 20
 
 
@@ -245,10 +245,10 @@ class WorkingGroup(Group):
         indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
         self.add_subsystem('wakemodel', WakeModel())
         self.connect('indep2.layout', 'wakemodel.layout')
+        self.wakemodel.linear_solver = LinearRunOnce()
 
 
 if __name__ == '__main__':
-    from openmdao.api import LinearBlockGS, LinearRunOnce
     prob = Problem()
 
     prob.model = WorkingGroup()
