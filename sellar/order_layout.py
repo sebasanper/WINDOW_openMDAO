@@ -2,7 +2,7 @@ from numpy import deg2rad, tan, cos, sqrt
 
 
 def distance_to_front(x, y, theta):
-    theta = deg2rad(theta)
+    theta = deg2rad(theta + 180.0)
     return abs(x + tan(theta) * y - 10000000000.0 / cos(theta)) / sqrt(1.0 + tan(theta) ** 2.0)
 
 
@@ -13,7 +13,6 @@ def order(layout_array, wind_direction):
     distances.sort()
     ordered_indices = [item[1] for item in distances]
     ordered_layout = [layout_array[int(i)] for i in ordered_indices]
-    print ordered_layout
     return ordered_layout
 
 if __name__ == '__main__':

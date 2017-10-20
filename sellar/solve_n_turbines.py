@@ -20,7 +20,7 @@ def speed(deficit):
 
 
 def distance(t1, t2, angle):
-    wind_direction = deg2rad(angle + 180.0)
+    wind_direction = deg2rad(angle)
     distance_to_centre = abs(- tan(wind_direction) * t2[1] + t2[2] + tan(wind_direction) * t1[1] - t1[2]) / sqrt(
         1.0 + tan(wind_direction) ** 2.0)
     # Coordinates of the intersection between closest path from turbine in wake to centreline.
@@ -111,10 +111,10 @@ class DetermineIfInWakeJensen(ExplicitComponent):
         crosswind_d = inputs['crosswind_d']
         fractions = np.array([])
         i = 0
-        for n in range(len(layout)):
+        for n in [2, 1, 0]:
             if n != self.number:
                 fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i]))
-                # print n, self.number, layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, i, downwind_d, crosswind_d, fractions
+                print self.number, n, layout[self.number], layout[n], angle, i, downwind_d, crosswind_d, fractions
                 i += 1
         outputs['fraction'] = fractions
 
@@ -144,7 +144,7 @@ class WakeDeficit(ExplicitComponent):
         deficits = np.array([])
         for ind in range(len(d_down)):
             if fraction[ind] > 0.0:
-                deficits = np.append(deficits, [self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
+                deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
             else:
                 deficits = np.append(deficits, [0.0])
         outputs['dU'] = deficits
@@ -217,7 +217,7 @@ class WakeMergeRSS(Group):
 class WakeModel(Group):
 
     def setup(self):
-        
+
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
             self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['layout', 'angle'])
@@ -264,27 +264,27 @@ class WorkingGroup(Group):
 
 if __name__ == '__main__':
     prob = Problem()
-
     prob.model = WorkingGroup()
     prob.setup()
-    # view_model(prob)
-    prob['indep2.angle'] = 357.0
-    prob.run_model()
-    prob2 = Problem()
+    # # view_model(prob)
+    # prob['indep2.angle'] = 0.0
+    # prob.run_model()
+    # prob2 = Problem()
 
-    prob2.model = WorkingGroup()
-    prob2.setup()
-    # view_model(prob)
-    prob2['indep2.angle'] = 177.0
-    prob2.run_model()
-    for n in range(n_turbines):
-        print(prob['wakemodel.speed{}.U'.format(n)])
-        print(prob2['wakemodel.speed{}.U'.format(n)])
-    # with open("angle_windspeeds.dat", 'w') as out:
-    #     for ang in range(360):
-    #         prob['indep2.angle'] = ang
-    #         prob.run_model()
-    #         out.write('{}'.format(ang))
-    #         for n in range(n_turbines):
-    #             out.write(' {}'.format(prob['wakemodel.speed{}.U'.format(n)][0]))
-    #         out.write('\n')
+    # prob2.model = WorkingGroup()
+    # prob2.setup()
+    # # view_model(prob)
+    # prob2['indep2.angle'] = 3.0
+    # prob2.run_model()
+    # for n in range(n_turbines):
+    #     # print(prob['wakemodel.speed{}.U'.format(n)])
+    #     print(prob2['wakemodel.speed{}.U'.format(n)])
+    with open("angle_windspeeds.dat", 'w') as out:
+        for ang in range(360):
+            prob['indep2.angle'] = ang
+            prob.run_model()
+            indices = [i[0] for i in prob['order.ordered']]
+            out.write('{}'.format(ang))
+            for n in indices:
+                out.write(' {}'.format(prob['wakemodel.speed{}.U'.format(int(n))][0]))
+            out.write('\n')
