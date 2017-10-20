@@ -14,7 +14,7 @@ def ct(v):
         return np.array([0.1])
 
 
-def wake_deficit(x, Ct, k=0.04, r0=40.0):
+def wake_deficit1(x, Ct, k, r0):
     if x > 0.0:
         return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x) / r0) ** 2.0
     else:
@@ -25,7 +25,7 @@ def speed(deficit):
     return u_far * (1.0 - deficit)
 
 
-def distance(t1, t2):
+def distance(t1, t2, angle):
     if t2[0] < t1[0]:
         return sqrt((t1[1] - t2[1]) ** 2.0 + (t1[2] - t2[2] ** 2.0))
     else:
@@ -66,37 +66,55 @@ class DistanceComponent(ExplicitComponent):
         self.number = number
 
     def setup(self):
+        self.add_input('angle', val=30.0)
         self.add_input('layout', shape=(n_turbines, 3))
-        self.add_output('dist', shape=n_turbines - 1, val=1.0)
+        self.add_output('dist_down', shape=n_turbines - 1, val=500.0)
+        self.add_output('dist_cross', shape=n_turbines - 1, val=300.0)
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs['layout']
-        d = np.array([])
+        angle = inputs['angle']
+        d_down = np.array([])
+        d_cross = np.array([])
         for n in range(len(layout)):
             if n != self.number:
-                d = np.append(d, [distance(layout[self.number], layout[n])])
-        outputs['dist'] = d
+                d_down = np.append(d_down, [distance(layout[self.number], layout[n], angle)[0]])
+                d_cross = np.append(d_cross, [distance(layout[self.number], layout[n], angle)[1]])
+        outputs['dist_down'] = d_down
+        outputs['dist_cross'] = d_cross
 
 
 class WakeDeficit(ExplicitComponent):
     def setup(self):
-        self.add_input('dist', shape=n_turbines - 1, val=560.0)
+        self.add_input('k', val=0.04)
+        self.add_input('r', val=40.0)
+        self.add_input('dist_down', shape=n_turbines - 1, val=560.0)
+        self.add_input('dist_cross', shape=n_turbines - 1, val=400.0)
         self.add_input('ct', shape=n_turbines - 1, val=0.79)
         self.add_output('dU', shape=n_turbines - 1, val=0.3)
 
     def compute(self, inputs, outputs):
-        deficits = np.array([])
-        d = inputs['dist']
+        k = inputs['k']
+        r = inputs['r']
+        d_down = inputs['dist_down']
+        d_cross = inputs['dist_cross']
         c_t = inputs['ct']
+        deficits = np.array([])
         for ind in range(len(d)):
             if d[ind] > 0.0:
-                deficits = np.append(deficits, [wake_deficit(d[ind], c_t[ind])])
+                deficits = np.append(deficits, [self.wake_deficit(d_down[ind], c_t[ind], 0.04, 40.0)])
             else:
                 deficits = np.append(deficits, [0])
         outputs['dU'] = deficits
+
+
+class JensenWakeDeficit(WakeDeficit):
+    def __init__(self):
+        super(JensenWakeDeficit, self).__init__()
+        self.wake_deficit = wake_deficit1
 
 
 class SumSquares(ExplicitComponent):
@@ -148,11 +166,12 @@ class WakeModel(Group):
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
             self.add_subsystem('dist{}'.format(n), DistanceComponent(n), promotes_inputs=['layout'])
-            self.add_subsystem('deficits{}'.format(n), WakeDeficit())
+            self.add_subsystem('deficits{}'.format(n), JensenWakeDeficit())
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
-            self.connect('dist{}.dist'.format(n), 'deficits{}.dist'.format(n))
+            self.connect('dist{}.dist_down'.format(n), 'deficits{}.dist_down'.format(n))
+            self.connect('dist{}.dist_cross'.format(n), 'deficits{}.dist_cross'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(n_turbines):
