@@ -1,6 +1,7 @@
-from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp, LinearRunOnce
-from numpy import sqrt
+from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, DirectSolver
+from numpy import sqrt, deg2rad, tan
 import numpy as np
+from jensen import determine_if_in_wake, wake_radius, wake_deficit1
 
 u_far = 8.5
 
@@ -14,22 +15,22 @@ def ct(v):
         return np.array([0.1])
 
 
-def wake_deficit(x, Ct, k=0.04, r0=40.0):
-    if x > 0.0:
-        return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x) / r0) ** 2.0
-    else:
-        return 0.0
-
-
 def speed(deficit):
     return u_far * (1.0 - deficit)
 
 
-def distance(t1, t2):
-    if t2[0] < t1[0]:
-        return sqrt((t1[1] - t2[1]) ** 2.0 + (t1[2] - t2[2] ** 2.0))
-    else:
-        return 0.0
+def distance(t1, t2, angle):
+    wind_direction = deg2rad(angle)
+    distance_to_centre = abs(- tan(wind_direction) * t2[1] + t2[2] + tan(wind_direction) * t1[1] - t1[2]) / sqrt(
+        1.0 + tan(wind_direction) ** 2.0)
+    # Coordinates of the intersection between closest path from turbine in wake to centreline.
+    x_int = (t2[1] + tan(wind_direction) * t2[2] + tan(wind_direction) * (tan(wind_direction) * t1[1] - t1[2])) / \
+            (tan(wind_direction) ** 2.0 + 1.0)
+    y_int = (- tan(wind_direction) * (- t2[1] - tan(wind_direction) * t2[2]) - tan(
+        wind_direction) * t1[1] + t1[2]) / (tan(wind_direction) ** 2.0 + 1.0)
+    # Distance from intersection point to turbine
+    distance_to_turbine = sqrt((x_int - t1[1]) ** 2.0 + (y_int - t1[2]) ** 2.0)
+    return distance_to_turbine, distance_to_centre
 
 
 n_turbines = 3
@@ -66,37 +67,110 @@ class DistanceComponent(ExplicitComponent):
         self.number = number
 
     def setup(self):
+        self.add_input('angle', val=90.0)
         self.add_input('layout', shape=(n_turbines, 3))
-        self.add_output('dist', shape=n_turbines - 1, val=1.0)
+        self.add_output('dist_down', shape=n_turbines - 1, val=500.0)
+        self.add_output('dist_cross', shape=n_turbines - 1, val=300.0)
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs['layout']
-        d = np.array([])
+        angle = inputs['angle']
+        d_down = np.array([])
+        d_cross = np.array([])
+
         for n in range(len(layout)):
             if n != self.number:
-                d = np.append(d, [distance(layout[self.number], layout[n])])
-        outputs['dist'] = d
+                d_down1, d_cross1 = distance(layout[self.number], layout[n], angle)
+                d_cross = np.append(d_cross, [d_cross1])
+                d_down = np.append(d_down, [d_down1])
+                # print n, self.number, layout[self.number], layout[n], angle, d_down1, d_cross1
+        outputs['dist_down'] = d_down
+        outputs['dist_cross'] = d_cross
+
+
+class DetermineIfInWakeJensen(ExplicitComponent):
+    def __init__(self, number):
+        super(DetermineIfInWakeJensen, self).__init__()
+        self.number = number
+
+    def setup(self):
+        self.add_input('layout', shape=(n_turbines, 3))
+        self.add_input('angle', val=90.0)
+        self.add_input('downwind_d', shape=n_turbines - 1)
+        self.add_input('crosswind_d', shape=n_turbines - 1)
+
+        self.add_output('fraction', shape=n_turbines - 1)
+
+    def compute(self, inputs, outputs):
+        layout = inputs['layout']
+        angle = inputs['angle']
+        downwind_d = inputs['downwind_d']
+        crosswind_d = inputs['crosswind_d']
+        fractions = np.array([])
+        i = 0
+        for n in [2, 1, 0]:
+            if n != self.number:
+                fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i]))
+                print self.number, n, layout[self.number], layout[n], angle, i, downwind_d, crosswind_d, fractions
+                i += 1
+        outputs['fraction'] = fractions
 
 
 class WakeDeficit(ExplicitComponent):
+    
+    def __init__(self):
+        super(WakeDeficit, self).__init__()
+        self.wake_deficit = None
+    
     def setup(self):
-        self.add_input('dist', shape=n_turbines - 1, val=560.0)
+        self.add_input('k', val=0.04)
+        self.add_input('r', val=40.0)
+        self.add_input('dist_down', shape=n_turbines - 1, val=560.0)
+        self.add_input('dist_cross', shape=n_turbines - 1, val=0.0)
         self.add_input('ct', shape=n_turbines - 1, val=0.79)
+        self.add_input('fraction', shape=n_turbines - 1)
         self.add_output('dU', shape=n_turbines - 1, val=0.3)
 
     def compute(self, inputs, outputs):
-        deficits = np.array([])
-        d = inputs['dist']
+        k = inputs['k']
+        r = inputs['r']
+        d_down = inputs['dist_down']
+        d_cross = inputs['dist_cross']
         c_t = inputs['ct']
-        for ind in range(len(d)):
-            if d[ind] > 0.0:
-                deficits = np.append(deficits, [wake_deficit(d[ind], c_t[ind])])
+        fraction = inputs['fraction']
+        deficits = np.array([])
+        for ind in range(len(d_down)):
+            if fraction[ind] > 0.0:
+                deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
             else:
-                deficits = np.append(deficits, [0])
+                deficits = np.append(deficits, [0.0])
         outputs['dU'] = deficits
+
+
+class Wake(Group):
+    def __init__(self, number):
+        super(Wake, self).__init__()
+        self.number = number
+
+    def setup(self):
+        self.add_subsystem('distance', DistanceComponent(self.number), promotes_inputs=['angle', 'layout'])
+        self.add_subsystem('determine', DetermineIfInWakeJensen(self.number), promotes_inputs=['angle', 'layout'])
+        self.add_subsystem('deficit', JensenWakeDeficit(), promotes_inputs=['ct'], promotes_outputs=['dU'])
+        self.connect('distance.dist_down', 'determine.downwind_d')
+        self.connect('distance.dist_cross', 'determine.crosswind_d')
+        self.connect('distance.dist_down', 'deficit.dist_down')
+        self.connect('distance.dist_cross', 'deficit.dist_cross')
+        self.connect('determine.fraction', 'deficit.fraction')
+
+
+
+class JensenWakeDeficit(WakeDeficit):
+    def __init__(self):
+        super(JensenWakeDeficit, self).__init__()
+        self.wake_deficit = wake_deficit1
 
 
 class SumSquares(ExplicitComponent):
@@ -130,7 +204,6 @@ class SpeedDeficits(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         dU = inputs['dU']
-
         outputs['U'] = u_far * (1.0 - dU)
 
 
@@ -144,41 +217,74 @@ class WakeMergeRSS(Group):
 class WakeModel(Group):
 
     def setup(self):
-        
+
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
-            self.add_subsystem('dist{}'.format(n), DistanceComponent(n), promotes_inputs=['layout'])
-            self.add_subsystem('deficits{}'.format(n), WakeDeficit())
+            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['layout', 'angle'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
-            self.connect('dist{}.dist'.format(n), 'deficits{}.dist'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(n_turbines):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
 
-        self.linear_solver = LinearRunOnce()
+        # self.nonlinear_solver = NonlinearBlockGS()
+        # self.linear_solver = DirectSearch()
+        # self.nonlinear_solver.options['maxiter'] = 20
+
+from order_layout import order
+class OrderLayout(ExplicitComponent):
+    def setup(self):
+        self.add_input('original', shape=(n_turbines, 3))
+        self.add_input('angle', val=1.0)
+        self.add_output('ordered', shape=(n_turbines, 3))
+
+    def compute(self, inputs, outputs):
+        original = inputs['original']
+        angle = inputs['angle']
+
+        outputs['ordered'] = order(original, angle)
 
 
 class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
+        indep2.add_output('angle', val=0.0)
+        self.add_subsystem('order', OrderLayout())
         self.add_subsystem('wakemodel', WakeModel())
-        self.connect('indep2.layout', 'wakemodel.layout')
+        self.connect('indep2.layout', 'order.original')
+        self.connect('indep2.angle', 'order.angle')
+        self.connect('order.ordered', 'wakemodel.layout')
+        self.connect('indep2.angle', 'wakemodel.angle')
+        self.wakemodel.linear_solver = LinearRunOnce()
 
 
 if __name__ == '__main__':
     prob = Problem()
-
     prob.model = WorkingGroup()
-    # NS = prob.model.linear_solver = LinearRunOnce()
-    # NS.options['iprint'] = 1
     prob.setup()
-    # view_model(prob)
+    # # view_model(prob)
+    # prob['indep2.angle'] = 0.0
+    # prob.run_model()
+    # prob2 = Problem()
 
-    prob.run_model()
-    for n in range(n_turbines):
-        print(prob['wakemodel.speed{}.U'.format(n)])
+    # prob2.model = WorkingGroup()
+    # prob2.setup()
+    # # view_model(prob)
+    # prob2['indep2.angle'] = 3.0
+    # prob2.run_model()
+    # for n in range(n_turbines):
+    #     # print(prob['wakemodel.speed{}.U'.format(n)])
+    #     print(prob2['wakemodel.speed{}.U'.format(n)])
+    with open("angle_windspeeds.dat", 'w') as out:
+        for ang in range(360):
+            prob['indep2.angle'] = ang
+            prob.run_model()
+            indices = [i[0] for i in prob['order.ordered']]
+            out.write('{}'.format(ang))
+            for n in indices:
+                out.write(' {}'.format(prob['wakemodel.speed{}.U'.format(int(n))][0]))
+            out.write('\n')
