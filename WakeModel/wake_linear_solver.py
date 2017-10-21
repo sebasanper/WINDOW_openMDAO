@@ -39,17 +39,16 @@ class DistanceComponent(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
-        layout = inputs['layout']
+        layout = inputs['layout'][:n_turbines]
         angle = inputs['angle']
         d_down = np.array([])
         d_cross = np.array([])
         lendif = max_n_turbines - n_turbines
         for n in range(n_turbines):
-            if n != self.number:
+            if n != self.number and self.number < n_turbines:
                 d_down1, d_cross1 = distance(layout[self.number], layout[n], angle)
                 d_cross = np.append(d_cross, [d_cross1])
                 d_down = np.append(d_down, [d_down1])
-        lendif = max_n_turbines - n_turbines
         outputs['dist_down'] = np.concatenate((d_down, [float('nan') for n in range(lendif)]))
         outputs['dist_cross'] = np.concatenate((d_cross, [float('nan') for n in range(lendif)]))
 
@@ -72,10 +71,10 @@ class DetermineIfInWakeJensen(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
-        layout = inputs['layout']
+        layout = inputs['layout'][:n_turbines]
         angle = inputs['angle']
-        downwind_d = inputs['downwind_d'][:n_turbines - 1]
-        crosswind_d = inputs['crosswind_d'][:n_turbines - 1]
+        downwind_d = inputs['downwind_d'][:n_turbines-1]
+        crosswind_d = inputs['crosswind_d'][:n_turbines-1]
         fractions = np.array([])
         k = inputs['k']
         r = inputs['r']
@@ -108,10 +107,13 @@ class WakeDeficit(ExplicitComponent):
         n_turbines = int(inputs['n_turbines'])
         k = inputs['k']
         r = inputs['r']
-        d_down = inputs['dist_down'][:n_turbines - 1]
-        d_cross = inputs['dist_cross'][:n_turbines - 1]
-        c_t = inputs['ct'][:n_turbines - 1]
-        fraction = inputs['fraction'][:n_turbines - 1]
+        d_down = inputs['dist_down'][:n_turbines-1]
+        d_cross = inputs['dist_cross'][:n_turbines-1]
+        print inputs['ct']
+        c_t = inputs['ct'][:n_turbines-1]
+        print c_t
+        print "ct"
+        fraction = inputs['fraction'][:n_turbines]
         deficits = np.array([])
         for ind in range(n_turbines - 1):
             if fraction[ind] > 0.0:
