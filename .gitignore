@@ -10,3 +10,11 @@ test\.py
 sellar/angle_windspeeds\.dat
 
 sellar/n2\.html
+
+sellar/angle_speedhorns8l\.dat
+
+sellar/angle_speedhorns8newt\.dat
+
+sellar/angle_speedhorns8nl\.dat
+
+sellar/distribcomp\.py
