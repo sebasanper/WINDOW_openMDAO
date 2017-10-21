@@ -2,20 +2,22 @@ from WakeModel.wake_linear_solver import WakeModel, OrderLayout
 from openmdao.api import IndepVarComp, Problem, Group, view_model
 import numpy as np
 from time import time
-from input_params import jensen_k, turbine_radius, n_turbines
+from input_params import jensen_k, turbine_radius, max_n_turbines
 
 
 class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0]]))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, float('nan'), float('nan')], [6, float('nan'), float('nan')]]))
         indep2.add_output('angle', val=180.0)
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('k', val=jensen_k)
+        indep2.add_output('n_turbines', val=5)
         self.add_subsystem('wakemodel', WakeModel())
         self.connect('indep2.layout', 'wakemodel.original')
         self.connect('indep2.angle', 'wakemodel.angle')
+        self.connect('indep2.n_turbines', 'wakemodel.n_turbines')
 
 def read_layout(layout_file):
 
