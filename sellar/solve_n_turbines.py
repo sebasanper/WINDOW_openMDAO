@@ -33,7 +33,7 @@ def distance(t1, t2, angle):
     return distance_to_turbine, distance_to_centre
 
 
-n_turbines = 80
+n_turbines = 8
 
 
 class ThrustCoefficient(ExplicitComponent):
@@ -251,7 +251,7 @@ class OrderLayout(ExplicitComponent):
 class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', val=read_layout('horns_rev.dat'))
+        indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
         # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0]]))
         indep2.add_output('angle', val=0.0)
         self.add_subsystem('order', OrderLayout())
@@ -278,13 +278,14 @@ if __name__ == '__main__':
     prob = Problem()
     prob.model = WorkingGroup()
     prob.setup()
-    view_model(prob)
-    # prob['indep2.angle'] = 44.0
+    # view_model(prob)
+    prob['indep2.angle'] = 276.0
     start = time()
     prob.run_model()
     print time() - start, "seconds"
-    # # prob2 = Problem()
+    prob.model.list_outputs()
 
+    # # prob2 = Problem()
     # # prob2.model = WorkingGroup()
     # # prob2.setup()
     # # # view_model(prob)
@@ -308,8 +309,9 @@ if __name__ == '__main__':
     #     # print(prob['wakemodel.speed{}.U'.format(int(n))], prob['order.ordered'][int(n)])
     #     print(final[n][1])
 
-        # print(prob2['wakemodel.speed{}.U'.format(n)])
-    # with open("angle_speedhorns14.dat", 'w') as out:
+    #     print(prob2['wakemodel.speed{}.U'.format(n)])
+    # with open("angle_speedhorns0.dat", 'w') as out:
+    #     start= time()
     #     for ang in range(360):
     #         prob['indep2.angle'] = ang
     #         prob.run_model()
@@ -317,5 +319,6 @@ if __name__ == '__main__':
     #         final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
     #         final =sorted(final)
     #         out.write('{}'.format(ang))
-    #         out.write(' {}'.format(final[14][1]))
+    #         out.write(' {}'.format(final[35][1]))
     #         out.write('\n')
+    #     print time() - start, "seconds"
