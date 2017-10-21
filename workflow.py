@@ -9,14 +9,18 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0], [3, float('nan'), float('nan')], [4, float('nan'), float('nan')]]))
-        indep2.add_output('angle', val=180.0)
+        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 0.0], [3, 1120.0, 1120.0], [4, float('nan'), float('nan')]]))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, float('nan'), float('nan')]]))
+
+        indep2.add_output('angle', val=0.0)
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('k', val=jensen_k)
-        indep2.add_output('n_turbines', val=3)
+        indep2.add_output('n_turbines', val=5)
         self.add_subsystem('wakemodel', WakeModel())
         self.connect('indep2.layout', 'wakemodel.original')
         self.connect('indep2.angle', 'wakemodel.angle')
+        self.connect('indep2.k', 'wakemodel.k')
+        self.connect('indep2.r', 'wakemodel.r')
         self.connect('indep2.n_turbines', 'wakemodel.n_turbines')
 
 def read_layout(layout_file):
@@ -44,7 +48,7 @@ results = prob['wakemodel.order_layout.ordered'].tolist()
 indices = [i[0] for i in results]
 final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
 final = sorted(final)
-for n in range(3):
+for n in range(5):
     print(final[n][1])
 
 # with open("angle_5square.dat", 'w') as out:

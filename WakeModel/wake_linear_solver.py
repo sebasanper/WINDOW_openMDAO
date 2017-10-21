@@ -132,7 +132,7 @@ class Wake(Group):
     def setup(self):
         self.add_subsystem('distance', DistanceComponent(self.number), promotes_inputs=['angle', 'layout', 'n_turbines'])
         self.add_subsystem('determine', DetermineIfInWakeJensen(self.number), promotes_inputs=['angle', 'layout', 'r', 'k', 'n_turbines'])
-        self.add_subsystem('deficit', JensenWakeDeficit(), promotes_inputs=['ct', 'r', 'k'], promotes_outputs=['dU'])
+        self.add_subsystem('deficit', JensenWakeDeficit(), promotes_inputs=['ct', 'r', 'k', 'n_turbines'], promotes_outputs=['dU'])
         self.connect('distance.dist_down', 'determine.downwind_d')
         self.connect('distance.dist_cross', 'determine.crosswind_d')
         self.connect('distance.dist_down', 'deficit.dist_down')
@@ -175,6 +175,7 @@ class WakeModel(Group):
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
         self.linear_solver = LinearRunOnce()
 
+
 class OrderLayout(ExplicitComponent):
     def setup(self):
         self.add_input('original', shape=(max_n_turbines, 3))
@@ -184,7 +185,14 @@ class OrderLayout(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
+        print n_turbines
         original = inputs['original'][:n_turbines]
+        print original
         angle = inputs['angle']
-        lendif = max_n_turbines - n_turbines
-        outputs['ordered'] = np.concatenate((order(original, angle), [[float('nan') for _ in range(3)] for n in range(lendif)]))
+        lendif = max_n_turbines - len(original)
+        print lendif
+        ordered = order(original, angle)
+        print ordered
+        if lendif > 0:
+            ordered = np.concatenate((ordered, [[float('nan') for _ in range(3)] for n in range(lendif)]))
+        outputs['ordered'] = ordered
