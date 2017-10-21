@@ -151,13 +151,14 @@ class SpeedDeficits(ExplicitComponent):
 class WakeModel(Group):
 
     def setup(self):
-
+        self.add_subsystem('order_layout', OrderLayout(), promotes_inputs=['original', 'angle'])
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
-            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['layout', 'angle', 'r', 'k'])
+            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['angle', 'r', 'k'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
+            self.connect('order_layout.ordered', 'deficits{}.layout'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(n_turbines):

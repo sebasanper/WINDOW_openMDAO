@@ -13,11 +13,8 @@ class WorkingGroup(Group):
         indep2.add_output('angle', val=180.0)
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('k', val=jensen_k)
-        self.add_subsystem('order', OrderLayout())
         self.add_subsystem('wakemodel', WakeModel())
-        self.connect('indep2.layout', 'order.original')
-        self.connect('indep2.angle', 'order.angle')
-        self.connect('order.ordered', 'wakemodel.layout')
+        self.connect('indep2.layout', 'wakemodel.original')
         self.connect('indep2.angle', 'wakemodel.angle')
 
 def read_layout(layout_file):
@@ -41,11 +38,11 @@ prob.run_model()
 print time() - start, "seconds"
 # prob.model.list_outputs()
 
-results = prob['order.ordered'].tolist()
+results = prob['wakemodel.order_layout.ordered'].tolist()
 indices = [i[0] for i in results]
 final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
 final = sorted(final)
-for n in range(n_turbines):
+for n in range(len(final)):
     print(final[n][1])
 
 # with open("angle_5square.dat", 'w') as out:
