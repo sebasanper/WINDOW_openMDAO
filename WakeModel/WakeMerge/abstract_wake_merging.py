@@ -1,5 +1,6 @@
-from openmdao.api import ExplicitComponent
-
+from openmdao.api import ExplicitComponent, Group
+from input_params import n_turbines
+from numpy import sqrt
 
 class AbstractWakeMerging(ExplicitComponent):
         
@@ -14,6 +15,36 @@ class AbstractWakeMerging(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         pass
+
+
+class SumSquares(ExplicitComponent):
+    def setup(self):
+        self.add_input('all_deficits', shape=n_turbines - 1)
+        self.add_output('sos')
+
+    def compute(self, inputs, outputs):
+        defs = inputs['all_deficits']
+        summation = 0.0
+        for item in defs:
+            summation += item ** 2.0
+        outputs['sos'] = summation
+
+
+class Sqrt(ExplicitComponent):
+
+    def setup(self):
+        self.add_input('summation')
+        self.add_output('sqrt')
+
+    def compute(self, inputs, outputs):
+        outputs['sqrt'] = sqrt(inputs['summation'])
+
+
+class WakeMergeRSS(Group):
+    def setup(self):
+        self.add_subsystem('sum', SumSquares(), promotes_inputs=['all_deficits'])
+        self.add_subsystem('sqrt', Sqrt(), promotes_outputs=['sqrt'])
+        self.connect('sum.sos', 'sqrt.summation')
 
 if __name__ == '__main__':
     from openmdao.api import Problem, Group, IndepVarComp
