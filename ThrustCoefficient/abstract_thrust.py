@@ -3,17 +3,6 @@ import numpy as np
 from input_params import max_n_turbines, u_far
 
 
-class AbstractThrust(ExplicitComponent):
-
-    def setup(self):
-        self.add_input('u', val=8.0)
-
-        self.add_output('Ct', val=0.79)
-
-    def compute(self, inputs, outputs):
-        pass
-
-
 class ThrustCoefficient(ExplicitComponent):
 
     def __init__(self, number):
@@ -34,24 +23,21 @@ class ThrustCoefficient(ExplicitComponent):
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
         c_t = np.array([])
-        for n in range(max_n_turbines-2):
-            if n != self.number:
-                c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
-        lendif = max_n_turbines - n_turbines
+        if self.number < n_turbines:
+            for n in range(n_turbines):
+                if n != self.number:
+                    c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
+        lendif = max_n_turbines - len(c_t) - 1
         outputs['ct'] = np.concatenate((c_t, [float('nan') for n in range(lendif)]))
 
-
 def ct(v):
-    if v == v:
-        if v < 4.0:
-            ans = np.array([0.1])
-        elif v <= 25.0:
-            val = 7.3139922126945e-7 * v ** 6.0 - 6.68905596915255e-5 * v ** 5.0 + 2.3937885e-3 * v ** 4.0 - 0.0420283143 * v ** 3.0 + 0.3716111285 * v ** 2.0 - 1.5686969749 * v + 3.2991094727
-            ans = np.array([val])
-        else:
-            ans = np.array([0.1])
+    if v < 4.0:
+        ans = np.array([0.1])
+    elif v <= 25.0:
+        val = 7.3139922126945e-7 * v ** 6.0 - 6.68905596915255e-5 * v ** 5.0 + 2.3937885e-3 * v ** 4.0 - 0.0420283143 * v ** 3.0 + 0.3716111285 * v ** 2.0 - 1.5686969749 * v + 3.2991094727
+        ans = np.array([val])
     else:
-        ans = float('nan')
+        ans = np.array([0.1])
     return ans
 
 if __name__ == '__main__':

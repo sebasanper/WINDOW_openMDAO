@@ -49,6 +49,7 @@ class DistanceComponent(ExplicitComponent):
                 d_down1, d_cross1 = distance(layout[self.number], layout[n], angle)
                 d_cross = np.append(d_cross, [d_cross1])
                 d_down = np.append(d_down, [d_down1])
+        lendif = max_n_turbines - len(d_down) - 1
         outputs['dist_down'] = np.concatenate((d_down, [float('nan') for n in range(lendif)]))
         outputs['dist_cross'] = np.concatenate((d_cross, [float('nan') for n in range(lendif)]))
 
@@ -73,17 +74,18 @@ class DetermineIfInWakeJensen(ExplicitComponent):
         n_turbines = int(inputs['n_turbines'])
         layout = inputs['layout'][:n_turbines]
         angle = inputs['angle']
-        downwind_d = inputs['downwind_d'][:n_turbines-1]
-        crosswind_d = inputs['crosswind_d'][:n_turbines-1]
+        downwind_d = inputs['downwind_d']
+        crosswind_d = inputs['crosswind_d']
         fractions = np.array([])
         k = inputs['k']
         r = inputs['r']
         i = 0
-        for n in range(n_turbines):
-            if n != self.number:
-                fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i], r, k))
-                i += 1
-        lendif = max_n_turbines - n_turbines
+        if self.number < n_turbines:
+            for n in range(n_turbines):
+                if n != self.number:
+                    fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i], r, k))
+                    i += 1
+        lendif = max_n_turbines - len(fractions) - 1
         outputs['fraction'] = np.concatenate((fractions, [float('nan') for n in range(lendif)]))
 
 
@@ -107,12 +109,9 @@ class WakeDeficit(ExplicitComponent):
         n_turbines = int(inputs['n_turbines'])
         k = inputs['k']
         r = inputs['r']
-        d_down = inputs['dist_down'][:n_turbines-1]
-        d_cross = inputs['dist_cross'][:n_turbines-1]
-        print inputs['ct']
-        c_t = inputs['ct'][:n_turbines-1]
-        print c_t
-        print "ct"
+        d_down = inputs['dist_down'][:n_turbines]
+        d_cross = inputs['dist_cross'][:n_turbines]
+        c_t = inputs['ct'][:n_turbines]
         fraction = inputs['fraction'][:n_turbines]
         deficits = np.array([])
         for ind in range(n_turbines - 1):
@@ -180,7 +179,7 @@ class OrderLayout(ExplicitComponent):
     def setup(self):
         self.add_input('original', shape=(max_n_turbines, 3))
         self.add_input('angle', val=1.0)
-        self.add_input('n_turbines', val=5)
+        self.add_input('n_turbines', val=1)
         self.add_output('ordered', shape=(max_n_turbines, 3))
 
     def compute(self, inputs, outputs):
@@ -188,5 +187,4 @@ class OrderLayout(ExplicitComponent):
         original = inputs['original'][:n_turbines]
         angle = inputs['angle']
         lendif = max_n_turbines - n_turbines
-
         outputs['ordered'] = np.concatenate((order(original, angle), [[float('nan') for _ in range(3)] for n in range(lendif)]))
