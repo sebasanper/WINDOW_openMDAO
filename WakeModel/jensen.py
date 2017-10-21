@@ -1,12 +1,12 @@
-from area import *
+from area import AreaReal
 from numpy import deg2rad, tan, sqrt, cos, sin
 
 
-def wake_deficit1(x_down, x_cross, Ct, k=0.04, r0=40.0):
+def wake_deficit1(x_down, x_cross, Ct, k, r0):
     return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x_down) / r0) ** 2.0
 
 
-def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, wind_direction, downwind_d, crosswind_d, radius=40.0, k=0.04):
+def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, wind_direction, downwind_d, crosswind_d, radius, k):
     wind_direction = deg2rad(wind_direction + 180.0)
     crosswind_d = abs(- tan(wind_direction) * x_downstream + y_downstream + tan(wind_direction) * x_upstream - y_upstream) / sqrt(
         1.0 + tan(wind_direction) ** 2.0)

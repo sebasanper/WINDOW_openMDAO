@@ -47,7 +47,6 @@ class DistanceComponent(ExplicitComponent):
                 d_down1, d_cross1 = distance(layout[self.number], layout[n], angle)
                 d_cross = np.append(d_cross, [d_cross1])
                 d_down = np.append(d_down, [d_down1])
-                # print n, self.number, layout[self.number], layout[n], angle, d_down1, d_cross1
         outputs['dist_down'] = d_down
         outputs['dist_cross'] = d_cross
 
@@ -62,7 +61,9 @@ class DetermineIfInWakeJensen(ExplicitComponent):
         self.add_input('angle', val=90.0)
         self.add_input('downwind_d', shape=n_turbines - 1)
         self.add_input('crosswind_d', shape=n_turbines - 1)
-
+        self.add_input('k', val=0.04)
+        self.add_input('r', val=40.0)
+        
         self.add_output('fraction', shape=n_turbines - 1)
 
     def compute(self, inputs, outputs):
@@ -71,11 +72,12 @@ class DetermineIfInWakeJensen(ExplicitComponent):
         downwind_d = inputs['downwind_d']
         crosswind_d = inputs['crosswind_d']
         fractions = np.array([])
+        k = inputs['k']
+        r = inputs['r']
         i = 0
         for n in range(len(layout)):
             if n != self.number:
-                fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i]))
-                # print self.number, n, layout[self.number], layout[n], angle, i, downwind_d, crosswind_d, fractions
+                fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i], r, k))
                 i += 1
         outputs['fraction'] = fractions
 
@@ -119,8 +121,8 @@ class Wake(Group):
 
     def setup(self):
         self.add_subsystem('distance', DistanceComponent(self.number), promotes_inputs=['angle', 'layout'])
-        self.add_subsystem('determine', DetermineIfInWakeJensen(self.number), promotes_inputs=['angle', 'layout'])
-        self.add_subsystem('deficit', JensenWakeDeficit(), promotes_inputs=['ct'], promotes_outputs=['dU'])
+        self.add_subsystem('determine', DetermineIfInWakeJensen(self.number), promotes_inputs=['angle', 'layout', 'r', 'k'])
+        self.add_subsystem('deficit', JensenWakeDeficit(), promotes_inputs=['ct', 'r', 'k'], promotes_outputs=['dU'])
         self.connect('distance.dist_down', 'determine.downwind_d')
         self.connect('distance.dist_cross', 'determine.crosswind_d')
         self.connect('distance.dist_down', 'deficit.dist_down')
@@ -152,7 +154,7 @@ class WakeModel(Group):
 
         for n in range(n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n))
-            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['layout', 'angle'])
+            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['layout', 'angle', 'r', 'k'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS())
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
@@ -162,8 +164,6 @@ class WakeModel(Group):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
         self.linear_solver = LinearRunOnce()
-        # self.nonlinear_solver = NewtonSolver()
-        # self.nonlinear_solver.options['maxiter'] = 300
 
 class OrderLayout(ExplicitComponent):
     def setup(self):
