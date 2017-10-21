@@ -1,4 +1,4 @@
-from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, DirectSolver
+from openmdao.api import Problem, Group, ExplicitComponent, view_model, IndepVarComp, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, DirectSolver, LinearBlockJac
 from numpy import sqrt, deg2rad, tan
 import numpy as np
 from jensen import determine_if_in_wake, wake_radius, wake_deficit1
@@ -33,7 +33,7 @@ def distance(t1, t2, angle):
     return distance_to_turbine, distance_to_centre
 
 
-n_turbines = 3
+n_turbines = 80
 
 
 class ThrustCoefficient(ExplicitComponent):
@@ -111,10 +111,10 @@ class DetermineIfInWakeJensen(ExplicitComponent):
         crosswind_d = inputs['crosswind_d']
         fractions = np.array([])
         i = 0
-        for n in [2, 1, 0]:
+        for n in range(len(layout)):
             if n != self.number:
                 fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i]))
-                print self.number, n, layout[self.number], layout[n], angle, i, downwind_d, crosswind_d, fractions
+                # print self.number, n, layout[self.number], layout[n], angle, i, downwind_d, crosswind_d, fractions
                 i += 1
         outputs['fraction'] = fractions
 
@@ -144,6 +144,7 @@ class WakeDeficit(ExplicitComponent):
         deficits = np.array([])
         for ind in range(len(d_down)):
             if fraction[ind] > 0.0:
+                # print "called"
                 deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
             else:
                 deficits = np.append(deficits, [0.0])
@@ -229,10 +230,9 @@ class WakeModel(Group):
             for m in range(n_turbines):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
-
+        self.linear_solver = LinearRunOnce()
         # self.nonlinear_solver = NonlinearBlockGS()
-        # self.linear_solver = DirectSearch()
-        # self.nonlinear_solver.options['maxiter'] = 20
+        # self.nonlinear_solver.options['maxiter'] = 300
 
 from order_layout import order
 class OrderLayout(ExplicitComponent):
@@ -251,7 +251,8 @@ class OrderLayout(ExplicitComponent):
 class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]]))
+        indep2.add_output('layout', val=read_layout('horns_rev.dat'))
+        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0]]))
         indep2.add_output('angle', val=0.0)
         self.add_subsystem('order', OrderLayout())
         self.add_subsystem('wakemodel', WakeModel())
@@ -259,32 +260,62 @@ class WorkingGroup(Group):
         self.connect('indep2.angle', 'order.angle')
         self.connect('order.ordered', 'wakemodel.layout')
         self.connect('indep2.angle', 'wakemodel.angle')
-        self.wakemodel.linear_solver = LinearRunOnce()
 
+def read_layout(layout_file):
+
+    layout_file = open(layout_file, 'r')
+    layout = []
+    i = 0
+    for line in layout_file:
+        columns = line.split()
+        layout.append([i, float(columns[0]), float(columns[1])])
+        i += 1
+
+    return np.array(layout)
 
 if __name__ == '__main__':
+    from time import time
     prob = Problem()
     prob.model = WorkingGroup()
     prob.setup()
-    # # view_model(prob)
-    # prob['indep2.angle'] = 0.0
-    # prob.run_model()
-    # prob2 = Problem()
+    view_model(prob)
+    # prob['indep2.angle'] = 44.0
+    start = time()
+    prob.run_model()
+    print time() - start, "seconds"
+    # # prob2 = Problem()
 
-    # prob2.model = WorkingGroup()
-    # prob2.setup()
-    # # view_model(prob)
-    # prob2['indep2.angle'] = 3.0
-    # prob2.run_model()
-    # for n in range(n_turbines):
-    #     # print(prob['wakemodel.speed{}.U'.format(n)])
-    #     print(prob2['wakemodel.speed{}.U'.format(n)])
-    with open("angle_windspeeds.dat", 'w') as out:
-        for ang in range(360):
-            prob['indep2.angle'] = ang
-            prob.run_model()
-            indices = [i[0] for i in prob['order.ordered']]
-            out.write('{}'.format(ang))
-            for n in indices:
-                out.write(' {}'.format(prob['wakemodel.speed{}.U'.format(int(n))][0]))
-            out.write('\n')
+    # # prob2.model = WorkingGroup()
+    # # prob2.setup()
+    # # # view_model(prob)
+    # # prob2['indep2.angle'] = 90.0
+    # # prob2.run_model()
+
+    # print prob['order.ordered']
+    # print
+    # # indices = [i[0] for i in prob['order.ordered']]
+    # results = prob['order.ordered'].tolist()
+    # indices = [i[0] for i in results]
+    # # results.sort()
+    # print results
+    # print
+    # print indices
+    # final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
+    # print final
+    # final = sorted(final)
+    # print final
+    # for n in range(79):
+    #     # print(prob['wakemodel.speed{}.U'.format(int(n))], prob['order.ordered'][int(n)])
+    #     print(final[n][1])
+
+        # print(prob2['wakemodel.speed{}.U'.format(n)])
+    # with open("angle_speedhorns14.dat", 'w') as out:
+    #     for ang in range(360):
+    #         prob['indep2.angle'] = ang
+    #         prob.run_model()
+    #         indices = [i[0] for i in prob['order.ordered']]
+    #         final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
+    #         final =sorted(final)
+    #         out.write('{}'.format(ang))
+    #         out.write(' {}'.format(final[14][1]))
+    #         out.write('\n')

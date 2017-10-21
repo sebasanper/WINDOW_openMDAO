@@ -7,7 +7,7 @@ def wake_deficit1(x_down, x_cross, Ct, k=0.04, r0=40.0):
 
 
 def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, wind_direction, downwind_d, crosswind_d, radius=40.0, k=0.04):
-    wind_direction = deg2rad(wind_direction)
+    wind_direction = deg2rad(wind_direction + 180.0)
     crosswind_d = abs(- tan(wind_direction) * x_downstream + y_downstream + tan(wind_direction) * x_upstream - y_upstream) / sqrt(
         1.0 + tan(wind_direction) ** 2.0)
     # Coordinates of the intersection between closest path from turbine in wake to centreline.
