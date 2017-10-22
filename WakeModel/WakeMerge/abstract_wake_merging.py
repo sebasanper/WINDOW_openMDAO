@@ -29,9 +29,12 @@ class SumSquares(ExplicitComponent):
         defs = inputs['all_deficits'][:n_turbines]
         print defs, "Input deficits"
         summation = 0.0
-        for item in defs:
-            if item == item:
-                summation += item ** 2.0
+        if sum([def1 == def1 for def1 in defs]) != 0:
+            for item in defs:
+                if item == item:
+                    summation += item ** 2.0
+        else:
+            summation = float('nan')
         outputs['sos'] = summation
         print outputs['sos'], "Output Sum of Squares"
 

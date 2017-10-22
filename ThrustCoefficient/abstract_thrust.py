@@ -31,9 +31,10 @@ class ThrustCoefficient(ExplicitComponent):
             for n in range(n_turbines):
                 if n != self.number:
                     c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
-        lendif = max_n_turbines - n_turbines
-        outputs['ct'] = np.concatenate((c_t, [float('nan') for n in range(lendif)]))
-        print outputs['ct'], "Output"
+        lendif = max_n_turbines - len(c_t) - 1
+        ans = np.concatenate((c_t, [float('nan') for n in range(lendif)]))
+        outputs['ct'] = ans
+        print ans, "Output Ct"
 
 def ct(v):
     if v < 4.0:

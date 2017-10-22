@@ -40,8 +40,8 @@ class DistanceComponent(ExplicitComponent):
     def compute(self, inputs, outputs):
         print "3 Distance"
         n_turbines = int(inputs['n_turbines'])
-        # print inputs['layout'], "Input"
         layout = inputs['layout']
+        print layout, "Input"
         angle = inputs['angle']
         d_down = np.array([])
         d_cross = np.array([])
@@ -50,7 +50,7 @@ class DistanceComponent(ExplicitComponent):
                 d_down1, d_cross1 = distance(layout[self.number], layout[n], angle)
                 d_cross = np.append(d_cross, [d_cross1])
                 d_down = np.append(d_down, [d_down1])
-        lendif = max_n_turbines - n_turbines
+        lendif = max_n_turbines - len(d_cross) - 1
         outputs['dist_down'] = np.concatenate((d_down, [float('nan') for n in range(lendif)]))
         print outputs['dist_down'], "Output1"
         outputs['dist_cross'] = np.concatenate((d_cross, [float('nan') for n in range(lendif)]))
@@ -75,7 +75,7 @@ class DetermineIfInWakeJensen(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         print "4 Determine"
-        # print inputs['layout'], "Input"
+        print inputs['layout'], "Input"
         n_turbines = int(inputs['n_turbines'])
         layout = inputs['layout'][:n_turbines]
         angle = inputs['angle']
@@ -90,7 +90,7 @@ class DetermineIfInWakeJensen(ExplicitComponent):
                 if n != self.number:
                     fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i], r, k))
                     i += 1
-        lendif = max_n_turbines - n_turbines
+        lendif = max_n_turbines - len(fractions) - 1
         outputs['fraction'] = np.concatenate((fractions, [float('nan') for n in range(lendif)]))
         print outputs['fraction'], "Output"
 
@@ -124,12 +124,13 @@ class WakeDeficit(ExplicitComponent):
         print fraction, "Input2 fraction"
         deficits = np.array([])
         for ind in range(n_turbines - 1):
-            if fraction[ind] > 0.0:
-                # print "called"
-                deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
-            else:
-                deficits = np.append(deficits, [0.0])
-        lendif = max_n_turbines - n_turbines
+            if fraction[ind] == fraction[ind]:
+                if fraction[ind] > 0.0:
+                    # print "called"
+                    deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
+                else:
+                    deficits = np.append(deficits, [0.0])
+        lendif = max_n_turbines - len(deficits) - 1
         outputs['dU'] = np.concatenate((deficits, [float('nan') for n in range(lendif)]))
         print outputs['dU'], "Output"
 
@@ -161,7 +162,7 @@ class SpeedDeficits(ExplicitComponent):
 
     def setup(self):
         self.add_input('dU', val=0.5)
-        self.add_output('U', val=2.0)
+        self.add_output('U', val=u_far)
 
     def compute(self, inputs, outputs):
         print "8 Speed"
@@ -187,8 +188,8 @@ class WakeModel(Group):
             for m in range(max_n_turbines):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
-        self.linear_solver = LinearBlockGS()
-        # self.nonlinear_solver = NonlinearBlockGS()
+        # self.linear_solver = LinearBlockGS()
+        self.nonlinear_solver = NonlinearBlockGS()
 
 class OrderLayout(ExplicitComponent):
     def setup(self):
