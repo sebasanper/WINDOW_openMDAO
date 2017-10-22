@@ -188,8 +188,8 @@ class WakeModel(Group):
             for m in range(max_n_turbines):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
-        # self.linear_solver = LinearBlockGS()
-        self.nonlinear_solver = NonlinearBlockGS()
+        self.linear_solver = LinearBlockGS()
+        # self.nonlinear_solver = NonlinearBlockGS()
 
 class OrderLayout(ExplicitComponent):
     def setup(self):

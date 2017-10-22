@@ -23,7 +23,6 @@ class WorkingGroup(Group):
         self.connect('indep2.k', 'wakemodel.k')
         self.connect('indep2.r', 'wakemodel.r')
         self.connect('indep2.n_turbines', 'wakemodel.n_turbines')
-        # self.nonlinear_solver = NonlinearBlockGS()
 
 def read_layout(layout_file):
 
