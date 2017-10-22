@@ -148,7 +148,7 @@ class SpeedDeficits(ExplicitComponent):
         outputs['U'] = u_far * (1.0 - dU)
 
 
-class WakeModel(Group):
+class LinearSolveWake(Group):
 
     def setup(self):
         self.add_subsystem('order_layout', OrderLayout(), promotes_inputs=['original', 'angle'])
@@ -166,7 +166,19 @@ class WakeModel(Group):
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
         self.linear_solver = LinearRunOnce()
 
+
+class WakeModel(Group):
+
+    def setup(self):
+        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'k', 'original', 'angle'])
+        self.add_subsystem('combine', CombineSpeed(), promotes_outputs=['U'])
+        for n in range(n_turbines):
+            self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
+        self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
+
+
 class OrderLayout(ExplicitComponent):
+
     def setup(self):
         self.add_input('original', shape=(n_turbines, 3))
         self.add_input('angle', val=1.0)
@@ -177,3 +189,26 @@ class OrderLayout(ExplicitComponent):
         angle = inputs['angle']
 
         outputs['ordered'] = order(original, angle)
+
+
+class CombineSpeed(ExplicitComponent):
+
+    def setup(self):
+
+        for n in range(n_turbines):
+            self.add_input('U{}'.format(n), val=8.5)
+        self.add_input('ordered_layout', shape=(n_turbines, 3))
+
+
+        self.add_output('U', shape=n_turbines)
+
+    def compute(self, inputs, outputs):
+        results = inputs['ordered_layout'].tolist()
+        print results
+        indices = [i[0] for i in results]
+        print indices
+        final = [[indices[n], inputs['U{}'.format(int(n))][0]] for n in range(len(indices))]
+        print final
+        array_speeds = [speed[1] for speed in sorted(final)]
+        print array_speeds
+        outputs['U'] = np.array(array_speeds)
