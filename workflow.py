@@ -1,5 +1,5 @@
 from WakeModel.wake_linear_solver import WakeModel, OrderLayout
-from openmdao.api import IndepVarComp, Problem, Group, view_model
+from openmdao.api import IndepVarComp, Problem, Group, view_model, NonlinearBlockGS, LinearBlockGS
 import numpy as np
 from time import time
 from input_params import jensen_k, turbine_radius, max_n_turbines
@@ -10,7 +10,7 @@ class WorkingGroup(Group):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
         # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 0.0], [3, 1120.0, 1120.0], [4, float('nan'), float('nan')]]))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0]]))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, float('nan'), float('nan')]]))
 
         indep2.add_output('angle', val=0.0)
         indep2.add_output('r', val=turbine_radius)
@@ -22,6 +22,7 @@ class WorkingGroup(Group):
         self.connect('indep2.k', 'wakemodel.k')
         self.connect('indep2.r', 'wakemodel.r')
         self.connect('indep2.n_turbines', 'wakemodel.n_turbines')
+        # self.nonlinear_solver = NonlinearBlockGS()
 
 def read_layout(layout_file):
 
@@ -37,6 +38,8 @@ def read_layout(layout_file):
 
 prob = Problem()
 prob.model = WorkingGroup()
+# prob.model.linear_solver = LinearBlockGS()
+prob.model.nonlinear_solver = NonlinearBlockGS()
 prob.setup()
 # view_model(prob)
 start = time()

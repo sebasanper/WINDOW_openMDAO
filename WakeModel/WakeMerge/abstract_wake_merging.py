@@ -30,7 +30,8 @@ class SumSquares(ExplicitComponent):
         print defs, "Input deficits"
         summation = 0.0
         for item in defs:
-            summation += item ** 2.0
+            if item == item:
+                summation += item ** 2.0
         outputs['sos'] = summation
         print outputs['sos'], "Output Sum of Squares"
 

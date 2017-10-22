@@ -40,7 +40,8 @@ class DistanceComponent(ExplicitComponent):
     def compute(self, inputs, outputs):
         print "3 Distance"
         n_turbines = int(inputs['n_turbines'])
-        layout = inputs['layout'][:n_turbines]
+        # print inputs['layout'], "Input"
+        layout = inputs['layout']
         angle = inputs['angle']
         d_down = np.array([])
         d_cross = np.array([])
@@ -74,6 +75,7 @@ class DetermineIfInWakeJensen(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         print "4 Determine"
+        # print inputs['layout'], "Input"
         n_turbines = int(inputs['n_turbines'])
         layout = inputs['layout'][:n_turbines]
         angle = inputs['angle']
@@ -146,6 +148,7 @@ class Wake(Group):
         self.connect('distance.dist_down', 'deficit.dist_down')
         self.connect('distance.dist_cross', 'deficit.dist_cross')
         self.connect('determine.fraction', 'deficit.fraction')
+        # self.nonlinear_solver = NonlinearBlockGS()
 
 
 class JensenWakeDeficit(WakeDeficit):
@@ -158,7 +161,7 @@ class SpeedDeficits(ExplicitComponent):
 
     def setup(self):
         self.add_input('dU', val=0.5)
-        self.add_output('U', val=1.0)
+        self.add_output('U', val=5.0)
 
     def compute(self, inputs, outputs):
         print "8 Speed"
@@ -177,15 +180,15 @@ class WakeModel(Group):
             self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['angle', 'r', 'k', 'n_turbines'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS(), promotes_inputs=['n_turbines'])
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
-            self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('order_layout.ordered', 'deficits{}.layout'.format(n))
+            self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
             for m in range(max_n_turbines):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
         # self.linear_solver = LinearBlockGS()
-        self.nonlinear_solver = NonlinearBlockGS()
+        # self.nonlinear_solver = NonlinearBlockGS()
 
 class OrderLayout(ExplicitComponent):
     def setup(self):
@@ -198,9 +201,11 @@ class OrderLayout(ExplicitComponent):
         print "1 Order"
         n_turbines = int(inputs['n_turbines'])
         original = inputs['original'][:n_turbines]
+        print original, "Input Original layout"
         angle = inputs['angle']
         lendif = max_n_turbines - len(original)
         ordered = order(original, angle)
         if lendif > 0:
             ordered = np.concatenate((ordered, [[float('nan') for _ in range(3)] for n in range(lendif)]))
         outputs['ordered'] = ordered
+        print ordered, "Output"
