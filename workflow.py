@@ -10,7 +10,7 @@ class WorkingGroup(Group):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
         # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 0.0], [3, 1120.0, 1120.0], [4, float('nan'), float('nan')]]))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, float('nan'), float('nan')]]))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0]]))
 
         indep2.add_output('angle', val=0.0)
         indep2.add_output('r', val=turbine_radius)
@@ -39,31 +39,31 @@ def read_layout(layout_file):
 prob = Problem()
 prob.model = WorkingGroup()
 # prob.model.linear_solver = LinearBlockGS()
-prob.model.nonlinear_solver = NonlinearBlockGS()
+# prob.model.nonlinear_solver = NonlinearBlockGS()
 prob.setup()
 # view_model(prob)
-start = time()
-prob.run_model()
-print time() - start, "seconds"
-# prob.model.list_outputs()
+# start = time()
+# prob.run_model()
+# print time() - start, "seconds"
+# # prob.model.list_outputs()
 
-results = prob['wakemodel.order_layout.ordered'].tolist()
-indices = [i[0] for i in results]
-final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
-final = sorted(final)
-for n in range(5):
-    print(final[n][1])
+# results = prob['wakemodel.order_layout.ordered'].tolist()
+# indices = [i[0] for i in results]
+# final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
+# final = sorted(final)
+# for n in range(5):
+#     print(final[n][1])
 
-# with open("angle_5square.dat", 'w') as out:
-#     start= time()
-#     for ang in range(360):
-#         prob['indep2.angle'] = ang
-#         prob.run_model()
-#         indices = [i[0] for i in prob['order.ordered']]
-#         final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
-#         final =sorted(final)
-#         out.write('{}'.format(ang))
-#         for n in range(n_turbines):
-#             out.write(' {}'.format(final[n][1]))
-#         out.write('\n')
-#     print time() - start, "seconds"
+with open("linear_fixed", 'w') as out:
+    start= time()
+    for ang in range(360):
+        prob['indep2.angle'] = ang
+        prob.run_model()
+        indices = [i[0] for i in prob['wakemodel.order_layout.ordered']]
+        final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
+        final =sorted(final)
+        out.write('{}'.format(ang))
+        for n in range(5):
+            out.write(' {}'.format(final[n][1]))
+        out.write('\n')
+    print time() - start, "seconds"

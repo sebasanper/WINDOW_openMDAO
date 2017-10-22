@@ -161,7 +161,7 @@ class SpeedDeficits(ExplicitComponent):
 
     def setup(self):
         self.add_input('dU', val=0.5)
-        self.add_output('U', val=5.0)
+        self.add_output('U', val=2.0)
 
     def compute(self, inputs, outputs):
         print "8 Speed"
@@ -187,7 +187,7 @@ class WakeModel(Group):
             for m in range(max_n_turbines):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
-        # self.linear_solver = LinearBlockGS()
+        self.linear_solver = LinearBlockGS()
         # self.nonlinear_solver = NonlinearBlockGS()
 
 class OrderLayout(ExplicitComponent):
