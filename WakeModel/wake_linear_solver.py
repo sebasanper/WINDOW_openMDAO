@@ -210,3 +210,25 @@ class OrderLayout(ExplicitComponent):
             ordered = np.concatenate((ordered, [[float('nan') for _ in range(3)] for n in range(lendif)]))
         outputs['ordered'] = ordered
         print ordered, "Output"
+
+class CombineSpeed(ExplicitComponent):
+
+    def setup(self):
+
+        for n in range(n_turbines):
+            self.add_input('U{}'.format(n), val=8.5)
+        self.add_input('ordered_layout', shape=(n_turbines, 3))
+
+
+        self.add_output('U', shape=n_turbines)
+
+    def compute(self, inputs, outputs):
+        results = inputs['ordered_layout'].tolist()
+        print results
+        indices = [i[0] for i in results]
+        print indices
+        final = [[indices[n], inputs['U{}'.format(int(n))][0]] for n in range(len(indices))]
+        print final
+        array_speeds = [speed[1] for speed in sorted(final)]
+        print array_speeds
+        outputs['U'] = np.array(array_speeds)
