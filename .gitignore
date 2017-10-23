@@ -20,3 +20,5 @@ sellar/angle_speedhorns8nl\.dat
 sellar/distribcomp\.py
 
 *.dat
+
+visualization/

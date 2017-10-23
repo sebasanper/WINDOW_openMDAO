@@ -39,6 +39,14 @@ def read_layout(layout_file):
 prob = Problem()
 prob.model = WorkingGroup()
 prob.setup()
+prob['indep2.angle'] = 45.0
+# view_model(prob)
+start = time()
+prob.run_model()
+print time() - start, "seconds"
+# prob.model.list_outputs()
+print prob['farmpower.farm_power']
+prob['indep2.angle'] = 90.0
 # view_model(prob)
 start = time()
 prob.run_model()
