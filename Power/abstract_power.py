@@ -10,8 +10,13 @@ class AbstractPower(ExplicitComponent):
 
         self.add_output('p', shape=n_turbines)
 
+                # Finite difference all partials.
+        self.declare_partials('*', '*', method='fd')
+
+
     def compute(self, inputs, outputs):
         pass
+
 
 class PowerPolynomial(AbstractPower):
     def compute(self, inputs, outputs):
@@ -36,9 +41,12 @@ class FarmAeroPower(ExplicitComponent):
         self.add_input('n_turbines', val=5)
 
         self.add_output('farm_power', val=0.0)
+                # Finite difference all partials.
+        self.declare_partials('*', '*', method='cs')
+
 
     def compute(self, inputs, outputs):
-        outputs['farm_power'] = sum(inputs['ind_powers'])
+        outputs['farm_power'] = sum(inputs['ind_powers'] * 2)
 
 
 if __name__ == '__main__':

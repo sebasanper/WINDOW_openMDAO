@@ -39,12 +39,17 @@ def read_layout(layout_file):
 prob = Problem()
 prob.model = WorkingGroup()
 prob.setup()
-# view_model(prob)
-start = time()
 prob.run_model()
-print time() - start, "seconds"
+data = prob.check_totals(of=['farmpower.farm_power'], wrt=['indep2.k'])
+print data
+# data = prob.check_partials(suppress_output=True)
+# print(data['farmpower']['farm_power', 'ind_powers'])
+# view_model(prob)
+# start = time()
+# prob.run_model()
+# print time() - start, "seconds"
 # prob.model.list_outputs()
-print prob['farmpower.farm_power']
+# print prob['farmpower.farm_power']
 
 
 # with open("angle_5square.dat", 'w') as out:

@@ -32,6 +32,8 @@ class DistanceComponent(ExplicitComponent):
         self.add_input('layout', shape=(n_turbines, 3))
         self.add_output('dist_down', shape=n_turbines - 1, val=500.0)
         self.add_output('dist_cross', shape=n_turbines - 1, val=300.0)
+        # Finite difference all partials.
+        self.declare_partials('*', '*', method='fd')
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
@@ -65,6 +67,8 @@ class DetermineIfInWakeJensen(ExplicitComponent):
         self.add_input('r', val=40.0)
         
         self.add_output('fraction', shape=n_turbines - 1)
+        # Finite difference all partials.
+        self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs['layout']
@@ -96,6 +100,8 @@ class WakeDeficit(ExplicitComponent):
         self.add_input('ct', shape=n_turbines - 1, val=0.79)
         self.add_input('fraction', shape=n_turbines - 1)
         self.add_output('dU', shape=n_turbines - 1, val=0.3)
+        # Finite difference all partials.
+        self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         k = inputs['k']
@@ -142,6 +148,8 @@ class SpeedDeficits(ExplicitComponent):
     def setup(self):
         self.add_input('dU', val=0.5)
         self.add_output('U', val=8.0)
+        # Finite difference all partials.
+        self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         dU = inputs['dU']
