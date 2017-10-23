@@ -2,6 +2,7 @@ from WakeModel.wake_linear_solver import WakeModel, OrderLayout
 from openmdao.api import IndepVarComp, Problem, Group, view_model, NonlinearBlockGS, LinearBlockGS
 import numpy as np
 from time import time
+from Power.abstract_power import PowerPolynomial, FarmAeroPower
 from input_params import jensen_k, turbine_radius, max_n_turbines
 
 
@@ -18,10 +19,14 @@ class WorkingGroup(Group):
         indep2.add_output('k', val=jensen_k)
         indep2.add_output('n_turbines', val=5)
         self.add_subsystem('wakemodel', WakeModel())
+        self.add_subsystem('power', PowerPolynomial())
+        self.add_subsystem('farmpower', FarmAeroPower())
         self.connect('indep2.layout', 'wakemodel.original')
         self.connect('indep2.angle', 'wakemodel.angle')
         self.connect('indep2.k', 'wakemodel.k')
         self.connect('indep2.r', 'wakemodel.r')
+        self.connect('wakemodel.U', 'power.U')
+        self.connect('power.p', 'farmpower.ind_powers')
         self.connect('indep2.n_turbines', 'wakemodel.n_turbines')
 
 def read_layout(layout_file):
@@ -41,18 +46,21 @@ prob.model = WorkingGroup()
 # prob.model.linear_solver = LinearBlockGS()
 # prob.model.nonlinear_solver = NonlinearBlockGS()
 prob.setup()
+prob['indep2.angle'] = 45.0
 # view_model(prob)
 # start = time()
 prob.run_model()
-# print time() - start, "seconds"
-prob.model.list_outputs()
+print time() - start, "seconds"
+# prob.model.list_outputs()
+print prob['farmpower.farm_power']
+prob['indep2.angle'] = 90.0
+# view_model(prob)
+start = time()
+prob.run_model()
+print time() - start, "seconds"
+# prob.model.list_outputs()
+print prob['farmpower.farm_power']
 
-results = prob['wakemodel.order_layout.ordered'].tolist()
-indices = [i[0] for i in results]
-final = [[indices[n], prob['wakemodel.speed{}.U'.format(int(n))][0]] for n in range(len(indices))]
-final = sorted(final)
-for n in range(10):
-    print(final[n][1])
 
 # with open("linear_fixed", 'w') as out:
 #     start= time()

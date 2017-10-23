@@ -172,7 +172,7 @@ class SpeedDeficits(ExplicitComponent):
         print outputs['U'], "Output U"
 
 
-class WakeModel(Group):
+class LinearSolveWake(Group):
 
     def setup(self):
         self.add_subsystem('order_layout', OrderLayout(), promotes_inputs=['original', 'angle', 'n_turbines'])
@@ -191,7 +191,19 @@ class WakeModel(Group):
         self.linear_solver = LinearBlockGS()
         # self.nonlinear_solver = NonlinearBlockGS()
 
+
+class WakeModel(Group):
+
+    def setup(self):
+        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'k', 'original', 'angle'])
+        self.add_subsystem('combine', CombineSpeed(), promotes_outputs=['U'])
+        for n in range(n_turbines):
+            self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
+        self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
+
+
 class OrderLayout(ExplicitComponent):
+
     def setup(self):
         self.add_input('original', shape=(max_n_turbines, 3))
         self.add_input('angle', val=1.0)
