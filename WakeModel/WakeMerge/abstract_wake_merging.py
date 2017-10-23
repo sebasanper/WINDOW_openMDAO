@@ -24,10 +24,10 @@ class SumSquares(ExplicitComponent):
         self.add_output('sos')
 
     def compute(self, inputs, outputs):
-        print "6 SumSquares"
+        #print"6 SumSquares"
         n_turbines = int(inputs['n_turbines'])
         defs = inputs['all_deficits'][:n_turbines]
-        print defs, "Input deficits"
+        #printdefs, "Input deficits"
         summation = 0.0
         if sum([def1 == def1 for def1 in defs]) != 0:
             for item in defs:
@@ -36,7 +36,7 @@ class SumSquares(ExplicitComponent):
         else:
             summation = float('nan')
         outputs['sos'] = summation
-        print outputs['sos'], "Output Sum of Squares"
+        #printoutputs['sos'], "Output Sum of Squares"
 
 
 class Sqrt(ExplicitComponent):
@@ -46,10 +46,10 @@ class Sqrt(ExplicitComponent):
         self.add_output('sqrt')
 
     def compute(self, inputs, outputs):
-        print "7 Sqrt"
-        print inputs['summation'], "Input Sum"
+        #print"7 Sqrt"
+        #printinputs['summation'], "Input Sum"
         outputs['sqrt'] = sqrt(inputs['summation'])
-        print outputs['sqrt'], "Output Sqrt"
+        #printoutputs['sqrt'], "Output Sqrt"
 
 
 class WakeMergeRSS(Group):

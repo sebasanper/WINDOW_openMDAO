@@ -19,7 +19,7 @@ def distance(t1, t2, angle):
         wind_direction) * t1[1] + t1[2]) / (tan(wind_direction) ** 2.0 + 1.0)
     # Distance from intersection point to turbine
     distance_to_turbine = sqrt((x_int - t1[1]) ** 2.0 + (y_int - t1[2]) ** 2.0)
-    return distance_to_turbine, distance_to_centre
+    return np.array(distance_to_turbine), np.array(distance_to_centre)
 
 
 class DistanceComponent(ExplicitComponent):
@@ -38,10 +38,10 @@ class DistanceComponent(ExplicitComponent):
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
-        print "3 Distance"
+        #print "3 Distance"
         n_turbines = int(inputs['n_turbines'])
         layout = inputs['layout']
-        print layout, "Input"
+        # print layout, "Input"
         angle = inputs['angle']
         d_down = np.array([])
         d_cross = np.array([])
@@ -52,9 +52,9 @@ class DistanceComponent(ExplicitComponent):
                 d_down = np.append(d_down, [d_down1])
         lendif = max_n_turbines - len(d_cross) - 1
         outputs['dist_down'] = np.concatenate((d_down, [float('nan') for n in range(lendif)]))
-        print outputs['dist_down'], "Output1"
+        #print outputs['dist_down'], "Output1"
         outputs['dist_cross'] = np.concatenate((d_cross, [float('nan') for n in range(lendif)]))
-        print outputs['dist_cross'], "Output2"
+        #print outputs['dist_cross'], "Output2"
 
 
 class DetermineIfInWakeJensen(ExplicitComponent):
@@ -74,8 +74,8 @@ class DetermineIfInWakeJensen(ExplicitComponent):
         self.add_output('fraction', shape=max_n_turbines - 1)
 
     def compute(self, inputs, outputs):
-        print "4 Determine"
-        print inputs['layout'], "Input"
+        #print "4 Determine"
+        # print inputs['layout'], "Input"
         n_turbines = int(inputs['n_turbines'])
         layout = inputs['layout'][:n_turbines]
         angle = inputs['angle']
@@ -92,7 +92,7 @@ class DetermineIfInWakeJensen(ExplicitComponent):
                     i += 1
         lendif = max_n_turbines - len(fractions) - 1
         outputs['fraction'] = np.concatenate((fractions, [float('nan') for n in range(lendif)]))
-        print outputs['fraction'], "Output"
+        #print outputs['fraction'], "Output"
 
 
 class WakeDeficit(ExplicitComponent):
@@ -112,7 +112,7 @@ class WakeDeficit(ExplicitComponent):
         self.add_output('dU', shape=max_n_turbines - 1, val=0.3)
 
     def compute(self, inputs, outputs):
-        print "5 WakeDeficit"
+        #print"5 WakeDeficit"
         n_turbines = int(inputs['n_turbines'])
         k = inputs['k']
         r = inputs['r']
@@ -120,19 +120,19 @@ class WakeDeficit(ExplicitComponent):
         d_cross = inputs['dist_cross'][:n_turbines]
         c_t = inputs['ct'][:n_turbines]
         fraction = inputs['fraction'][:n_turbines]
-        print c_t, "Input1 ct"
-        print fraction, "Input2 fraction"
+        #print c_t, "Input1 ct"
+        #print fraction, "Input2 fraction"
         deficits = np.array([])
         for ind in range(n_turbines - 1):
             if fraction[ind] == fraction[ind]:
                 if fraction[ind] > 0.0:
-                    # print "called"
+                    # #print"called"
                     deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
                 else:
                     deficits = np.append(deficits, [0.0])
         lendif = max_n_turbines - len(deficits) - 1
         outputs['dU'] = np.concatenate((deficits, [float('nan') for n in range(lendif)]))
-        print outputs['dU'], "Output"
+        #print outputs['dU'], "Output"
 
 
 class Wake(Group):
@@ -162,14 +162,15 @@ class SpeedDeficits(ExplicitComponent):
 
     def setup(self):
         self.add_input('dU', val=0.5)
-        self.add_output('U', val=u_far)
+        self.add_output('U', val=8.5)
 
     def compute(self, inputs, outputs):
-        print "8 Speed"
+
+        #print "8 Speed"
         dU = inputs['dU']
-        print dU, 'Input dU'
-        outputs['U'] = u_far * (1.0 - dU)
-        print outputs['U'], "Output U"
+        #printdU, 'Input dU'
+        outputs['U'] = np.array(u_far * (1.0 - dU))
+        #print outputs['U'], "Output U"
 
 
 class LinearSolveWake(Group):
@@ -189,15 +190,16 @@ class LinearSolveWake(Group):
                 if m != n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
         self.linear_solver = LinearBlockGS()
-        # self.nonlinear_solver = NonlinearBlockGS()
+        # self.nonlinear_solver = NewtonSolver()
+        # self.nonlinear_solver.options['maxiter'] = 30
 
 
 class WakeModel(Group):
 
     def setup(self):
-        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'k', 'original', 'angle'])
+        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'k', 'original', 'angle', 'n_turbines'])
         self.add_subsystem('combine', CombineSpeed(), promotes_outputs=['U'])
-        for n in range(n_turbines):
+        for n in range(max_n_turbines):
             self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
         self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
 
@@ -211,36 +213,32 @@ class OrderLayout(ExplicitComponent):
         self.add_output('ordered', shape=(max_n_turbines, 3))
 
     def compute(self, inputs, outputs):
-        print "1 Order"
+        #print "1 Order"
         n_turbines = int(inputs['n_turbines'])
         original = inputs['original'][:n_turbines]
-        print original, "Input Original layout"
+        #print original, "Input Original layout"
         angle = inputs['angle']
         lendif = max_n_turbines - len(original)
         ordered = order(original, angle)
         if lendif > 0:
             ordered = np.concatenate((ordered, [[float('nan') for _ in range(3)] for n in range(lendif)]))
         outputs['ordered'] = ordered
-        print ordered, "Output"
+        # print ordered, "Output"
 
 class CombineSpeed(ExplicitComponent):
 
     def setup(self):
 
-        for n in range(n_turbines):
+        for n in range(max_n_turbines):
             self.add_input('U{}'.format(n), val=8.5)
-        self.add_input('ordered_layout', shape=(n_turbines, 3))
+        self.add_input('ordered_layout', shape=(max_n_turbines, 3))
 
-
-        self.add_output('U', shape=n_turbines)
+        self.add_output('U', shape=max_n_turbines)
 
     def compute(self, inputs, outputs):
         results = inputs['ordered_layout'].tolist()
-        print results
         indices = [i[0] for i in results]
-        print indices
         final = [[indices[n], inputs['U{}'.format(int(n))][0]] for n in range(len(indices))]
-        print final
         array_speeds = [speed[1] for speed in sorted(final)]
-        print array_speeds
         outputs['U'] = np.array(array_speeds)
+        #print outputs['U'], "Combined Wind Speeds U"
