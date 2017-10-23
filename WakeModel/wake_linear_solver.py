@@ -1,11 +1,11 @@
-from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, DirectSolver, LinearBlockJac
+from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, DirectSolver, LinearBlockJac, IndepVarComp
 from numpy import sqrt, deg2rad, tan
 import numpy as np
 from jensen import determine_if_in_wake, wake_radius, wake_deficit1
 from order_layout import order
-from ThrustCoefficient.abstract_thrust import ThrustCoefficient
+from ThrustCoefficient.abstract_thrust import ThrustCoefficient, FirstThrustCoefficient
 from WakeModel.WakeMerge.abstract_wake_merging import WakeMergeRSS
-from input_params import u_far, max_n_turbines
+from input_params import max_n_turbines
 
 
 def distance(t1, t2, angle):
@@ -51,9 +51,9 @@ class DistanceComponent(ExplicitComponent):
                 d_cross = np.append(d_cross, [d_cross1])
                 d_down = np.append(d_down, [d_down1])
         lendif = max_n_turbines - len(d_cross) - 1
-        outputs['dist_down'] = np.concatenate((d_down, [float('nan') for n in range(lendif)]))
+        outputs['dist_down'] = np.concatenate((d_down, [0 for n in range(lendif)]))
         #print outputs['dist_down'], "Output1"
-        outputs['dist_cross'] = np.concatenate((d_cross, [float('nan') for n in range(lendif)]))
+        outputs['dist_cross'] = np.concatenate((d_cross, [0 for n in range(lendif)]))
         #print outputs['dist_cross'], "Output2"
 
 
@@ -91,7 +91,7 @@ class DetermineIfInWakeJensen(ExplicitComponent):
                     fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i], r, k))
                     i += 1
         lendif = max_n_turbines - len(fractions) - 1
-        outputs['fraction'] = np.concatenate((fractions, [float('nan') for n in range(lendif)]))
+        outputs['fraction'] = np.concatenate((fractions, [0 for n in range(lendif)]))
         #print outputs['fraction'], "Output"
 
 
@@ -131,7 +131,7 @@ class WakeDeficit(ExplicitComponent):
                 else:
                     deficits = np.append(deficits, [0.0])
         lendif = max_n_turbines - len(deficits) - 1
-        outputs['dU'] = np.concatenate((deficits, [float('nan') for n in range(lendif)]))
+        outputs['dU'] = np.concatenate((deficits, [0 for n in range(lendif)]))
         #print outputs['dU'], "Output"
 
 
@@ -162,36 +162,73 @@ class SpeedDeficits(ExplicitComponent):
 
     def setup(self):
         self.add_input('dU', val=0.5)
-        self.add_output('U', val=8.5)
+        self.add_input('freestream', val=5.5)
+        self.add_output('U', val=5.5)
 
     def compute(self, inputs, outputs):
 
         #print "8 Speed"
         dU = inputs['dU']
+        freestream = inputs['freestream']
         #printdU, 'Input dU'
-        outputs['U'] = np.array(u_far * (1.0 - dU))
+        outputs['U'] = np.array(freestream * (1.0 - dU))
         #print outputs['U'], "Output U"
 
 
 class LinearSolveWake(Group):
 
     def setup(self):
+        freestream = self.add_subsystem('freestream', IndepVarComp())
+        freestream.add_output('freestream', val=5.5)
         self.add_subsystem('order_layout', OrderLayout(), promotes_inputs=['original', 'angle', 'n_turbines'])
+        # self.add_subsystem('ct0', ThrustCoefficient(0), promotes_inputs=['n_turbines'])
+        # self.add_subsystem('deficits0', Wake(0), promotes_inputs=['angle', 'r', 'k', 'n_turbines'])
+        # self.add_subsystem('merge0', WakeMergeRSS(), promotes_inputs=['n_turbines'])
+        # self.add_subsystem('speed0', SpeedDeficits())
+        # self.connect('freestream.freestream', 'speed0.freestream')
+        # self.connect('order_layout.ordered', 'deficits0.layout')
+        # self.connect('ct0.ct', 'deficits0.ct')
+        # self.connect('deficits0.dU', 'merge0.all_deficits')
+        # self.connect('merge0.sqrt', 'speed0.dU')
+        # for m in range(1, max_n_turbines): 
+            # self.connect('freestream.freestream', 'ct{}.U{}'.format(m))
         for n in range(max_n_turbines):
+            # self.connect('freestream.freestream', 'speed{}.freestream'.format(n))
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n), promotes_inputs=['n_turbines'])
             self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['angle', 'r', 'k', 'n_turbines'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS(), promotes_inputs=['n_turbines'])
             self.add_subsystem('speed{}'.format(n), SpeedDeficits())
+
+        #     self.connect('order_layout.ordered', 'deficits{}.layout'.format(n))
+        # self.connect('ct0.ct', 'deficits0.ct')
+        # self.connect('deficits0.dU', 'merge0.all_deficits')
+        # self.connect('merge0.sqrt', 'speed0.dU')
+        # self.connect('speed0.U', ['ct1.U0', 'ct2.U0', 'ct3.U0'])
+        # self.connect('ct1.ct', 'deficits1.ct')
+        # self.connect('deficits1.dU', 'merge1.all_deficits')
+        # self.connect('merge1.sqrt', 'speed1.dU')
+        # self.connect('speed1.U', ['ct2.U1', 'ct0.U1', 'ct3.U1'])
+        # self.connect('ct2.ct', 'deficits2.ct')
+        # self.connect('deficits2.dU', 'merge2.all_deficits')
+        # self.connect('merge2.sqrt', 'speed2.dU')
+        # self.connect('speed2.U', ['ct1.U2', 'ct0.U2', 'ct3.U2'])
+        # self.connect('ct3.ct', 'deficits3.ct')
+        # self.connect('deficits3.dU', 'merge3.all_deficits')
+        # self.connect('merge3.sqrt', 'speed3.dU')
+        # self.connect('speed3.U', ['ct1.U3', 'ct0.U3', 'ct2.U3'])
+
+
             self.connect('order_layout.ordered', 'deficits{}.layout'.format(n))
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
-            self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n), )
+            self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n))
             for m in range(max_n_turbines):
                 if m != n:
+                    # self.connect('freestream.freestream', 'ct{}.U{}'.format(m, n))
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
-        self.linear_solver = LinearBlockGS()
-        # self.nonlinear_solver = NewtonSolver()
-        # self.nonlinear_solver.options['maxiter'] = 30
+        # self.linear_solver = LinearBlockGS()
+        self.nonlinear_solver = NonlinearBlockGS()
+        self.nonlinear_solver.options['maxiter'] = 30
 
 
 class WakeModel(Group):
@@ -221,7 +258,7 @@ class OrderLayout(ExplicitComponent):
         lendif = max_n_turbines - len(original)
         ordered = order(original, angle)
         if lendif > 0:
-            ordered = np.concatenate((ordered, [[float('nan') for _ in range(3)] for n in range(lendif)]))
+            ordered = np.concatenate((ordered, [[0 for _ in range(3)] for n in range(lendif)]))
         outputs['ordered'] = ordered
         # print ordered, "Output"
 

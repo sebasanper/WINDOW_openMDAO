@@ -28,7 +28,7 @@ class PowerPolynomial(AbstractPower):
                 else:
                     pow = 0.0
             else:
-                pow = float('nan')
+                pow = 0
             p = np.append(p, pow)
         outputs['p'] = p
 

@@ -34,7 +34,7 @@ class SumSquares(ExplicitComponent):
                 if item == item:
                     summation += item ** 2.0
         else:
-            summation = float('nan')
+            summation = 0
         outputs['sos'] = summation
         #printoutputs['sos'], "Output Sum of Squares"
 

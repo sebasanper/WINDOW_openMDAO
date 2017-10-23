@@ -1,6 +1,6 @@
 from openmdao.api import ExplicitComponent
 import numpy as np
-from input_params import max_n_turbines, u_far
+from input_params import max_n_turbines
 
 
 class ThrustCoefficient(ExplicitComponent):
@@ -32,9 +32,48 @@ class ThrustCoefficient(ExplicitComponent):
                 if n != self.number:
                     c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
         lendif = max_n_turbines - len(c_t) - 1
-        ans = np.concatenate((c_t, [float('nan') for n in range(lendif)]))
+        print c_t
+        ans = np.concatenate((c_t, [0 for n in range(lendif)]))
+        print ans
         outputs['ct'] = ans
         #printans, "Output Ct"
+
+
+class FirstThrustCoefficient(ExplicitComponent):
+
+    def __init__(self, number):
+        super(FirstThrustCoefficient, self).__init__()
+        self.number = number
+
+    def setup(self):
+        self.add_input('n_turbines', val=5)
+        self.add_input('freestream', val=2)
+
+        self.add_output('ct', shape=max_n_turbines - 1, val=0.79)
+
+        # Finite difference all partials.
+        # self.declare_partials('*', '*', method='fd')
+
+    def compute(self, inputs, outputs):
+        U = [0 for _ in range(max_n_turbines-1)]
+        for n in range(max_n_turbines-1):
+            if n != self.number:
+                U[n] = inputs['freestream']
+        #print"2 Thrust"        
+        # for n in range(max_n_turbines):
+        #     if n != self.number:
+                #printinputs['U{}'.format(n)], "Input U{}".format(n)
+        n_turbines = int(inputs['n_turbines'])
+        c_t = np.array([])
+        if self.number < n_turbines:
+            for n in range(n_turbines):
+                if n != self.number:
+                    c_t = np.append(c_t, [ct(U[n])])
+        lendif = max_n_turbines - len(c_t) - 1
+        ans = np.concatenate((c_t, [0 for n in range(lendif)]))
+        outputs['ct'] = ans
+        #printans, "Output Ct"
+
 
 def ct(v):
     if v < 4.0:
