@@ -65,13 +65,13 @@ class DetermineIfInWakeJensen(ExplicitComponent):
     def setup(self):
         self.add_input('layout', shape=(max_n_turbines, 3))
         self.add_input('angle', val=90.0)
-        self.add_input('n_turbines', val=5)
+        self.add_input('n_turbines', val=1)
         self.add_input('downwind_d', shape=max_n_turbines - 1)
         self.add_input('crosswind_d', shape=max_n_turbines - 1)
         self.add_input('k', val=0.04)
         self.add_input('r', val=40.0)
 
-        self.add_output('fraction', shape=max_n_turbines - 1)
+        self.add_output('fraction', shape=max_n_turbines - 1, val=0)
 
     def compute(self, inputs, outputs):
         # print "4 Determine"
@@ -112,7 +112,7 @@ class WakeDeficit(ExplicitComponent):
         self.add_output('dU', shape=max_n_turbines - 1, val=0.3)
 
     def compute(self, inputs, outputs):
-        #print"5 WakeDeficit"
+        #print "5 WakeDeficit"
         n_turbines = int(inputs['n_turbines'])
         k = inputs['k']
         r = inputs['r']
@@ -124,12 +124,12 @@ class WakeDeficit(ExplicitComponent):
         #print fraction, "Input2 fraction"
         deficits = np.array([])
         for ind in range(n_turbines - 1):
-            if fraction[ind] == fraction[ind]:
-                if fraction[ind] > 0.0:
-                    # #print"called"
-                    deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
-                else:
-                    deficits = np.append(deficits, [0.0])
+            if fraction[ind] > 0.0:
+                print "called"
+                print ind
+                deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
+            else:
+                deficits = np.append(deficits, [0.0])
         lendif = max_n_turbines - len(deficits) - 1
         outputs['dU'] = np.concatenate((deficits, [0 for n in range(lendif)]))
         #print outputs['dU'], "Output"
@@ -149,7 +149,6 @@ class Wake(Group):
         self.connect('distance.dist_down', 'deficit.dist_down')
         self.connect('distance.dist_cross', 'deficit.dist_cross')
         self.connect('determine.fraction', 'deficit.fraction')
-        # self.nonlinear_solver = NonlinearBlockGS()
 
 
 class JensenWakeDeficit(WakeDeficit):
@@ -197,8 +196,8 @@ class LinearSolveWake(Group):
                 if m != n:
                     self.connect('freestream.freestream', 'ct{}.U{}'.format(m, n))
                     # self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
-        self.linear_solver = LinearBlockGS()
-        # self.nonlinear_solver = NonlinearBlockGS()
+        # self.linear_solver = LinearBlockGS()
+        self.nonlinear_solver = NonlinearBlockGS()
         # self.nonlinear_solver.options['maxiter'] = 30
 
 

@@ -47,7 +47,7 @@ class FarmAeroPower(ExplicitComponent):
 
         self.add_output('farm_power', val=0.0)
                 # Finite difference all partials.
-        self.declare_partials('*', '*', method='cs')
+        # self.declare_partials('*', '*', method='cs')
 
 
     def compute(self, inputs, outputs):

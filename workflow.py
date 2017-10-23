@@ -49,8 +49,8 @@ prob.model = WorkingGroup()
 # prob.model.nonlinear_solver = NonlinearBlockGS()
 prob.setup()
 prob.run_model()
-data = prob.check_totals(of=['farmpower.farm_power'], wrt=['indep2.k'])
-print data
+# data = prob.check_totals(of=['farmpower.farm_power'], wrt=['indep2.k'])
+# print data
 # data = prob.check_partials(suppress_output=True)
 # print(data['farmpower']['farm_power', 'ind_powers'])
 # view_model(prob)
