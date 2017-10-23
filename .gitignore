@@ -21,4 +21,10 @@ sellar/distribcomp\.py
 
 *.dat
 
+nonlinear_fixed
+
+linear_variable
+
+linear_fixed
+
 visualization/
