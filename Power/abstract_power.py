@@ -7,6 +7,7 @@ class AbstractPower(ExplicitComponent):
 
     def setup(self):
         self.add_input('U', shape=max_n_turbines)
+        self.add_input('n_turbines', val=1)
 
         self.add_output('p', shape=max_n_turbines)
 
@@ -20,27 +21,29 @@ class AbstractPower(ExplicitComponent):
 
 class PowerPolynomial(AbstractPower):
     def compute(self, inputs, outputs):
-        u = inputs['U']
+        n_turbines = int(inputs['n_turbines'])
+        u = inputs['U'][:n_turbines]
         p = np.array([])
         for u0 in u:
-            if u0 == u0:
-                if u0 < 4.0:
-                    pow = 0.0
-                elif u0 <= 10.0:
-                    pow = (3.234808e-4 * u0 ** 7.0 - 0.0331940121 * u0 ** 6.0 + 1.3883148012 * u0 ** 5.0 - 30.3162345004 * u0 ** 4.0 + 367.6835557011 * u0 ** 3.0 - 2441.6860655008 * u0 ** 2.0 + 8345.6777042343 * u0 - 11352.9366182805) * 1000.0
-                elif u0 <= 25.0:
-                    pow = 2000000.0
-                else:
-                    pow = 0.0
+            if u0 < 4.0:
+                pow = 0.0
+            elif u0 <= 10.0:
+                pow = (3.234808e-4 * u0 ** 7.0 - 0.0331940121 * u0 ** 6.0 + 1.3883148012 * u0 ** 5.0 - 30.3162345004 * u0 ** 4.0 + 367.6835557011 * u0 ** 3.0 - 2441.6860655008 * u0 ** 2.0 + 8345.6777042343 * u0 - 11352.9366182805) * 1000.0
+            elif u0 <= 25.0:
+                pow = 2000000.0
             else:
-                pow = float('nan')
+                pow = 0.0
             p = np.append(p, pow)
+        lendif = max_n_turbines - len(p)
+        if lendif > 0:
+            p = np.concatenate((p, [0 for n in range(lendif)]))
         outputs['p'] = p
 
 
 class FarmAeroPower(ExplicitComponent):
     def setup(self):
         self.add_input('ind_powers', shape=max_n_turbines)
+        self.add_input('n_turbines', val=1)
 
         self.add_output('farm_power', val=0.0)
                 # Finite difference all partials.
@@ -48,7 +51,8 @@ class FarmAeroPower(ExplicitComponent):
 
 
     def compute(self, inputs, outputs):
-        outputs['farm_power'] = sum([ind for ind in inputs['ind_powers'] if ind == ind])  # Alternative without using n_turbines. 
+        n_turbines = int(inputs['n_turbines'])
+        outputs['farm_power'] = sum(inputs['ind_powers'][:n_turbines])  # Alternative without using n_turbines. 
 
 
 if __name__ == '__main__':

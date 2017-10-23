@@ -39,5 +39,30 @@ def wake_radius(x_down, r0, k):
 
 
 if __name__ == '__main__':
-    pass
+    def ct(v):
+        if v < 4.0:
+            ans = np.array([0.1])
+        elif v <= 25.0:
+            val = 7.3139922126945e-7 * v ** 6.0 - 6.68905596915255e-5 * v ** 5.0 + 2.3937885e-3 * v ** 4.0 - 0.0420283143 * v ** 3.0 + 0.3716111285 * v ** 2.0 - 1.5686969749 * v + 3.2991094727
+            ans = np.array([val])
+        else:
+            ans = np.array([0.1])
+        return ans
+
+    def u(du):
+        return 5.5*(1.0-du)
+
+
+    du0=wake_deficit1(560.0, 0.0, ct(5.5), 0.04, 40.0)
+    u0 = u(du0)
+    print du0, u0, ct(5.5)
+    du1a= wake_deficit1(560.0, 0.0, ct(u0), 0.04, 40.0)
+    u1a = u(du1a)
+    print du1a, ct(u0), u1a
+    du1b = wake_deficit1(1120.0, 0.0, ct(5.5), 0.04, 40.0)
+    print du1b, u(du1b)
+    du1= sqrt(du1b**2.0+du1a**2.0)
+    print du1, u(du1)
+    # print 5.5*(1-wake_deficit1(1120.0, 0.0, 0.79411391, 0.04, 40.0))
+    # print 5.5*(1-wake_deficit1(1120.0, 0.0, 0.79411391, 0.04, 40.0))
     # print determine_if_in_wake(0, 0, 500, 0, 150.0, 64.0)
