@@ -10,24 +10,26 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0], [3, None, None]]))#, [4, 0.0, 1120.0]]))#, [5, float('nan'), float('nan')], [6, float('nan'), float('nan')], [7, float('nan'), float('nan')], [8, float('nan'), float('nan')], [9, float('nan'), float('nan')]]))
-        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, 6666.6, 6666.6], [6, 6666.6, 6666.6], [7, 6666.6, 6666.6], [8, 6666.6, 6666.6], [9, 6666.6, 6666.6]]))
+        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0], [3, 1.0, 0.0], [4, 0.0, 1120.0], [5, 0.0, 1120.0], [6, 0.0, 1120.0], [7, 0.0, 1120.0], [8, 0.0, 1120.0], [9, 0.0, 1120.0]]))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, 6666.6, 6666.6], [6, 6666.6, 6666.6], [7, 6666.6, 6666.6], [8, 6666.6, 6666.6], [9, 6666.6, 6666.6]]))
         # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, float('nan'), float('nan')]]))
 
         indep2.add_output('angle', val=0.0)
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('k', val=jensen_k)
-        indep2.add_output('n_turbines', val=3)
+        indep2.add_output('n_turbines', val=5)
         self.add_subsystem('wakemodel', WakeModel())
         self.add_subsystem('power', PowerPolynomial())
         self.add_subsystem('farmpower', FarmAeroPower())
         self.connect('indep2.layout', 'wakemodel.original')
         self.connect('indep2.angle', 'wakemodel.angle')
+        self.connect('indep2.n_turbines', 'wakemodel.n_turbines')
+        self.connect('indep2.n_turbines', 'farmpower.n_turbines')
+        self.connect('indep2.n_turbines', 'power.n_turbines')
         self.connect('indep2.k', 'wakemodel.k')
         self.connect('indep2.r', 'wakemodel.r')
         self.connect('wakemodel.U', 'power.U')
         self.connect('power.p', 'farmpower.ind_powers')
-        self.connect('indep2.n_turbines', 'wakemodel.n_turbines')
 
 def read_layout(layout_file):
 
@@ -51,10 +53,8 @@ start = time()
 prob.run_model()
 print time() - start, "seconds"
 # prob.model.list_outputs()
-print prob['farmpower.farm_power']
-print prob['farmpower.ind_powers']
-print prob['wakemodel.U']
-print prob['wakemodel.linear_solve.ct0.ct']
+print [ind for ind in prob['farmpower.ind_powers'] if ind > 0]
+print [ind for ind in prob['wakemodel.U'] if ind > 0]
 
 
 # with open("linear_fixed", 'w') as out:

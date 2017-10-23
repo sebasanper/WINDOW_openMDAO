@@ -3,7 +3,7 @@ import numpy as np
 
 
 def distance_to_front(x, y, theta):
-    theta = deg2rad(theta + 180.0)
+    theta = deg2rad(theta)
     return abs(x + tan(theta) * y - 10000000000.0 / cos(theta)) / sqrt(1.0 + tan(theta) ** 2.0)
 
 
