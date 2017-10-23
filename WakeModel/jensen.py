@@ -1,5 +1,6 @@
 from area import AreaReal
 from numpy import deg2rad, tan, sqrt, cos, sin
+import numpy as np
 
 
 def wake_deficit1(x_down, x_cross, Ct, k, r0):
@@ -30,7 +31,7 @@ def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, win
                 pass
             elif abs(radius) > abs(crosswind_d) - radius:
                 fraction = AreaReal(radius, radius, crosswind_d).area()
-    return fraction
+    return np.array(fraction)
 
 
 def wake_radius(x_down, r0, k):
