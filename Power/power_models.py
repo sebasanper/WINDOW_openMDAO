@@ -1,22 +1,6 @@
-from openmdao.api import ExplicitComponent
 from input_params import max_n_turbines
 import numpy as np
-
-
-class AbstractPower(ExplicitComponent):
-
-    def setup(self):
-        self.add_input('U', shape=max_n_turbines)
-        self.add_input('n_turbines', val=1)
-
-        self.add_output('p', shape=max_n_turbines)
-
-                # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
-
-
-    def compute(self, inputs, outputs):
-        pass
+from src.api import AbstractPower
 
 
 class PowerPolynomial(AbstractPower):
@@ -38,21 +22,6 @@ class PowerPolynomial(AbstractPower):
         if lendif > 0:
             p = np.concatenate((p, [0 for n in range(lendif)]))
         outputs['p'] = p
-
-
-class FarmAeroPower(ExplicitComponent):
-    def setup(self):
-        self.add_input('ind_powers', shape=max_n_turbines)
-        self.add_input('n_turbines', val=1)
-
-        self.add_output('farm_power', val=0.0)
-                # Finite difference all partials.
-        # self.declare_partials('*', '*', method='cs')
-
-
-    def compute(self, inputs, outputs):
-        n_turbines = int(inputs['n_turbines'])
-        outputs['farm_power'] = sum(inputs['ind_powers'][:n_turbines])  # Alternative without using n_turbines. 
 
 
 if __name__ == '__main__':

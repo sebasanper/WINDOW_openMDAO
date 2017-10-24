@@ -1,14 +1,21 @@
-from WakeModel.AbsWakeModel.wake_linear_solver import WakeModel
+from src.api import WakeModel
 from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 # from WakeModel.AbsWakeModel.my_comps import WakeDeficit
 from openmdao.api import IndepVarComp, Problem, Group, view_model, NonlinearBlockGS, LinearBlockGS
 import numpy as np
 from time import time
-from Power.AbsPower.abstract_power import PowerPolynomial, FarmAeroPower
+from src.api import FarmAeroPower
+from Power.power_models import PowerPolynomial
 from input_params import turbine_radius, max_n_turbines
 
 
 class WorkingGroup(Group):
+    def __init__(self, power_model, fraction_model, deficit_model):
+        super(WorkingGroup, self).__init__()
+        self.power_model = power_model
+        self.fraction_model = fraction_model
+        self.deficit_model = deficit_model
+
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
@@ -19,8 +26,8 @@ class WorkingGroup(Group):
         indep2.add_output('angle', val=0.0)  # Follows windrose convention. N = 0 deg, E = 90 deg, S = 180 deg, W = 270 deg
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('n_turbines', val=5)
-        self.add_subsystem('wakemodel', WakeModel(JensenWakeFraction, JensenWakeDeficit))
-        self.add_subsystem('power', PowerPolynomial())
+        self.add_subsystem('wakemodel', WakeModel(self.fraction_model, self.deficit_model))
+        self.add_subsystem('power', self.power_model())
         self.add_subsystem('farmpower', FarmAeroPower())
         self.connect('indep2.layout', 'wakemodel.original')
         self.connect('indep2.angle', 'wakemodel.angle')
@@ -45,7 +52,7 @@ def read_layout(layout_file):
     return np.array(layout)
 
 prob = Problem()
-prob.model = WorkingGroup()
+prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit)
 prob.setup()
 prob.run_model()
 # data = prob.check_totals(of=['farmpower.farm_power'], wrt=['indep2.k'])
