@@ -3,7 +3,7 @@ from numpy import sqrt, deg2rad, tan
 import numpy as np
 from order_layout import OrderLayout
 from ThrustCoefficient.AbsThrustCoefficient.abstract_thrust import ThrustCoefficient, FirstThrustCoefficient
-from WakeMerge.abstract_wake_merging import WakeMergeRSS
+from WakeModel.WakeMerge.abstract_wake_merging import WakeMergeRSS
 from input_params import max_n_turbines
 
 # class DetermineIfInWakeJensen(ExplicitComponent):

@@ -1,5 +1,5 @@
 from area import AreaReal
-from my_comps import DetermineIfInWake, WakeDeficit
+from AbsWakeModel.my_comps import DetermineIfInWake, WakeDeficit
 from numpy import deg2rad, tan, sqrt, cos, sin
 import numpy as np
 from input_params import max_n_turbines
