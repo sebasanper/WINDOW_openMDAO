@@ -1,3 +1,4 @@
 from AbsWakeModel.wake_linear_solver import WakeModel
-from AbsWakeModel.my_comps import DetermineIfInWake, WakeDeficit
+from AbsWakeModel.AbstractWakeModel import DetermineIfInWake, WakeDeficit
 from AbsPower.abstract_power import FarmAeroPower, AbstractPower
+from AbsWakeModel.AbsWakeMerge.abstract_wake_merging import BaseWakeMerge

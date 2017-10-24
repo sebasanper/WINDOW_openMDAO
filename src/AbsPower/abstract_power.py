@@ -11,9 +11,8 @@ class AbstractPower(ExplicitComponent):
 
         self.add_output('p', shape=max_n_turbines)
 
-                # Finite difference all partials.
+        # Finite difference all partials.
         self.declare_partials('*', '*', method='fd')
-
 
     def compute(self, inputs, outputs):
         pass
@@ -25,9 +24,8 @@ class FarmAeroPower(ExplicitComponent):
         self.add_input('n_turbines', val=1)
 
         self.add_output('farm_power', val=0.0)
-                # Finite difference all partials.
+        # Finite difference all partials.
         # self.declare_partials('*', '*', method='cs')
-
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
