@@ -1,5 +1,5 @@
 from area import AreaReal
-from WakeModel.AbsWakeModel.wake_linear_solver import DetermineIfInWake, WakeDeficit
+from my_comps import DetermineIfInWake, WakeDeficit
 from numpy import deg2rad, tan, sqrt, cos, sin
 import numpy as np
 from input_params import max_n_turbines
@@ -13,7 +13,7 @@ class JensenWakeDeficit(WakeDeficit):
 
     def wake_deficit(self, inputs, *args, **kwargs):
         k_jensen = inputs['k']
-        return wake_deficit1(k=k_jensen, *args, **kwargs)
+        return wake_deficit1(k_jensen=k_jensen, *args, **kwargs)
         # self.wake_deficit == wake_deficit1(d_down[ind], d_cross[ind], c_t[ind], k, r)
 
 
@@ -28,8 +28,8 @@ class JensenWakeFraction(DetermineIfInWake):
         return determine_if_in_wake(k_jensen=k_jensen, *args, **kwargs)
 
 
-def wake_deficit1(x_down, x_cross, Ct, k, r0):
-    return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x_down) / r0) ** 2.0
+def wake_deficit1(x_down, x_cross, Ct, k_jensen, r0):
+    return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k_jensen * x_down) / r0) ** 2.0
 
 
 def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, wind_direction, downwind_d, crosswind_d, radius, k_jensen):
@@ -60,8 +60,8 @@ def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, win
     return np.array(fraction)
 
 
-def jensen_wake_radius(x_down, r0, k):
-    return r0 + k * x_down
+def jensen_wake_radius(x_down, r0, k_jensen):
+    return r0 + k_jensen * x_down
 
 if __name__ == '__main__':
     def ct(v):

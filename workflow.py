@@ -1,5 +1,6 @@
 from WakeModel.AbsWakeModel.wake_linear_solver import WakeModel
 from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
+# from WakeModel.AbsWakeModel.my_comps import WakeDeficit
 from openmdao.api import IndepVarComp, Problem, Group, view_model, NonlinearBlockGS, LinearBlockGS
 import numpy as np
 from time import time
@@ -18,7 +19,7 @@ class WorkingGroup(Group):
         indep2.add_output('angle', val=0.0)  # Follows windrose convention. N = 0 deg, E = 90 deg, S = 180 deg, W = 270 deg
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('n_turbines', val=5)
-        self.add_subsystem('wakemodel', WakeModel(WakeModel.jensen.JensenWakeFraction, WakeModel.jensen.JensenWakeDeficit))
+        self.add_subsystem('wakemodel', WakeModel(JensenWakeFraction, JensenWakeDeficit))
         self.add_subsystem('power', PowerPolynomial())
         self.add_subsystem('farmpower', FarmAeroPower())
         self.connect('indep2.layout', 'wakemodel.original')
