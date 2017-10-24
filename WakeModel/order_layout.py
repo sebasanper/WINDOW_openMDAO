@@ -5,7 +5,7 @@ from input_params import max_n_turbines
 
 
 def distance_to_front(x, y, theta):
-    theta = deg2rad(theta)
+    theta = deg2rad(- theta + 90.0)
     return abs(x + tan(theta) * y - 10000000000.0 / cos(theta)) / sqrt(1.0 + tan(theta) ** 2.0)
 
 

@@ -9,7 +9,7 @@ from input_params import max_n_turbines
 
 
 def distance(t1, t2, angle):
-    wind_direction = deg2rad(angle)
+    wind_direction = deg2rad(- angle + 90.0)
     distance_to_centre = abs(- tan(wind_direction) * t2[1] + t2[2] + tan(wind_direction) * t1[1] - t1[2]) / sqrt(
         1.0 + tan(wind_direction) ** 2.0)
     # Coordinates of the intersection between closest path from turbine in wake to centreline.
@@ -183,9 +183,8 @@ class LinearSolveWake(Group):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n), promotes_inputs=['n_turbines'])
             self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['angle', 'r', 'k', 'n_turbines'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS(), promotes_inputs=['n_turbines'])
-            self.add_subsystem('speed{}'.format(n), SpeedDeficits())
+            self.add_subsystem('speed{}'.format(n), SpeedDeficits(), promotes_inputs=['freestream'])
 
-            self.connect('freestream.freestream', 'speed{}.freestream'.format(n))
             self.connect('order_layout.ordered', 'deficits{}.layout'.format(n))
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
@@ -202,7 +201,7 @@ class LinearSolveWake(Group):
 class WakeModel(Group):
 
     def setup(self):
-        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'k', 'original', 'angle', 'n_turbines'])
+        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'k', 'original', 'angle', 'n_turbines', 'freestream'])
         self.add_subsystem('combine', CombineSpeed(), promotes_inputs=['n_turbines'], promotes_outputs=['U'])
         for n in range(max_n_turbines):
             self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
