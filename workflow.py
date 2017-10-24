@@ -13,10 +13,9 @@ class WorkingGroup(Group):
         # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0], [3, 1.0, 0.0], [4, 0.0, 1120.0], [5, 0.0, 1120.0], [6, 0.0, 1120.0], [7, 0.0, 1120.0], [8, 0.0, 1120.0], [9, 0.0, 1120.0]]))
         indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, 6666.6, 6666.6], [6, 6666.6, 6666.6], [7, 6666.6, 6666.6], [8, 6666.6, 6666.6], [9, 6666.6, 6666.6]]))
         # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, float('nan'), float('nan')]]))
-        indep2.add_output('freestream', val=10.0)
-        indep2.add_output('angle', val=0.0)  # Follows windrose convention. N = 0°, E = 90°, S = 180°, W = 270°
+        indep2.add_output('freestream', val=8.5)
+        indep2.add_output('angle', val=0.0)  # Follows windrose convention. N = 0 deg, E = 90 deg, S = 180 deg, W = 270 deg
         indep2.add_output('r', val=turbine_radius)
-        indep2.add_output('k', val=jensen_k)
         indep2.add_output('n_turbines', val=5)
         self.add_subsystem('wakemodel', WakeModel())
         self.add_subsystem('power', PowerPolynomial())
@@ -27,7 +26,6 @@ class WorkingGroup(Group):
         self.connect('indep2.n_turbines', 'farmpower.n_turbines')
         self.connect('indep2.n_turbines', 'power.n_turbines')
         self.connect('indep2.freestream', 'wakemodel.freestream')
-        self.connect('indep2.k', 'wakemodel.k')
         self.connect('indep2.r', 'wakemodel.r')
         self.connect('wakemodel.U', 'power.U')
         self.connect('power.p', 'farmpower.ind_powers')
