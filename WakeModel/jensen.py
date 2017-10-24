@@ -1,5 +1,5 @@
 from area import AreaReal
-from AbstractModels.AbsWakeModel.wake_linear_solver import *
+from WakeModel.AbsWakeModel.wake_linear_solver import DetermineIfInWake, WakeDeficit
 from numpy import deg2rad, tan, sqrt, cos, sin
 import numpy as np
 from input_params import max_n_turbines
