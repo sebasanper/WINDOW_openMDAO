@@ -12,12 +12,12 @@ class SpeedDeficits(ExplicitComponent):
 
     def compute(self, inputs, outputs):
 
-        #print "8 Speed"
+        # print "8 Speed"
         dU = inputs['dU']
         freestream = inputs['freestream']
-        #print dU, 'Input dU'
+        # print dU, 'Input dU'
         outputs['U'] = np.array(freestream * (1.0 - dU))
-        #print outputs['U'], "Output U"
+        # print outputs['U'], "Output U"
 
 
 class CombineSpeed(ExplicitComponent):
@@ -46,4 +46,4 @@ class CombineSpeed(ExplicitComponent):
         if lendif > 0:
             array_speeds = np.concatenate((array_speeds, [0 for n in range(lendif)]))
         outputs['U'] = np.array(array_speeds)
-        #print outputs['U'], "Combined Wind Speeds U"
+        # print outputs['U'], "Combined Wind Speeds U"
