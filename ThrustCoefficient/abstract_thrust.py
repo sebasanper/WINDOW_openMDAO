@@ -12,7 +12,7 @@ class ThrustCoefficient(ExplicitComponent):
     def setup(self):
         self.add_input('n_turbines', val=5)
         for n in range(max_n_turbines):
-            if n != self.number:
+            if n < self.number:
                 self.add_input('U{}'.format(n), val=8.5)
 
         self.add_output('ct', shape=max_n_turbines - 1, val=0.79)
@@ -21,22 +21,22 @@ class ThrustCoefficient(ExplicitComponent):
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
-        #print "2 Thrust"        
+        # print "2 Thrust"
         # for n in range(max_n_turbines):
         #     if n != self.number:
-                #print inputs['U{}'.format(n)], "Input U{}".format(n)
+                # print inputs['U{}'.format(n)], "Input U{}".format(n)
         n_turbines = int(inputs['n_turbines'])
         c_t = np.array([])
         if self.number < n_turbines:
             for n in range(n_turbines):
-                if n != self.number:
+                if n < self.number:
                     c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
         lendif = max_n_turbines - len(c_t) - 1
         # print c_t
         ans = np.concatenate((c_t, [0 for n in range(lendif)]))
         # print ans
         outputs['ct'] = ans
-        #print ans, "Output Ct"
+        # print ans, "Output Ct"
 
 
 class FirstThrustCoefficient(ExplicitComponent):

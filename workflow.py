@@ -45,8 +45,6 @@ def read_layout(layout_file):
 
 prob = Problem()
 prob.model = WorkingGroup()
-# prob.model.linear_solver = LinearBlockGS()
-# prob.model.nonlinear_solver = NonlinearBlockGS()
 prob.setup()
 prob.run_model()
 # data = prob.check_totals(of=['farmpower.farm_power'], wrt=['indep2.k'])

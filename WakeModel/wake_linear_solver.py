@@ -2,7 +2,7 @@ from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS,
 from numpy import sqrt, deg2rad, tan
 import numpy as np
 from jensen import determine_if_in_wake, wake_radius, wake_deficit1
-from order_layout import order
+from order_layout import OrderLayout
 from ThrustCoefficient.abstract_thrust import ThrustCoefficient, FirstThrustCoefficient
 from WakeModel.WakeMerge.abstract_wake_merging import WakeMergeRSS
 from input_params import max_n_turbines
@@ -125,8 +125,6 @@ class WakeDeficit(ExplicitComponent):
         deficits = np.array([])
         for ind in range(n_turbines - 1):
             if fraction[ind] > 0.0:
-                print "called"
-                print ind
                 deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
             else:
                 deficits = np.append(deficits, [0.0])
@@ -193,11 +191,11 @@ class LinearSolveWake(Group):
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n))
             for m in range(max_n_turbines):
-                if m != n:
-                    self.connect('freestream.freestream', 'ct{}.U{}'.format(m, n))
-                    # self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
-        # self.linear_solver = LinearBlockGS()
-        self.nonlinear_solver = NonlinearBlockGS()
+                if m > n:
+                    # self.connect('freestream.freestream', 'ct{}.U{}'.format(m, n))
+                    self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
+        # self.linear_solver = LinearRunOnce()
+        # self.nonlinear_solver = NonlinearBlockGS()
         # self.nonlinear_solver.options['maxiter'] = 30
 
 
@@ -210,27 +208,6 @@ class WakeModel(Group):
             self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
         self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
 
-
-class OrderLayout(ExplicitComponent):
-
-    def setup(self):
-        self.add_input('original', shape=(max_n_turbines, 3))
-        self.add_input('angle', val=1.0)
-        self.add_input('n_turbines', val=1)
-        self.add_output('ordered', shape=(max_n_turbines, 3))
-
-    def compute(self, inputs, outputs):
-        # print "1 Order"
-        n_turbines = int(inputs['n_turbines'])
-        original = inputs['original'][:n_turbines]
-        # print original, "Input Original layout"
-        angle = inputs['angle']
-        ordered = order(original, angle)
-        lendif = max_n_turbines - len(original)
-        if lendif > 0:
-            ordered = np.concatenate((ordered, [[0 for _ in range(3)] for n in range(lendif)]))
-        outputs['ordered'] = ordered
-        # print ordered, "Output"
 
 class CombineSpeed(ExplicitComponent):
 
