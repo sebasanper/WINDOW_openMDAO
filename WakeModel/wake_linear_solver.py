@@ -1,7 +1,7 @@
 from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, DirectSolver, LinearBlockJac, IndepVarComp
 from numpy import sqrt, deg2rad, tan
 import numpy as np
-from jensen import determine_if_in_wake, wake_radius, wake_deficit1
+from jensen import JensenWakeDeficit, JensenWakeFraction
 from order_layout import OrderLayout
 from ThrustCoefficient.abstract_thrust import ThrustCoefficient, FirstThrustCoefficient
 from WakeModel.WakeMerge.abstract_wake_merging import WakeMergeRSS
@@ -57,80 +57,19 @@ class DistanceComponent(ExplicitComponent):
         #print outputs['dist_cross'], "Output2"
 
 
-class DetermineIfInWakeJensen(ExplicitComponent):
-    def __init__(self, number):
-        super(DetermineIfInWakeJensen, self).__init__()
+class TotalWake(Group):
+
+    def __init__(self, fraction_model, deficit_model, number):
+        super(TotalWake, self).__init__()
+        self.fraction_model = fraction_model
+        self.deficit_model = deficit_model
         self.number = number
 
     def setup(self):
-        self.add_input('layout', shape=(max_n_turbines, 3))
-        self.add_input('angle', val=90.0)
-        self.add_input('n_turbines', val=1)
-        self.add_input('downwind_d', shape=max_n_turbines - 1)
-        self.add_input('crosswind_d', shape=max_n_turbines - 1)
-        self.add_input('k', val=0.04)
-        self.add_input('r', val=40.0)
+        self.add_subsystem('fraction', self.fraction_model(self.number), promotes_inputs=['layout', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'r'])
+        self.add_subsystem('deficit', self.deficit_model(), promotes_inputs=['r', 'downwind_d', 'crosswind_d', 'ct', 'n_turbines'], promotes_outputs=['dU'])
 
-        self.add_output('fraction', shape=max_n_turbines - 1, val=0)
-
-    def compute(self, inputs, outputs):
-        # print "4 Determine"
-        # print inputs['layout'], "Input"
-        n_turbines = int(inputs['n_turbines'])
-        layout = inputs['layout']
-        angle = inputs['angle']
-        downwind_d = inputs['downwind_d']
-        crosswind_d = inputs['crosswind_d']
-        fractions = np.array([])
-        k = inputs['k']
-        r = inputs['r']
-        i = 0
-        if self.number < n_turbines:
-            for n in range(n_turbines):
-                if n != self.number:
-                    fractions = np.append(fractions, determine_if_in_wake(layout[self.number][1], layout[self.number][2], layout[n][1], layout[n][2], angle, downwind_d[i], crosswind_d[i], r, k))
-                    i += 1
-        lendif = max_n_turbines - len(fractions) - 1
-        outputs['fraction'] = np.concatenate((fractions, [0 for n in range(lendif)]))
-        #print outputs['fraction'], "Output"
-
-
-class WakeDeficit(ExplicitComponent):
-
-    def __init__(self):
-        super(WakeDeficit, self).__init__()
-        self.wake_deficit = None
-
-    def setup(self):
-        self.add_input('k', val=0.04)
-        self.add_input('r', val=40.0)
-        self.add_input('dist_down', shape=max_n_turbines - 1, val=560.0)
-        self.add_input('dist_cross', shape=max_n_turbines - 1, val=0.0)
-        self.add_input('ct', shape=max_n_turbines - 1, val=0.79)
-        self.add_input('fraction', shape=max_n_turbines - 1)
-        self.add_input('n_turbines', val=1)
-        self.add_output('dU', shape=max_n_turbines - 1, val=0.3)
-
-    def compute(self, inputs, outputs):
-        #print "5 WakeDeficit"
-        n_turbines = int(inputs['n_turbines'])
-        k = inputs['k']
-        r = inputs['r']
-        d_down = inputs['dist_down']
-        d_cross = inputs['dist_cross']
-        c_t = inputs['ct']
-        fraction = inputs['fraction']
-        #print c_t, "Input1 ct"
-        #print fraction, "Input2 fraction"
-        deficits = np.array([])
-        for ind in range(n_turbines - 1):
-            if fraction[ind] > 0.0:
-                deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(d_down[ind], d_cross[ind], c_t[ind], k, r)])
-            else:
-                deficits = np.append(deficits, [0.0])
-        lendif = max_n_turbines - len(deficits) - 1
-        outputs['dU'] = np.concatenate((deficits, [0 for n in range(lendif)]))
-        #print outputs['dU'], "Output"
+        self.connect('fraction.fractions', 'deficit.fractions')
 
 
 class Wake(Group):
@@ -140,19 +79,9 @@ class Wake(Group):
 
     def setup(self):
         self.add_subsystem('distance', DistanceComponent(self.number), promotes_inputs=['angle', 'layout', 'n_turbines'])
-        self.add_subsystem('determine', DetermineIfInWakeJensen(self.number), promotes_inputs=['angle', 'layout', 'r', 'k', 'n_turbines'])
-        self.add_subsystem('deficit', JensenWakeDeficit(), promotes_inputs=['ct', 'r', 'k', 'n_turbines'], promotes_outputs=['dU'])
-        self.connect('distance.dist_down', 'determine.downwind_d')
-        self.connect('distance.dist_cross', 'determine.crosswind_d')
-        self.connect('distance.dist_down', 'deficit.dist_down')
-        self.connect('distance.dist_cross', 'deficit.dist_cross')
-        self.connect('determine.fraction', 'deficit.fraction')
-
-
-class JensenWakeDeficit(WakeDeficit):
-    def __init__(self):
-        super(JensenWakeDeficit, self).__init__()
-        self.wake_deficit = wake_deficit1
+        self.add_subsystem('total_wake', TotalWake(JensenWakeFraction, JensenWakeDeficit, self.number), promotes_inputs=['ct', 'angle', 'layout', 'r', 'n_turbines'], promotes_outputs=['dU'])
+        self.connect('distance.dist_down', 'total_wake.downwind_d')
+        self.connect('distance.dist_cross', 'total_wake.crosswind_d')
 
 
 class SpeedDeficits(ExplicitComponent):
@@ -181,7 +110,7 @@ class LinearSolveWake(Group):
 
         for n in range(max_n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n), promotes_inputs=['n_turbines'])
-            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['angle', 'r', 'k', 'n_turbines'])
+            self.add_subsystem('deficits{}'.format(n), Wake(n), promotes_inputs=['angle', 'r', 'n_turbines'])
             self.add_subsystem('merge{}'.format(n), WakeMergeRSS(), promotes_inputs=['n_turbines'])
             self.add_subsystem('speed{}'.format(n), SpeedDeficits(), promotes_inputs=['freestream'])
 
@@ -201,7 +130,7 @@ class LinearSolveWake(Group):
 class WakeModel(Group):
 
     def setup(self):
-        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'k', 'original', 'angle', 'n_turbines', 'freestream'])
+        self.add_subsystem('linear_solve', LinearSolveWake(), promotes_inputs=['r', 'original', 'angle', 'n_turbines', 'freestream'])
         self.add_subsystem('combine', CombineSpeed(), promotes_inputs=['n_turbines'], promotes_outputs=['U'])
         for n in range(max_n_turbines):
             self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
@@ -235,3 +164,5 @@ class CombineSpeed(ExplicitComponent):
             array_speeds = np.concatenate((array_speeds, [0 for n in range(lendif)]))
         outputs['U'] = np.array(array_speeds)
         #print outputs['U'], "Combined Wind Speeds U"
+if __name__ == '__main__':
+    pass
