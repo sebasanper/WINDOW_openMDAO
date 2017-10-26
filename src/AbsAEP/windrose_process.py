@@ -50,7 +50,7 @@ class WindrosePreprocessor(ExplicitComponent):
             for ws, prob3 in zip(wind_speeds2, prob2):
                 cases.append([wdir, ws])
                 probs.append(prob1 / 100.0 * prob3 / 100.0)
-        outputs['probabilities'] = probs
+        outputs['probabilities'] = probs[0]
         outputs['cases'] = np.array(cases)
 
 

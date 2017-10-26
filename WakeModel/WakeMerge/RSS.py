@@ -32,7 +32,7 @@ class SumSquares(ExplicitComponent):
 
 class Sqrt(ExplicitComponent):
     def __init__(self, n_cases):
-        super(ExplicitComponent, self).__init__()
+        super(Sqrt, self).__init__()
         self.n_cases = n_cases
 
     def setup(self):
