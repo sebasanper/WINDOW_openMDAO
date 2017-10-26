@@ -2,7 +2,7 @@ from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS,
     LinearBlockJac, IndepVarComp
 import numpy as np
 from order_layout import OrderLayout
-from src.AbsThrustCoefficient.abstract_thrust import ThrustCoefficient, FirstThrustCoefficient
+from src.AbsThrustCoefficient.abstract_thrust import ThrustCoefficient
 from input_params import max_n_turbines
 from distance import DistanceComponent
 from windspeed_deficits import SpeedDeficits, CombineSpeed
@@ -29,21 +29,19 @@ class LinearSolveWake(Group):
         super(LinearSolveWake, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
-        self.model_merge = merge_model
+        self.merge_model = merge_model
 
     def setup(self):
-        freestream = self.add_subsystem('freestream', IndepVarComp())
-        freestream.add_output('freestream', val=8.5)
         self.add_subsystem('order_layout', OrderLayout(), promotes_inputs=['original', 'angle', 'n_turbines'])
 
         for n in range(max_n_turbines):
             self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n), promotes_inputs=['n_turbines'])
             self.add_subsystem('deficits{}'.format(n), Wake(self.fraction_model, self.deficit_model, n),
                                promotes_inputs=['angle', 'r', 'n_turbines'])
-            self.add_subsystem('merge{}'.format(n), self.model_merge(), promotes_inputs=['n_turbines'])
+            self.add_subsystem('merge{}'.format(n), self.merge_model(), promotes_inputs=['n_turbines'])
             self.add_subsystem('speed{}'.format(n), SpeedDeficits(), promotes_inputs=['freestream'])
 
-            self.connect('order_layout.ordered', 'deficits{}.layout'.format(n))
+            self.connect('order_layout.ordered', 'deficits{}.ordered'.format(n))
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n))
@@ -64,9 +62,9 @@ class Wake(Group):
 
     def setup(self):
         self.add_subsystem('distance', DistanceComponent(self.number),
-                           promotes_inputs=['angle', 'layout', 'n_turbines'])
+                           promotes_inputs=['angle', 'ordered', 'n_turbines'])
         self.add_subsystem('total_wake', TotalWake(self.fraction_model, self.deficit_model, self.number),
-                           promotes_inputs=['ct', 'angle', 'layout', 'r', 'n_turbines'], promotes_outputs=['dU'])
+                           promotes_inputs=['ct', 'angle', 'ordered', 'r', 'n_turbines'], promotes_outputs=['dU'])
         self.connect('distance.dist_down', 'total_wake.downwind_d')
         self.connect('distance.dist_cross', 'total_wake.crosswind_d')
 
@@ -83,7 +81,7 @@ class TotalWake(Group):
         k = self.add_subsystem('k_indep', IndepVarComp())
         k.add_output('k_jensen', val=0.04)
         self.add_subsystem('fraction', self.fraction_model(self.number),
-                           promotes_inputs=['layout', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'r'])
+                           promotes_inputs=['ordered', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'r'])
         self.add_subsystem('deficit', self.deficit_model(),
                            promotes_inputs=['r', 'downwind_d', 'crosswind_d', 'ct', 'n_turbines'],
                            promotes_outputs=['dU'])

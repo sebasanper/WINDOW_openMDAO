@@ -9,40 +9,45 @@ class DetermineIfInWake(ExplicitComponent):
         self.number = number
 
     def setup(self):
-        self.add_input('layout', shape=(max_n_turbines, 3))
-        self.add_input('angle', val=90.0)
+        self.add_input('ordered', shape=(2, max_n_turbines, 3))
+        self.add_input('angle', shape=2)
         self.add_input('n_turbines', val=1)
-        self.add_input('downwind_d', shape=max_n_turbines - 1)
-        self.add_input('crosswind_d', shape=max_n_turbines - 1)
+        self.add_input('downwind_d', shape=(2, max_n_turbines - 1))
+        self.add_input('crosswind_d', shape=(2, max_n_turbines - 1))
         self.add_input('r', val=40.0)
 
-        self.add_output('fractions', shape=max_n_turbines - 1, val=0)
+        self.add_output('fractions', shape=(2, max_n_turbines - 1), val=0)
 
     def compute(self, inputs, outputs):
         # print "4 Determine"
         # print inputs['layout'], "Input"
-        n_turbines = int(inputs['n_turbines'])
-        layout = inputs['layout']
-        angle = inputs['angle']
-        downwind_d = inputs['downwind_d']
-        crosswind_d = inputs['crosswind_d']
         fractions = np.array([])
-        r = inputs['r']
-        i = 0
-        if self.number < n_turbines:
-            for n in range(n_turbines):
-                if n != self.number:
-                    fractions = np.append(fractions, self.wake_fraction(inputs, x_upstream=layout[self.number][1],
-                                                                        y_upstream=layout[self.number][2],
-                                                                        x_downstream=layout[n][1],
-                                                                        y_downstream=layout[n][2],
-                                                                        wind_direction=angle,
-                                                                        downwind_d=downwind_d[i],
-                                                                        crosswind_d=crosswind_d[i],
-                                                                        radius=r))
-                    i += 1
-        lendif = max_n_turbines - len(fractions) - 1
-        outputs['fractions'] = np.concatenate((fractions, [0 for _ in range(lendif)]))
+        for case in range(2):
+            n_turbines = int(inputs['n_turbines'])
+            ordered = inputs['ordered'][case]
+            angle = inputs['angle'][case]
+            downwind_d = inputs['downwind_d'][case]
+            crosswind_d = inputs['crosswind_d'][case]
+            fractions1 = np.array([])
+            r = inputs['r']
+            i = 0
+            if self.number < n_turbines:
+                for n in range(n_turbines):
+                    if n != self.number:
+                        fractions1 = np.append(fractions1, self.wake_fraction(inputs, x_upstream=ordered[self.number][1],
+                                                                            y_upstream=ordered[self.number][2],
+                                                                            x_downstream=ordered[n][1],
+                                                                            y_downstream=ordered[n][2],
+                                                                            wind_direction=angle,
+                                                                            downwind_d=downwind_d[i],
+                                                                            crosswind_d=crosswind_d[i],
+                                                                            radius=r))
+                        i += 1
+            lendif = max_n_turbines - len(fractions1) - 1
+            fractions1 = np.concatenate((fractions1, [0 for _ in range(lendif)]))
+            fractions = np.append(fractions, fractions1)
+        fractions = fractions.reshape(2, max_n_turbines - 1)
+        outputs['fractions'] = fractions
         # print outputs['fraction'], "Output"
 
 
@@ -50,31 +55,36 @@ class WakeDeficit(ExplicitComponent):
 
     def setup(self):
         self.add_input('r', val=40.0)
-        self.add_input('downwind_d', shape=max_n_turbines - 1, val=560.0)
-        self.add_input('crosswind_d', shape=max_n_turbines - 1, val=0.0)
-        self.add_input('ct', shape=max_n_turbines - 1, val=0.79)
-        self.add_input('fractions', shape=max_n_turbines - 1)
+        self.add_input('downwind_d', shape=(2, max_n_turbines - 1))
+        self.add_input('crosswind_d', shape=(2, max_n_turbines - 1))
+        self.add_input('ct', shape=(2, max_n_turbines - 1))
+        self.add_input('fractions', shape=(2, max_n_turbines - 1))
         self.add_input('n_turbines', val=1)
-        self.add_output('dU', shape=max_n_turbines - 1, val=0.3)
+        self.add_output('dU', shape=(2, max_n_turbines - 1))
 
     def compute(self, inputs, outputs):
         # print "5 WakeDeficit"
-        n_turbines = int(inputs['n_turbines'])
-        r = inputs['r']
-        d_down = inputs['downwind_d']
-        d_cross = inputs['crosswind_d']
-        c_t = inputs['ct']
-        fraction = inputs['fractions']
-        # print c_t, "Input1 ct"
-        # print fraction, "Input2 fraction"
-        deficits = np.array([])
-        for ind in range(n_turbines - 1):
-            if fraction[ind] > 0.0:
-                deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(inputs, x_down=d_down[ind],
-                                                                                  x_cross=d_cross[ind], Ct=c_t[ind],
-                                                                                  r0=r)])
-            else:
-                deficits = np.append(deficits, [0.0])
-        lendif = max_n_turbines - len(deficits) - 1
-        outputs['dU'] = np.concatenate((deficits, [0 for _ in range(lendif)]))
+        du = np.array([])
+        for case in range(2):
+            n_turbines = int(inputs['n_turbines'])
+            r = inputs['r']
+            d_down = inputs['downwind_d'][case]
+            d_cross = inputs['crosswind_d'][case]
+            c_t = inputs['ct'][case]
+            fraction = inputs['fractions'][case]
+            # print c_t, "Input1 ct"
+            # print fraction, "Input2 fraction"
+            deficits = np.array([])
+            for ind in range(n_turbines - 1):
+                if fraction[ind] > 0.0:
+                    deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(inputs, x_down=d_down[ind],
+                                                                                      x_cross=d_cross[ind], Ct=c_t[ind],
+                                                                                      r0=r)])
+                else:
+                    deficits = np.append(deficits, [0.0])
+            lendif = max_n_turbines - len(deficits) - 1
+            deficits = np.concatenate((deficits, [0 for _ in range(lendif)]))
+            du = np.append(du, deficits)
+        du = du.reshape(2, max_n_turbines - 1)
+        outputs['dU'] = du
         # print outputs['dU'], "Output"

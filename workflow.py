@@ -20,19 +20,14 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0], [3, 1680.0, 0.0],
-                                                  [4, 0.0, 1120.0], [5, 0.0, 1120.0], [6, 0.0, 1120.0],
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 0.0, 1120.0],
+                                                  [4, 1120.0, 0.0], [5, 0.0, 1120.0], [6, 0.0, 1120.0],
                                                   [7, 0.0, 1120.0], [8, 0.0, 1120.0], [9, 0.0, 1120.0]]))
-        # indep2.add_output('layout', val=np.array(
-        #     [[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 1120.0, 0.0], [4, 0.0, 1120.0],
-        #     [5, 6666.6, 6666.6], [6, 6666.6, 6666.6], [7, 6666.6, 6666.6], [8, 6666.6, 6666.6], [9, 6666.6, 6666.6]]))
-        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0],
-        # [3, 1120.0, 0.0], [4, 0.0, 1120.0], [5, float('nan'), float('nan')]]))
-        indep2.add_output('freestream', val=8.5)
-        indep2.add_output('angle',
-                          val=90.0)  # Follows windrose convention. N = 0 deg, E = 90 deg, S = 180 deg, W = 270 deg
+        indep2.add_output('freestream', val=[8.5, 8.49])
+        indep2.add_output('angle', val=[45.0, 135.0])  # Follows windrose convention. N = 0 deg, E = 90 deg, S = 180 deg
+        # W = 270 deg
         indep2.add_output('r', val=turbine_radius)
-        indep2.add_output('n_turbines', val=4)
+        indep2.add_output('n_turbines', val=5)
         self.add_subsystem('wakemodel', WakeModel(self.fraction_model, self.deficit_model, self.merge_model))
         self.add_subsystem('power', self.power_model())
         self.add_subsystem('farmpower', FarmAeroPower())
@@ -72,8 +67,9 @@ prob.run_model()
 # prob.run_model()
 # print time() - start, "seconds"
 # prob.model.list_outputs()
-print [ind for ind in prob['farmpower.ind_powers'] if ind > 0]
-print [ind for ind in prob['wakemodel.U'] if ind > 0]
+print prob['wakemodel.U']
+# print [ind for ind in prob['farmpower.ind_powers'] if ind > 0]
+# print [ind for ind in prob['wakemodel.U'] if ind > 0]
 
 
 # with open("linear_fixed", 'w') as out:

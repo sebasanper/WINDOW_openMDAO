@@ -4,8 +4,7 @@ from numpy import sqrt
 
 
 class BaseWakeMerge(Group):
-    def setup(self):
-        self.add_subsystem('merge', AbstractWakeMerging(), promotes=['*'])
+    pass
 
 
 class AbstractWakeMerging(ExplicitComponent):

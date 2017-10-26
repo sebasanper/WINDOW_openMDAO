@@ -33,7 +33,7 @@ class ThrustCoefficient(ExplicitComponent):
                     c_t = np.append(c_t, [ct(inputs['U{}'.format(n)])])
         lendif = max_n_turbines - len(c_t) - 1
         # print c_t
-        ans = np.concatenate((c_t, [0 for n in range(lendif)]))
+        ans = np.concatenate((c_t, [0 for _ in range(lendif)]))
         # print ans
         outputs['ct'] = ans
         # print ans, "Output Ct"
