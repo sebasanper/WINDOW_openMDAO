@@ -1,6 +1,6 @@
 from area import AreaReal
 from src.api import DetermineIfInWake, WakeDeficit
-from numpy import deg2rad, tan, sqrt, cos, sin
+from numpy import deg2rad, sqrt, cos, sin
 import numpy as np
 from input_params import max_n_turbines
 from openmdao.api import Group, IndepVarComp

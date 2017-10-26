@@ -18,7 +18,7 @@ class WakeModel(Group):
     def setup(self):
         self.add_subsystem('linear_solve', LinearSolveWake(self.fraction_model, self.deficit_model, self.merge_model),
                            promotes_inputs=['r', 'original', 'angle', 'n_turbines', 'freestream'])
-        self.add_subsystem('combine', CombineSpeed(), promotes_inputs=['n_turbines'], promotes_outputs=['U'])
+        self.add_subsystem('combine', CombineSpeed(self.n_cases), promotes_inputs=['n_turbines'], promotes_outputs=['U'])
         for n in range(max_n_turbines):
             self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
         self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
@@ -32,14 +32,14 @@ class LinearSolveWake(Group):
         self.merge_model = merge_model
 
     def setup(self):
-        self.add_subsystem('order_layout', OrderLayout(), promotes_inputs=['original', 'angle', 'n_turbines'])
+        self.add_subsystem('order_layout', OrderLayout(self.n_cases), promotes_inputs=['original', 'angle', 'n_turbines'])
 
         for n in range(max_n_turbines):
-            self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n), promotes_inputs=['n_turbines'])
+            self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n, self.n_cases), promotes_inputs=['n_turbines'])
             self.add_subsystem('deficits{}'.format(n), Wake(self.fraction_model, self.deficit_model, n),
                                promotes_inputs=['angle', 'r', 'n_turbines'])
             self.add_subsystem('merge{}'.format(n), self.merge_model(), promotes_inputs=['n_turbines'])
-            self.add_subsystem('speed{}'.format(n), SpeedDeficits(), promotes_inputs=['freestream'])
+            self.add_subsystem('speed{}'.format(n), SpeedDeficits(self.n_cases), promotes_inputs=['freestream'])
 
             self.connect('order_layout.ordered', 'deficits{}.ordered'.format(n))
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
@@ -61,7 +61,7 @@ class Wake(Group):
         self.number = number
 
     def setup(self):
-        self.add_subsystem('distance', DistanceComponent(self.number),
+        self.add_subsystem('distance', DistanceComponent(self.number, self.n_cases),
                            promotes_inputs=['angle', 'ordered', 'n_turbines'])
         self.add_subsystem('total_wake', TotalWake(self.fraction_model, self.deficit_model, self.number),
                            promotes_inputs=['ct', 'angle', 'ordered', 'r', 'n_turbines'], promotes_outputs=['dU'])

@@ -20,17 +20,20 @@ def order(layout_array, wind_direction):
 
 
 class OrderLayout(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(OrderLayout, self).__init__()
+        self.n_cases = n_cases
 
     def setup(self):
         self.add_input('original', shape=(max_n_turbines, 3))
-        self.add_input('angle', val=[1.0, 1.0])
+        self.add_input('angle', shape=self.n_cases)
         self.add_input('n_turbines', val=1)
-        self.add_output('ordered', shape=(2, max_n_turbines, 3))
+        self.add_output('ordered', shape=(self.n_cases, max_n_turbines, 3))
 
     def compute(self, inputs, outputs):
         # print "1 Order"
         ordered = np.array([])
-        for case in range(2):
+        for case in range(self.n_cases):
             angle = inputs['angle'][case]
             n_turbines = int(inputs['n_turbines'])
             original = inputs['original'][:n_turbines]
@@ -38,9 +41,9 @@ class OrderLayout(ExplicitComponent):
             res = order(original, angle)
             lendif = max_n_turbines - len(original)
             if lendif > 0:
-                res = np.concatenate((res, [[0 for _ in range(3)] for n in range(lendif)]))
+                res = np.concatenate((res, [[0 for _ in range(3)] for _ in range(lendif)]))
             ordered = np.append(ordered, res)
-        ordered = ordered.reshape(2, max_n_turbines, 3)
+        ordered = ordered.reshape(self.n_cases, max_n_turbines, 3)
         outputs['ordered'] = ordered
         # print ordered, "Output"
 

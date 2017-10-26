@@ -4,25 +4,26 @@ import numpy as np
 
 
 class DetermineIfInWake(ExplicitComponent):
-    def __init__(self, number):
+    def __init__(self, number, n_cases):
         super(DetermineIfInWake, self).__init__()
         self.number = number
+        self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('ordered', shape=(2, max_n_turbines, 3))
-        self.add_input('angle', shape=2)
+        self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
+        self.add_input('angle', shape=self.n_cases)
         self.add_input('n_turbines', val=1)
-        self.add_input('downwind_d', shape=(2, max_n_turbines - 1))
-        self.add_input('crosswind_d', shape=(2, max_n_turbines - 1))
+        self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines - 1))
         self.add_input('r', val=40.0)
 
-        self.add_output('fractions', shape=(2, max_n_turbines - 1), val=0)
+        self.add_output('fractions', shape=(self.n_cases, max_n_turbines - 1), val=0)
 
     def compute(self, inputs, outputs):
         # print "4 Determine"
         # print inputs['layout'], "Input"
         fractions = np.array([])
-        for case in range(2):
+        for case in range(self.n_cases):
             n_turbines = int(inputs['n_turbines'])
             ordered = inputs['ordered'][case]
             angle = inputs['angle'][case]
@@ -46,26 +47,29 @@ class DetermineIfInWake(ExplicitComponent):
             lendif = max_n_turbines - len(fractions1) - 1
             fractions1 = np.concatenate((fractions1, [0 for _ in range(lendif)]))
             fractions = np.append(fractions, fractions1)
-        fractions = fractions.reshape(2, max_n_turbines - 1)
+        fractions = fractions.reshape(self.n_cases, max_n_turbines - 1)
         outputs['fractions'] = fractions
         # print outputs['fraction'], "Output"
 
 
 class WakeDeficit(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(WakeDeficit, self).__init__()
+        self.n_cases = n_cases
 
     def setup(self):
         self.add_input('r', val=40.0)
-        self.add_input('downwind_d', shape=(2, max_n_turbines - 1))
-        self.add_input('crosswind_d', shape=(2, max_n_turbines - 1))
-        self.add_input('ct', shape=(2, max_n_turbines - 1))
-        self.add_input('fractions', shape=(2, max_n_turbines - 1))
+        self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('ct', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('fractions', shape=(self.n_cases, max_n_turbines - 1))
         self.add_input('n_turbines', val=1)
-        self.add_output('dU', shape=(2, max_n_turbines - 1))
+        self.add_output('dU', shape=(self.n_cases, max_n_turbines - 1))
 
     def compute(self, inputs, outputs):
         # print "5 WakeDeficit"
         du = np.array([])
-        for case in range(2):
+        for case in range(self.n_cases):
             n_turbines = int(inputs['n_turbines'])
             r = inputs['r']
             d_down = inputs['downwind_d'][case]
@@ -85,6 +89,6 @@ class WakeDeficit(ExplicitComponent):
             lendif = max_n_turbines - len(deficits) - 1
             deficits = np.concatenate((deficits, [0 for _ in range(lendif)]))
             du = np.append(du, deficits)
-        du = du.reshape(2, max_n_turbines - 1)
+        du = du.reshape(self.n_cases, max_n_turbines - 1)
         outputs['dU'] = du
         # print outputs['dU'], "Output"

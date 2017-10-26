@@ -5,16 +5,17 @@ from numpy import sqrt, deg2rad, tan
 
 
 class DistanceComponent(ExplicitComponent):
-    def __init__(self, number):
+    def __init__(self, number, n_cases):
         super(DistanceComponent, self).__init__()
         self.number = number
+        self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('angle', val=[90.0, 90.0])
-        self.add_input('ordered', shape=(2, max_n_turbines, 3))
+        self.add_input('angle', shape=self.n_cases)
+        self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
-        self.add_output('dist_down', shape=(2, max_n_turbines - 1))
-        self.add_output('dist_cross', shape=(2, max_n_turbines - 1))
+        self.add_output('dist_down', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_output('dist_cross', shape=(self.n_cases, max_n_turbines - 1))
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
@@ -22,7 +23,7 @@ class DistanceComponent(ExplicitComponent):
     def compute(self, inputs, outputs):
         d_down2 = []
         d_cross2 = []
-        for case in range(2):
+        for case in range(self.n_cases):
             # print "3 Distance"
             n_turbines = int(inputs['n_turbines'])
             ordered = inputs['ordered']
@@ -40,8 +41,8 @@ class DistanceComponent(ExplicitComponent):
             d_cross = np.concatenate((d_cross, [0 for _ in range(lendif)]))
             d_down2 = np.append(d_down2, d_down)
             d_cross2 = np.append(d_cross2, d_cross)
-        d_down2 = d_down2.reshape(2, max_n_turbines - 1)
-        d_cross2 = d_cross2.reshape(2, max_n_turbines - 1)
+        d_down2 = d_down2.reshape(self.n_cases, max_n_turbines - 1)
+        d_cross2 = d_cross2.reshape(self.n_cases, max_n_turbines - 1)
         outputs['dist_down'] = d_down2
         outputs['dist_cross'] = d_cross2
         # print outputs['dist_down'], "Output1"

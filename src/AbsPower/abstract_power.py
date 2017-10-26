@@ -4,12 +4,15 @@ import numpy as np
 
 
 class AbstractPower(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(AbstractPower, self).__init__()
+        self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('U', shape=(2, max_n_turbines))
+        self.add_input('U', shape=(self.n_cases, max_n_turbines))
         self.add_input('n_turbines', val=1)
 
-        self.add_output('p', shape=(2, max_n_turbines))
+        self.add_output('p', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
         self.declare_partials('*', '*', method='fd')
@@ -19,21 +22,25 @@ class AbstractPower(ExplicitComponent):
 
 
 class FarmAeroPower(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(FarmAeroPower, self).__init__()
+        self.n_cases = n_cases
+
     def setup(self):
-        self.add_input('ind_powers', shape=(2, max_n_turbines))
+        self.add_input('ind_powers', shape=(self.n_cases, max_n_turbines))
         self.add_input('n_turbines', val=1)
 
-        self.add_output('farm_power', shape=2)
+        self.add_output('farm_power', shape=self.n_cases)
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='cs')
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
         ans = np.array([])
-        for case in range(2):
+        for case in range(self.n_cases):
             farm_output = sum(inputs['ind_powers'][case][:n_turbines])  # Alternative without using n_turbines.
             ans = np.append(ans, farm_output)
-        ans = ans.reshape(2)
+        ans = ans.reshape(self.n_cases)
         outputs['farm_power'] = ans
 
 

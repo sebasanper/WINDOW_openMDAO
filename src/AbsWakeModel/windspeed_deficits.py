@@ -4,41 +4,47 @@ from input_params import max_n_turbines
 
 
 class SpeedDeficits(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(SpeedDeficits, self).__init__()
+        self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('dU', shape=2)
-        self.add_input('freestream', shape=2)
-        self.add_output('U', shape=2)
+        self.add_input('dU', shape=self.n_cases)
+        self.add_input('freestream', shape=self.n_cases)
+        self.add_output('U', shape=self.n_cases)
 
     def compute(self, inputs, outputs):
         # print "8 Speed"
         ans = np.array([])
-        for case in range(2):
+        for case in range(self.n_cases):
             dU = inputs['dU'][case]
             freestream = inputs['freestream'][case]
         # print dU, 'Input dU'
-            res = freestream * (1.0 - dU)
+            res = [freestream * (1.0 - dU)]
             ans = np.append(ans, res)
-        ans = ans.reshape(2)
+        ans = ans.reshape(self.n_cases)
         # print ans
         outputs['U'] = ans
         # print outputs['U'], "Output U"
 
 
 class CombineSpeed(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(CombineSpeed, self).__init__()
+        self.n_cases = n_cases
 
     def setup(self):
 
         for n in range(max_n_turbines):
-            self.add_input('U{}'.format(n), shape=2)
-        self.add_input('ordered_layout', shape=(2, max_n_turbines, 3))
+            self.add_input('U{}'.format(n), shape=self.n_cases)
+        self.add_input('ordered_layout', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
 
-        self.add_output('U', shape=(2, max_n_turbines))
+        self.add_output('U', shape=(self.n_cases, max_n_turbines))
 
     def compute(self, inputs, outputs):
         ans = np.array([])
-        for case in range(2):
+        for case in range(self.n_cases):
             n_turbines = int(inputs['n_turbines'])
             ordered_layout = inputs['ordered_layout'][case][:n_turbines].tolist()
             # print ordered_layout
@@ -53,6 +59,6 @@ class CombineSpeed(ExplicitComponent):
             if lendif > 0:
                 array_speeds = np.concatenate((array_speeds, [0 for _ in range(lendif)]))
             ans = np.append(ans, array_speeds)
-        ans = ans.reshape(2, max_n_turbines)
+        ans = ans.reshape(self.n_cases, max_n_turbines)
         outputs['U'] = np.array(ans)
         # print outputs['U'], "Combined Wind Speeds U"

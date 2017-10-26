@@ -5,17 +5,18 @@ from input_params import max_n_turbines
 
 class ThrustCoefficient(ExplicitComponent):
 
-    def __init__(self, number):
+    def __init__(self, number, n_cases):
         super(ThrustCoefficient, self).__init__()
         self.number = number
+        self.n_cases = n_cases
 
     def setup(self):
         self.add_input('n_turbines', val=5)
         for n in range(max_n_turbines):
             if n < self.number:
-                self.add_input('U{}'.format(n), shape=2)
+                self.add_input('U{}'.format(n), shape=self.n_cases)
 
-        self.add_output('ct', shape=(2, max_n_turbines - 1), val=0.79)
+        self.add_output('ct', shape=(self.n_cases, max_n_turbines - 1))
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
@@ -26,7 +27,7 @@ class ThrustCoefficient(ExplicitComponent):
         #     if n != self.number:
                 # print inputs['U{}'.format(n)], "Input U{}".format(n)
         ans = np.array([])
-        for case in range(2):
+        for case in range(self.n_cases):
             n_turbines = int(inputs['n_turbines'])
             c_t = np.array([])
             if self.number < n_turbines:
@@ -37,7 +38,7 @@ class ThrustCoefficient(ExplicitComponent):
             # print c_t
             c_t = np.concatenate((c_t, [0 for _ in range(lendif)]))
             ans = np.append(ans, c_t)
-        ans = ans.reshape(2, max_n_turbines - 1)
+        ans = ans.reshape(self.n_cases, max_n_turbines - 1)
         # print ans
         outputs['ct'] = ans
         # print ans, "Output Ct"
