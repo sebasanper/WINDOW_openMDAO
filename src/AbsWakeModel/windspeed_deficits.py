@@ -24,6 +24,7 @@ class SpeedDeficits(ExplicitComponent):
             ans = np.append(ans, res)
         ans = ans.reshape(self.n_cases)
         # print ans
+        # inputs['dU'] = []
         outputs['U'] = ans
         # print outputs['U'], "Output U"
 
@@ -44,8 +45,8 @@ class CombineSpeed(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         ans = np.array([])
+        n_turbines = int(inputs['n_turbines'])
         for case in range(self.n_cases):
-            n_turbines = int(inputs['n_turbines'])
             ordered_layout = inputs['ordered_layout'][case][:n_turbines].tolist()
             # print ordered_layout
             indices = [i[0] for i in ordered_layout]
@@ -60,5 +61,7 @@ class CombineSpeed(ExplicitComponent):
                 array_speeds = np.concatenate((array_speeds, [0 for _ in range(lendif)]))
             ans = np.append(ans, array_speeds)
         ans = ans.reshape(self.n_cases, max_n_turbines)
+        # for n in range(self.n_cases):
+        #     inputs['U{}'.format(n)] = []
         outputs['U'] = np.array(ans)
         # print outputs['U'], "Combined Wind Speeds U"
