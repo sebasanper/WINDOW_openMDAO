@@ -19,8 +19,8 @@ class JensenWakeDeficit(WakeDeficit):
 
 class JensenWakeFraction(DetermineIfInWake):
     def setup(self):
-        self.add_input('k', val=0.04)
         super(JensenWakeFraction, self).setup()
+        self.add_input('k', val=0.04)
 
     def wake_fraction(self, inputs, *args, **kwargs):
         k_jensen = inputs['k']

@@ -56,6 +56,7 @@ def ct(v):
         ans = np.array([0.1])
     return ans
 
+
 if __name__ == '__main__':
     from openmdao.api import Problem, Group, IndepVarComp
 

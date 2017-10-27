@@ -7,22 +7,26 @@ from input_params import turbine_radius
 from WakeModel.WakeMerge.RSS import WakeMergeRSS
 from src.api import AEPWorkflow
 
-real_angle = 30.0
-artificial_angle = 10.0
-n_windspeedbins = 10
+real_angle = 180.0
+artificial_angle = 90.0
+n_windspeedbins = 1
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
+print n_cases, "Number of cases"
 
-direction = []
-weibull_scale = []
-weibull_shape = []
-dir_probability = []
-with open('weibull_windrose.dat', 'r') as windrose:
-    for line in windrose:
-        columns = line.split()
-        direction.append(float(columns[0]))
-        weibull_scale.append(float(columns[1]))
-        weibull_shape.append(float(columns[2]))
-        dir_probability.append(float(columns[3]))
+
+def read_windrose(filename):
+    direction = []
+    weibull_scale = []
+    weibull_shape = []
+    dir_probability = []
+    with open(filename, 'r') as windrose:
+        for line in windrose:
+            columns = line.split()
+            direction.append(float(columns[0]))
+            weibull_scale.append(float(columns[1]))
+            weibull_shape.append(float(columns[2]))
+            dir_probability.append(float(columns[3]))
+    return direction, weibull_scale, weibull_shape, dir_probability
 
 
 class WorkingGroup(Group):
@@ -35,20 +39,27 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', val=read_layout('horns_rev.dat'))
-        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0],
-        #                                           [3, 0.0, 1120.0], [4, 1120.0, 0.0]]))#, [5, 0.0, 1120.0],
+        # indep2.add_output('layout', val=read_layout('horns_rev.dat'))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0],
+                                                  [3, 0.0, 1120.0], [4, 1120.0, 0.0]]))#, [5, 0.0, 1120.0],
                                                   # [6, 0.0, 1120.0], [7, 0.0, 1120.0], [8, 0.0, 1120.0],
                                                   # [9, 0.0, 1120.0]]))
-        indep2.add_output('weibull_shapes', val=weibull_shape)
-        indep2.add_output('weibull_scales', val=weibull_scale)
-        indep2.add_output('dir_probabilities', val=dir_probability)
-        indep2.add_output('wind_directions', val=direction)  # Follows windrose convention N = 0 deg, E = 90 deg,
-        #  S = 180 deg, W = 270 deg
-        indep2.add_output('cut_in', val=4.0)
-        indep2.add_output('cut_out', val=25.0)
+
+        # wd, wsc, wsh, wdp = read_windrose('weibull_windrose.dat')
+
+        wsh = [1.0, 1.0]
+        wsc = [8.0, 8.0]
+        wdp = [50.0, 50.0]
+        wd = [0.0, 180.0]
+
+        indep2.add_output('weibull_shapes', val=wsh)
+        indep2.add_output('weibull_scales', val=wsc)
+        indep2.add_output('dir_probabilities', val=wdp)
+        indep2.add_output('wind_directions', val=wd)  # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
+        indep2.add_output('cut_in', val=8.0)
+        indep2.add_output('cut_out', val=9.0)
         indep2.add_output('r', val=turbine_radius)
-        indep2.add_output('n_turbines', val=80)
+        indep2.add_output('n_turbines', val=5)
         aep = self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
                                                     self.fraction_model, self.deficit_model, self.merge_model))
 
@@ -96,9 +107,11 @@ print clock(), "Before 1st run"
 prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
-print prob['AEP.AEP']
-print sum(prob['AEP.windrose.probabilities'])
-#
+print prob.model.list_outputs()
+print prob.model.list_inputs()
+# print prob['AEP.wakemodel.linear_solve.deficits2.dU']
+# print prob['AEP.wakemodel.combine.U']
+# print prob.model.list_inputs(values=False)
 # print "second run"
 # start = time()
 # print clock(), "Before 2nd run"
@@ -117,8 +130,8 @@ print sum(prob['AEP.windrose.probabilities'])
 # print prob['AEP.AEP']
 
 
-with open("angle_power.dat", "w") as out:
-    for n in range(n_cases):
-        out.write("{} {} {} {} {}\n".format(prob['AEP.open_cases.wind_directions'][n], prob['AEP.open_cases.freestream_wind_speeds'][n], prob['AEP.windrose.probabilities'][n], prob['AEP.farmpower.farm_power'][n], prob['AEP.energies'][n]))
-print prob['AEP.AEP']
-print sum(prob['AEP.windrose.probabilities'])
+# with open("angle_power.dat", "w") as out:
+#     for n in range(n_cases):
+#         out.write("{} {} {} {} {}\n".format(prob['AEP.open_cases.wind_directions'][n], prob['AEP.open_cases.freestream_wind_speeds'][n], prob['AEP.windrose.probabilities'][n], prob['AEP.farmpower.farm_power'][n], prob['AEP.energies'][n]))
+# print prob['AEP.AEP']
+# print sum(prob['AEP.windrose.probabilities'])
