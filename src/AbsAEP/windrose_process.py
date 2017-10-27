@@ -43,14 +43,16 @@ class WindrosePreprocessor(ExplicitComponent):
         wind_directions2, direction_probabilities2 = getdata.adapt_directions()
         wind_speeds2, wind_speeds_probabilities2 = getdata.speed_probabilities()
 
-        cases = []
-        probs = []
+        cases = np.array([])
+        probs = np.array([])
 
         for wdir, prob1, prob2 in zip(wind_directions2, direction_probabilities2, wind_speeds_probabilities2):
             for ws, prob3 in zip(wind_speeds2, prob2):
-                cases.append([wdir, ws])
-                probs.append(prob1 / 100.0 * prob3 / 100.0)
-        outputs['probabilities'] = probs[0]
+                cases = np.append(cases, [wdir, ws])
+                probs = np.append(probs, prob1 / 100.0 * prob3 / 100.0)
+        cases = cases.reshape(self.n_cases, 2)
+        probs = probs.reshape(self.n_cases)
+        outputs['probabilities'] = probs
         outputs['cases'] = np.array(cases)
 
 
@@ -168,26 +170,26 @@ class WeibullWindBins(object):
         return self.windspeeds, speed_probabilities
 
 
-# if __name__ == '__main__':
-#
-#     getdata = WeibullWindBins([0.01, 0.01], [10.0, 12.0], [25.0, 75.0], [0.0, 180.0], 180., 60., 2)
-#     getdata.cutin = 4.0
-#     getdata.cutout = 25.0
-#
-#     wind_directions2, direction_probabilities2 = getdata.adapt_directions()
-#     wind_speeds2, wind_speeds_probabilities2 = getdata.speed_probabilities()
-#     cases = []
-#
-#     cases = []
-#     probs = []
-#
-#     for wdir, prob1, prob2 in zip(wind_directions2, direction_probabilities2, wind_speeds_probabilities2):
-#         for ws, prob3 in zip(wind_speeds2, prob2):
-#             cases.append([wdir, ws])
-#             probs.append(prob1 / 100 * prob3 / 100)
-#
-#     cases = np.array(cases)
-#
-#     print cases
-#     print probs
+if __name__ == '__main__':
+
+    getdata = WeibullWindBins([1.0, 1.0], [8.5, 8.5], [50.0, 50.0], [0.0, 180.0], 180., 1., 16)
+    getdata.cutin = 4.0
+    getdata.cutout = 25.0
+
+    wind_directions2, direction_probabilities2 = getdata.adapt_directions()
+    wind_speeds2, wind_speeds_probabilities2 = getdata.speed_probabilities()
+    cases = []
+
+    cases = []
+    probs = []
+
+    for wdir, prob1, prob2 in zip(wind_directions2, direction_probabilities2, wind_speeds_probabilities2):
+        for ws, prob3 in zip(wind_speeds2, prob2):
+            cases.append([wdir, ws])
+            probs.append(prob1 / 100.0 * prob3 / 100.0)
+
+    cases = np.array(cases)
+
+    print cases
+    print probs
 
