@@ -5,15 +5,14 @@ from numpy import sqrt, deg2rad, tan
 
 
 class DistanceComponent(ExplicitComponent):
-    def __init__(self, artificial_angle, number, n_cases):
+    def __init__(self, number, n_cases):
         super(DistanceComponent, self).__init__()
         self.number = number
         self.n_cases = n_cases
-        self.artificial_angle = artificial_angle
 
     def setup(self):
         self.add_input('angle', shape=self.n_cases)
-        self.add_input('ordered', shape=(int(360.0 / self.artificial_angle), max_n_turbines, 3))
+        self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
         self.add_output('dist_down', shape=(self.n_cases, max_n_turbines - 1))
         self.add_output('dist_cross', shape=(self.n_cases, max_n_turbines - 1))
@@ -24,18 +23,17 @@ class DistanceComponent(ExplicitComponent):
     def compute(self, inputs, outputs):
         d_down2 = []
         d_cross2 = []
-        n_turbines = int(inputs['n_turbines'])
         for case in range(self.n_cases):
             # print "3 Distance"
-            if case % (self.n_cases / int(360.0 / self.artificial_angle)) == 0:
-                ordered = inputs['ordered'][int(case / (360.0 / self.artificial_angle))]
+            n_turbines = int(inputs['n_turbines'])
+            ordered = inputs['ordered']
             # print layout, "Input"
             angle = inputs['angle'][case]
             d_down = np.array([])
             d_cross = np.array([])
             for n in range(n_turbines):
                 if n != self.number and self.number < n_turbines:
-                    d_down1, d_cross1 = distance(ordered[self.number], ordered[n], angle)
+                    d_down1, d_cross1 = distance(ordered[case][self.number], ordered[case][n], angle)
                     d_cross = np.append(d_cross, [d_cross1])
                     d_down = np.append(d_down, [d_down1])
             lendif = max_n_turbines - len(d_cross) - 1
