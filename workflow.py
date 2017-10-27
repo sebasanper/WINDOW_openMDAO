@@ -8,7 +8,7 @@ from WakeModel.WakeMerge.RSS import WakeMergeRSS
 from src.api import AEPWorkflow
 
 real_angle = 180.0
-artificial_angle = 2.0
+artificial_angle = 1.0
 n_windspeedbins = 15
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 
@@ -24,7 +24,10 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0], [3, 0.0, 1120.0], [4, 1120.0, 0.0]]))#, [5, 0.0, 1120.0], [6, 0.0, 1120.0], [7, 0.0, 1120.0], [8, 0.0, 1120.0], [9, 0.0, 1120.0]]))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0],
+                                                  [3, 0.0, 1120.0], [4, 1120.0, 0.0]]))#, [5, 0.0, 1120.0],
+                                                  # [6, 0.0, 1120.0], [7, 0.0, 1120.0], [8, 0.0, 1120.0],
+                                                  # [9, 0.0, 1120.0]]))
         indep2.add_output('weibull_shapes', val=[1.0, 1.0])
         indep2.add_output('weibull_scales', val=[8.5, 8.5])
         indep2.add_output('dir_probabilities', val=[50.0, 50.0])
@@ -34,15 +37,15 @@ class WorkingGroup(Group):
         indep2.add_output('cut_out', val=8.5)
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('n_turbines', val=5)
-        aep = self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model, self.fraction_model, self.deficit_model, self.merge_model))
+        aep = self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
+                                                    self.fraction_model, self.deficit_model, self.merge_model))
 
+        # self.my_recorder = SqliteRecorder("data_out_try")
+        # self.my_recorder.options['record_outputs'] = True
+        # self.my_recorder.options['record_inputs'] = True
+        # self.my_recorder.options['record_residuals'] = True
 
-        self.my_recorder = SqliteRecorder("data_out_try")
-        self.my_recorder.options['record_outputs'] = True
-        self.my_recorder.options['record_inputs'] = True
-        self.my_recorder.options['record_residuals'] = True
-
-        aep.add_recorder(self.my_recorder)
+        # aep.add_recorder(self.my_recorder)
 
         self.connect('indep2.layout', 'AEP.original')
         self.connect('indep2.n_turbines', 'AEP.n_turbines')
@@ -82,6 +85,9 @@ print clock(), "Before 1st run"
 prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
+with open("angle_power.dat", "w") as out:
+    for n in range(n_cases):
+        out.write("{} {} {} {} {} {}\n".format(prob['AEP.windrose.wind_directions'][n], prob['AEP.windrose.freestream_wind_speeds'][n], prob['AEP.windrose.probabilities'][n], prob['AEP.wakemodel.combine.U'][n], prob['AEP.farmpower.farm_power'][n], prob['AEP.energy.energies'][n]))
 print prob['AEP.AEP']
 
 # print "second run"
@@ -92,8 +98,8 @@ print prob['AEP.AEP']
 # print clock(), "After 2nd run"
 # print time() - start, "seconds", clock()
 # print prob['AEP.AEP']
-
-
+#
+#
 # print "third run"
 # start = time()
 # prob['indep2.cut_in'] = 4.3

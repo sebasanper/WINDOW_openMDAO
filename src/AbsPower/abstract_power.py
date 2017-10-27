@@ -15,7 +15,7 @@ class AbstractPower(ExplicitComponent):
         self.add_output('p', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
+        # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         pass
