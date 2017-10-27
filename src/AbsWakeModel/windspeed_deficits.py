@@ -30,15 +30,16 @@ class SpeedDeficits(ExplicitComponent):
 
 
 class CombineSpeed(ExplicitComponent):
-    def __init__(self, n_cases):
+    def __init__(self, artificial_angle, n_cases):
         super(CombineSpeed, self).__init__()
         self.n_cases = n_cases
+        self.artificial_angle = artificial_angle
 
     def setup(self):
 
         for n in range(max_n_turbines):
             self.add_input('U{}'.format(n), shape=self.n_cases)
-        self.add_input('ordered_layout', shape=(self.n_cases, max_n_turbines, 3))
+        self.add_input('ordered_layout', shape=(int(360.0 / self.artificial_angle), max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
 
         self.add_output('U', shape=(self.n_cases, max_n_turbines))
@@ -47,7 +48,8 @@ class CombineSpeed(ExplicitComponent):
         ans = np.array([])
         n_turbines = int(inputs['n_turbines'])
         for case in range(self.n_cases):
-            ordered_layout = inputs['ordered_layout'][case][:n_turbines].tolist()
+            if case % (self.n_cases / int(360.0 / self.artificial_angle)) == 0:
+                ordered_layout = inputs['ordered_layout'][int(case / (360.0 / self.artificial_angle))][:n_turbines].tolist()
             # print ordered_layout
             indices = [i[0] for i in ordered_layout]
             # print indices

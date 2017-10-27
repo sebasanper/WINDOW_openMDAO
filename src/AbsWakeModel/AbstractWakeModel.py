@@ -4,13 +4,14 @@ import numpy as np
 
 
 class DetermineIfInWake(ExplicitComponent):
-    def __init__(self, number, n_cases):
+    def __init__(self, artificial_angle, number, n_cases):
         super(DetermineIfInWake, self).__init__()
         self.number = number
         self.n_cases = n_cases
+        self.artificial_angle = artificial_angle
 
     def setup(self):
-        self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
+        self.add_input('ordered', shape=(int(360.0 / self.artificial_angle), max_n_turbines, 3))
         self.add_input('angle', shape=self.n_cases)
         self.add_input('n_turbines', val=1)
         self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines - 1))
@@ -21,12 +22,14 @@ class DetermineIfInWake(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         # print "4 Determine"
-        # print inputs['layout'], "Input"
+        # print inputs['ordered'], "Input"
         fractions = np.array([])
+        n_turbines = int(inputs['n_turbines'])
         for case in range(self.n_cases):
-            n_turbines = int(inputs['n_turbines'])
-            ordered = inputs['ordered'][case]
             angle = inputs['angle'][case]
+            if case % (self.n_cases / int(360.0 / self.artificial_angle)) == 0:
+                # print case, angle, int(360.0 / self.artificial_angle)
+                ordered = inputs['ordered'][int(case / (360.0 / self.artificial_angle))]
             downwind_d = inputs['downwind_d'][case]
             crosswind_d = inputs['crosswind_d'][case]
             fractions1 = np.array([])
