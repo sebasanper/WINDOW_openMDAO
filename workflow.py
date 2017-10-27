@@ -8,7 +8,7 @@ from WakeModel.WakeMerge.RSS import WakeMergeRSS
 from src.api import AEPWorkflow
 
 real_angle = 30.0
-artificial_angle = 30.0
+artificial_angle = 10.0
 n_windspeedbins = 10
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 
