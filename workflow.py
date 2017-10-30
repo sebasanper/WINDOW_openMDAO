@@ -96,9 +96,12 @@ print clock(), "Before 1st run"
 prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
-print prob['AEP.AEP']
-print sum(prob['AEP.windrose.probabilities'])
-#
+
+# print prob['AEP.wakemodel.linear_solve.deficits2.dU']
+ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
+print ordered
+# print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
+
 # print "second run"
 # start = time()
 # print clock(), "Before 2nd run"
