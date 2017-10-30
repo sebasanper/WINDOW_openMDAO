@@ -6,10 +6,11 @@ from Power.power_models import PowerPolynomial
 from input_params import turbine_radius
 from WakeModel.WakeMerge.RSS import WakeMergeRSS
 from src.api import AEPWorkflow
+from src.api import AbstractWakeAddedTurbulence, DeficitMatrix
 
-real_angle = 180.0
-artificial_angle = 90.0
-n_windspeedbins = 1
+real_angle = 360.0
+artificial_angle = 360.0
+n_windspeedbins = 0
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
 
@@ -47,10 +48,14 @@ class WorkingGroup(Group):
 
         # wd, wsc, wsh, wdp = read_windrose('weibull_windrose.dat')
 
-        wsh = [1.0, 1.0]
-        wsc = [8.0, 8.0]
-        wdp = [50.0, 50.0]
-        wd = [0.0, 180.0]
+        # wsh = [1.0, 1.0]
+        # wsc = [8.0, 8.0]
+        # wdp = [50.0, 50.0]
+        # wd = [0.0, 180.0]
+        wsh = [1.0]
+        wsc = [8.0]
+        wdp = [100.0]
+        wd = [0.0]
 
         indep2.add_output('weibull_shapes', val=wsh)
         indep2.add_output('weibull_scales', val=wsc)
@@ -60,8 +65,15 @@ class WorkingGroup(Group):
         indep2.add_output('cut_out', val=9.0)
         indep2.add_output('r', val=turbine_radius)
         indep2.add_output('n_turbines', val=5)
+
+        indep2.add_output('TI_amb', val=[0.11 for _ in n_cases])
+
         aep = self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
                                                     self.fraction_model, self.deficit_model, self.merge_model))
+
+        self.add_subsystem('dU_matrix', )
+
+        self.add_subsystem('TI', AbstractWakeAddedTurbulence(n_cases))
 
         # self.my_recorder = SqliteRecorder("data_out_try")
         # self.my_recorder.options['record_outputs'] = True
@@ -79,6 +91,13 @@ class WorkingGroup(Group):
         self.connect('indep2.weibull_scales', 'AEP.weibull_scales')
         self.connect('indep2.dir_probabilities', 'AEP.dir_probabilities')
         self.connect('indep2.wind_directions', 'AEP.wind_directions')
+
+        self.connect('AEP.wakemodel.linear_solve.ordered.order_layout', 'TI.ordered')
+        self.connect('indep2.TI_amb', 'TI.TI_amb')
+        self.connect('TI.ct')
+        self.connect('TI.dU_matrix')
+        self.connect('TI.freestream')
+        self.connect('indep2.n_turbines', 'TI.n_turbines')
 
 
 def read_layout(layout_file):
@@ -98,20 +117,37 @@ prob = Problem()
 print clock(), "Before defining model"
 prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, WakeMergeRSS)
 print clock(), "Before setup"
-prob.setup(check=False)
+prob.setup()
 
 print clock(), "After setup"
 # view_model(prob)
+prob['indep2.cut_in'] = 8.5
 start = time()
 print clock(), "Before 1st run"
 prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
-print prob.model.list_outputs()
-print prob.model.list_inputs()
-# print prob['AEP.wakemodel.linear_solve.deficits2.dU']
-# print prob['AEP.wakemodel.combine.U']
-# print prob.model.list_inputs(values=False)
+
+# print prob['AEP.windrose.cases']
+# print prob['AEP.farmpower.ind_powers']
+# print prob['AEP.wakemodel.U']
+print prob['AEP.wakemodel.linear_solve.deficits0.dU']
+print prob['AEP.wakemodel.linear_solve.deficits1.dU']
+print prob['AEP.wakemodel.linear_solve.deficits2.dU']
+print prob['AEP.wakemodel.linear_solve.deficits3.dU']
+print prob['AEP.wakemodel.linear_solve.deficits4.dU']
+print prob['AEP.wakemodel.linear_solve.deficits0.ct']
+print prob['AEP.wakemodel.linear_solve.deficits1.ct']
+print prob['AEP.wakemodel.linear_solve.deficits2.ct']
+print prob['AEP.wakemodel.linear_solve.deficits3.ct']
+print prob['AEP.wakemodel.linear_solve.deficits4.ct']
+print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_down']
+print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_cross']
+ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
+# print ordered
+# print prob['indep2.layout']
+# print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
+
 # print "second run"
 # start = time()
 # print clock(), "Before 2nd run"
