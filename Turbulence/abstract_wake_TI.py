@@ -6,14 +6,14 @@ from numpy import sqrt
 
 class AbstractWakeAddedTurbulence(ExplicitComponent):
     def __init__(self, n_cases):
-        super(AbstractWakeAddedTurbulence, self).__init__(n_cases)
+        super(AbstractWakeAddedTurbulence, self).__init__()
         self.n_cases = n_cases
 
     def setup(self):
         self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('TI_amb', shape=self.n_cases)
-        self.add_input('ct', shape=(self.n_cases, self.max_n_turbines - 1))
-        self.add_input('dU_matrix', shape=(self.n_cases, self.max_n_turbines - 1, self.max_n_turbines - 1))
+        self.add_input('ct', shape=(self.n_cases, max_n_turbines, max_n_turbines))
+        self.add_input('dU_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines))
         self.add_input('freestream', shape=self.n_cases)
         self.add_input('n_turbines', val=0)
 
@@ -21,18 +21,20 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         TI_eff = np.array([])
-        n_turbines = inputs['n_turbines']
-        ordered = inputs['ordered'][n_turbines]
-        ct = inputs['ct']
+        n_turbines = int(inputs['n_turbines'])
+        # print ct
         for case in range(self.n_cases):
+            ordered = inputs['ordered'][case][:n_turbines]
             TI_amb_case = inputs['TI_amb'][case]
             freestream_case = inputs['freestream'][case]
             TI_case = np.array([])
-            for n in range(n_turbines):                
-                max_index = np.argmax(dU_matrix[case][n])
-                print max_index
-                ct_case_closest = ct[case][max_index]
-                distance_closest = self.distance(ordered[n], ordered[n], ordered[max_index][1], ordered[max_index][2])
+            for n in range(n_turbines):
+                rowct = inputs['ct'][case][n]
+                row = inputs['dU_matrix'][case][n]
+                max_index = np.argmax(row)
+                ct_case_closest = rowct[max_index]
+                distance_closest = self.distance(ordered[n][1], ordered[n][2], ordered[max_index][1], ordered[max_index][2])
+                # print n, row, max_index, rowct, ct_case_closest, n, max_index, distance_closest, ordered[n][1], ordered[n][2], ordered[max_index][1], ordered[max_index][2]
                 ans = self.TI_model(TI_amb_case, ct_case_closest, freestream_case, distance_closest)
                 TI_case = np.append(TI_case, ans)
             lendif = max_n_turbines - len(TI_case)
@@ -42,23 +44,54 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
         TI_eff = TI_eff.reshape(self.n_cases, max_n_turbines)
         outputs['TI_eff'] = TI_eff
 
-    def distance(x1, y1, x2, y2):
+    def distance(self, x1, y1, x2, y2):
         return sqrt((x1 - x2) ** 2.0 + (y1 - y2) ** 2.0)
 
-    def TI_model(ambient_turbulence, ct, wind_speed, spacing):
-        return 0.79
+    def TI_model(self, ambient_turbulence, ct, wind_speed, spacing):
+        print ambient_turbulence, ct, wind_speed, spacing
+        if ct == 0:
+            return ambient_turbulence
+        return 0.18
 
 
 class DeficitMatrix(ExplicitComponent):
     def __init__(self, n_cases):
-        super(DeficitMatrix, self).__init__(n_cases)
+        super(DeficitMatrix, self).__init__()
         self.n_cases = n_cases
 
     def setup(self):
         for n in range(max_n_turbines):
             self.add_input('deficits{}'.format(n), shape=(self.n_cases, max_n_turbines - 1))
-        self.add_output('dU_matrix', shape=(self.n_cases, self.max_n_turbines - 1, self.max_n_turbines - 1))
+        self.add_output('dU_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines))
 
+    def compute(self, inputs, outputs):
+        matrix = np.array([])
+        for n in range(max_n_turbines):
+            row = inputs['deficits{}'.format(n)]
+            row = np.insert(row, n, 0)
+            matrix = np.append(matrix, row)
+        matrix = matrix.reshape(self.n_cases, max_n_turbines, max_n_turbines)
+        outputs['dU_matrix'] = matrix
+
+
+class CtMatrix(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(CtMatrix, self).__init__()
+        self.n_cases = n_cases
+
+    def setup(self):
+        for n in range(max_n_turbines):
+            self.add_input('ct{}'.format(n), shape=(self.n_cases, max_n_turbines - 1))
+        self.add_output('ct_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines))
+
+    def compute(self, inputs, outputs):
+        matrix = np.array([])
+        for n in range(max_n_turbines):
+            row = inputs['ct{}'.format(n)]
+            row = np.insert(row, n, 0)
+            matrix = np.append(matrix, row)
+        matrix = matrix.reshape(self.n_cases, max_n_turbines, max_n_turbines)
+        outputs['ct_matrix'] = matrix
 
 
 if __name__ == '__main__':

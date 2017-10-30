@@ -3,4 +3,4 @@ from AbsWakeModel.AbstractWakeModel import DetermineIfInWake, WakeDeficit
 from AbsPower.abstract_power import FarmAeroPower, AbstractPower
 from AbsWakeModel.AbsWakeMerge.abstract_wake_merging import BaseWakeMerge
 from AbsAEP.farmpower_workflow import AEPWorkflow
-from Abs.AbsTurbulence.abstract_wake_TI import AbstractWakeAddedTurbulence, DeficitMatrix
+from Turbulence.abstract_wake_TI import AbstractWakeAddedTurbulence, DeficitMatrix, CtMatrix

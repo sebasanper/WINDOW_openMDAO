@@ -3,10 +3,10 @@ from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorde
 import numpy as np
 from time import time, clock
 from Power.power_models import PowerPolynomial
-from input_params import turbine_radius
+from input_params import turbine_radius, max_n_turbines
 from WakeModel.WakeMerge.RSS import WakeMergeRSS
 from src.api import AEPWorkflow
-from src.api import AbstractWakeAddedTurbulence, DeficitMatrix
+from src.api import AbstractWakeAddedTurbulence, DeficitMatrix, CtMatrix
 
 real_angle = 360.0
 artificial_angle = 360.0
@@ -41,7 +41,7 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev.dat'))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 560.0], [2, 1120.0, 1120.0],
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 0.0, 560.0], [2, 0.0, 1120.0],
                                                   [3, 0.0, 1120.0], [4, 1120.0, 0.0]]))#, [5, 0.0, 1120.0],
                                                   # [6, 0.0, 1120.0], [7, 0.0, 1120.0], [8, 0.0, 1120.0],
                                                   # [9, 0.0, 1120.0]]))
@@ -64,14 +64,15 @@ class WorkingGroup(Group):
         indep2.add_output('cut_in', val=8.0)
         indep2.add_output('cut_out', val=9.0)
         indep2.add_output('r', val=turbine_radius)
-        indep2.add_output('n_turbines', val=5)
+        indep2.add_output('n_turbines', val=3)
 
-        indep2.add_output('TI_amb', val=[0.11 for _ in n_cases])
+        indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
         aep = self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
                                                     self.fraction_model, self.deficit_model, self.merge_model))
 
-        self.add_subsystem('dU_matrix', )
+        self.add_subsystem('dU_matrix', DeficitMatrix(n_cases))
+        self.add_subsystem('ct_matrix', CtMatrix(n_cases))
 
         self.add_subsystem('TI', AbstractWakeAddedTurbulence(n_cases))
 
@@ -92,11 +93,15 @@ class WorkingGroup(Group):
         self.connect('indep2.dir_probabilities', 'AEP.dir_probabilities')
         self.connect('indep2.wind_directions', 'AEP.wind_directions')
 
-        self.connect('AEP.wakemodel.linear_solve.ordered.order_layout', 'TI.ordered')
+        for n in range(max_n_turbines):
+            self.connect('AEP.wakemodel.linear_solve.deficits{}.dU'.format(n), 'dU_matrix.deficits{}'.format(n))
+            self.connect('AEP.wakemodel.linear_solve.ct{}.ct'.format(n), 'ct_matrix.ct{}'.format(n))
+        self.connect('dU_matrix.dU_matrix', 'TI.dU_matrix')
+        self.connect('ct_matrix.ct_matrix', 'TI.ct')
+
+        self.connect('AEP.wakemodel.linear_solve.order_layout.ordered', 'TI.ordered')
         self.connect('indep2.TI_amb', 'TI.TI_amb')
-        self.connect('TI.ct')
-        self.connect('TI.dU_matrix')
-        self.connect('TI.freestream')
+        self.connect('AEP.open_cases.freestream_wind_speeds', 'TI.freestream')
         self.connect('indep2.n_turbines', 'TI.n_turbines')
 
 
@@ -128,22 +133,24 @@ prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
+print prob['TI.TI_eff']
+
 # print prob['AEP.windrose.cases']
 # print prob['AEP.farmpower.ind_powers']
 # print prob['AEP.wakemodel.U']
-print prob['AEP.wakemodel.linear_solve.deficits0.dU']
-print prob['AEP.wakemodel.linear_solve.deficits1.dU']
-print prob['AEP.wakemodel.linear_solve.deficits2.dU']
-print prob['AEP.wakemodel.linear_solve.deficits3.dU']
-print prob['AEP.wakemodel.linear_solve.deficits4.dU']
-print prob['AEP.wakemodel.linear_solve.deficits0.ct']
-print prob['AEP.wakemodel.linear_solve.deficits1.ct']
-print prob['AEP.wakemodel.linear_solve.deficits2.ct']
-print prob['AEP.wakemodel.linear_solve.deficits3.ct']
-print prob['AEP.wakemodel.linear_solve.deficits4.ct']
-print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_down']
-print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_cross']
-ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
+# print prob['AEP.wakemodel.linear_solve.deficits0.dU']
+# print prob['AEP.wakemodel.linear_solve.deficits1.dU']
+# print prob['AEP.wakemodel.linear_solve.deficits2.dU']
+# print prob['AEP.wakemodel.linear_solve.deficits3.dU']
+# print prob['AEP.wakemodel.linear_solve.deficits4.dU']
+# print prob['AEP.wakemodel.linear_solve.ct0.ct']
+# print prob['AEP.wakemodel.linear_solve.ct1.ct']
+# print prob['AEP.wakemodel.linear_solve.ct2.ct']
+# print prob['AEP.wakemodel.linear_solve.ct3.ct']
+# print prob['AEP.wakemodel.linear_solve.ct4.ct']
+# print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_down']
+# print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_cross']
+# ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
 # print ordered
 # print prob['indep2.layout']
 # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
