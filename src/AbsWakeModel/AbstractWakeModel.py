@@ -15,7 +15,7 @@ class DetermineIfInWake(ExplicitComponent):
         self.add_input('n_turbines', val=1)
         self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines - 1))
         self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_input('r', val=0.0)
+        self.add_input('turbine_radius', val=0.0)
 
         self.add_output('fractions', shape=(self.n_cases, max_n_turbines - 1), val=0)
 
@@ -30,7 +30,7 @@ class DetermineIfInWake(ExplicitComponent):
             downwind_d = inputs['downwind_d'][case]
             crosswind_d = inputs['crosswind_d'][case]
             fractions1 = np.array([])
-            r = inputs['r']
+            r = inputs['turbine_radius']
             i = 0
             if self.number < n_turbines:
                 for n in range(n_turbines):
@@ -58,7 +58,7 @@ class WakeDeficit(ExplicitComponent):
         self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('r', val=0.0)
+        self.add_input('turbine_radius', val=0.0)
         self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines - 1))
         self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines - 1))
         self.add_input('ct', shape=(self.n_cases, max_n_turbines - 1))
@@ -71,7 +71,7 @@ class WakeDeficit(ExplicitComponent):
         du = np.array([])
         for case in range(self.n_cases):
             n_turbines = int(inputs['n_turbines'])
-            r = inputs['r']
+            r = inputs['turbine_radius']
             d_down = inputs['downwind_d'][case]
             d_cross = inputs['crosswind_d'][case]
             c_t = inputs['ct'][case]

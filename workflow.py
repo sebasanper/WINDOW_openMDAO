@@ -6,10 +6,11 @@ from Power.power_models import PowerPolynomial
 from input_params import turbine_radius, max_n_turbines
 from WakeModel.WakeMerge.RSS import WakeMergeRSS
 from src.api import AEPWorkflow
-from src.api import AbstractWakeAddedTurbulence, DeficitMatrix, CtMatrix
+from src.api import DeficitMatrix, CtMatrix
+from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
 
-real_angle = 360.0
-artificial_angle = 360.0
+real_angle = 180.0
+artificial_angle = 45.0
 n_windspeedbins = 0
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
@@ -41,21 +42,21 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev.dat'))
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 0.0, 560.0], [2, 0.0, 1120.0],
-                                                  [3, 0.0, 1120.0], [4, 1120.0, 0.0]]))#, [5, 0.0, 1120.0],
-                                                  # [6, 0.0, 1120.0], [7, 0.0, 1120.0], [8, 0.0, 1120.0],
+        indep2.add_output('layout', val=np.array([[0, -560.0, -560.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
+                                                  [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
+                                                  [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0]]))#,
                                                   # [9, 0.0, 1120.0]]))
 
         # wd, wsc, wsh, wdp = read_windrose('weibull_windrose.dat')
 
-        # wsh = [1.0, 1.0]
-        # wsc = [8.0, 8.0]
-        # wdp = [50.0, 50.0]
-        # wd = [0.0, 180.0]
-        wsh = [1.0]
-        wsc = [8.0]
-        wdp = [100.0]
-        wd = [0.0]
+        wsh = [1.0, 1.0]
+        wsc = [8.0, 8.0]
+        wdp = [50.0, 50.0]
+        wd = [0.0, 180.0]
+        # wsh = [1.0]
+        # wsc = [8.0]
+        # wdp = [100.0]
+        # wd = [45.0]
 
         indep2.add_output('weibull_shapes', val=wsh)
         indep2.add_output('weibull_scales', val=wsc)
@@ -63,8 +64,8 @@ class WorkingGroup(Group):
         indep2.add_output('wind_directions', val=wd)  # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
         indep2.add_output('cut_in', val=8.0)
         indep2.add_output('cut_out', val=9.0)
-        indep2.add_output('r', val=turbine_radius)
-        indep2.add_output('n_turbines', val=3)
+        indep2.add_output('turbine_radius', val=turbine_radius)
+        indep2.add_output('n_turbines', val=9)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
@@ -74,7 +75,7 @@ class WorkingGroup(Group):
         self.add_subsystem('dU_matrix', DeficitMatrix(n_cases))
         self.add_subsystem('ct_matrix', CtMatrix(n_cases))
 
-        self.add_subsystem('TI', AbstractWakeAddedTurbulence(n_cases))
+        self.add_subsystem('TI', Quarton(n_cases))
 
         # self.my_recorder = SqliteRecorder("data_out_try")
         # self.my_recorder.options['record_outputs'] = True
@@ -85,7 +86,7 @@ class WorkingGroup(Group):
 
         self.connect('indep2.layout', 'AEP.original')
         self.connect('indep2.n_turbines', 'AEP.n_turbines')
-        self.connect('indep2.r', 'AEP.r')
+        self.connect('indep2.turbine_radius', ['AEP.turbine_radius', 'TI.radius'])
         self.connect('indep2.cut_in', 'AEP.cut_in')
         self.connect('indep2.cut_out', 'AEP.cut_out')
         self.connect('indep2.weibull_shapes', 'AEP.weibull_shapes')

@@ -29,7 +29,7 @@ class AEPWorkflow(Group):
                                                                                                     'wind_directions'])
         self.add_subsystem('open_cases', OpenCases(self.n_cases))
         self.add_subsystem('wakemodel', WakeModel(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model),
-                           promotes_inputs=['r', 'original', 'n_turbines'])
+                           promotes_inputs=['turbine_radius', 'original', 'n_turbines'])
         self.add_subsystem('power', self.power_model(self.n_cases), promotes_inputs=['n_turbines'])
         self.add_subsystem('farmpower', FarmAeroPower(self.n_cases), promotes_inputs=['n_turbines'])
         self.add_subsystem('energy', PowersToAEP(self.artificial_angle, self.n_windspeedbins),
