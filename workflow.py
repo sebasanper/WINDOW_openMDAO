@@ -10,6 +10,7 @@ from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, L
 from ThrustCoefficient.thrust_models import ThrustPolynomial
 from src.Utils.read_files import read_layout, read_windrose
 from WaterDepth.water_depth_models import RoughInterpolation
+from ElectricalCollection.topology_optimiser import TopologyHybridHeuristic
 
 real_angle = 90.0
 artificial_angle = 45.0
@@ -56,12 +57,17 @@ class WorkingGroup(Group):
         indep2.add_output('cut_out', val=25.0)
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=9)
+        indep2.add_output('n_turbines_p_cable_type', val=[3, 0, 0])
+        indep2.add_output('substation_coords', val=[[560.0, 560.0], [0, 0]])
+        indep2.add_output('n_substations', val=1)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
         self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
                                                     self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model))
         self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
+
+        self.add_subsystem('electrical', TopologyHybridHeuristic())
 
         self.connect('indep2.layout', 'depths.layout')
         self.connect('indep2.n_turbines', 'depths.n_turbines')
@@ -85,6 +91,11 @@ class WorkingGroup(Group):
         self.connect('AEP.open_cases.freestream_wind_speeds', 'TI.freestream')
         self.connect('indep2.n_turbines', 'TI.n_turbines')
 
+        self.connect('indep2.layout', 'electrical.layout')
+        self.connect('indep2.n_turbines_p_cable_type', 'electrical.n_turbines_p_cable_type')
+        self.connect('indep2.substation_coords', 'electrical.substation_coords')
+        self.connect('indep2.n_substations', 'electrical.n_substations')
+
 
 print clock(), "Before defining problem"
 prob = Problem()
@@ -102,7 +113,9 @@ prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
-print prob['depths.water_depths']
+print prob['electrical.topology']
+print prob['electrical.cost']
+print prob['electrical.cable_lengths']
 
 # print prob['AEP.windrose.cases']
 # print prob['AEP.farmpower.ind_powers']
