@@ -5,3 +5,4 @@ from AbsAEP.farmpower_workflow import AEPWorkflow
 from AbsTurbulence.abstract_wake_TI import AbstractWakeAddedTurbulence, DeficitMatrix, CtMatrix
 from AbsThrustCoefficient.abstract_thrust import AbstractThrustCoefficient
 from AbsWakeModel.AbsWakeMerge.abstract_wake_merging import AbstractWakeMerge
+from AbsTurbulence.TI_workflow import TIWorkflow
