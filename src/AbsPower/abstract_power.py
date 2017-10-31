@@ -18,7 +18,20 @@ class AbstractPower(ExplicitComponent):
         # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
-        pass
+        ans = np.array([])
+        for case in range(self.n_cases):
+            n_turbines = int(inputs['n_turbines'])
+            u = inputs['U'][case][:n_turbines]
+            p = np.array([])
+            for u0 in u:
+                power = self.power_model(u0)
+                p = np.append(p, [power])
+            lendif = max_n_turbines - len(p)
+            if lendif > 0:
+                p = np.concatenate((p, [0 for _ in range(lendif)]))
+            ans = np.append(ans, p)
+        ans = ans.reshape(self.n_cases, max_n_turbines)
+        outputs['p'] = ans
 
 
 class FarmAeroPower(ExplicitComponent):

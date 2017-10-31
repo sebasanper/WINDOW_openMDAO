@@ -3,10 +3,10 @@ import numpy as np
 from input_params import max_n_turbines
 
 
-class ThrustCoefficient(ExplicitComponent):
+class AbstractThrustCoefficient(ExplicitComponent):
 
     def __init__(self, number, n_cases):
-        super(ThrustCoefficient, self).__init__()
+        super(AbstractThrustCoefficient, self).__init__()
         self.number = number
         self.n_cases = n_cases
 
@@ -30,10 +30,9 @@ class ThrustCoefficient(ExplicitComponent):
         for case in range(self.n_cases):
             n_turbines = int(inputs['n_turbines'])
             c_t = np.array([])
-            if self.number < n_turbines:
-                for n in range(n_turbines):
-                    if n < self.number:
-                        c_t = np.append(c_t, [ct(inputs['U{}'.format(n)][case])])
+            for n in range(n_turbines):
+                if n < self.number < n_turbines:
+                    c_t = np.append(c_t, [self.ct_model(inputs['U{}'.format(n)][case])])
             lendif = max_n_turbines - len(c_t) - 1
             # print c_t
             c_t = np.concatenate((c_t, [0 for _ in range(lendif)]))
@@ -55,6 +54,7 @@ def ct(v):
     else:
         ans = np.array([0.1])
     return ans
+
 
 if __name__ == '__main__':
     from openmdao.api import Problem, Group, IndepVarComp
