@@ -94,13 +94,13 @@ class Quarton(AbstractWakeAddedTurbulence):
         D = 40.0 * 2.0
         spacing *= D
         x = spacing
-        Ia = ambient_turbulence * 100.0
-        K1 = 4.8
+        Ia = ambient_turbulence
+        K1 = 5.7#4.8
         a1 = 0.7
         a2 = 0.68
-        a3 = - 0.57
-        m = 1.0 / (1.0 - ct) ** 0.5
-        r0 = D / 2.0 * ((m + 1.0) / 2.0) ** 0.5
+        a3 = - 0.96#- 0.57
+        m = sqrt(1.0 / (1.0 - ct))
+        r0 = D / 2.0 * sqrt((m + 1.0) / 2.0)
 
         if Ia >= 0.02:
             da = 2.5 * Ia + 0.05
@@ -110,13 +110,11 @@ class Quarton(AbstractWakeAddedTurbulence):
         B = 3  # Number of blades
         L = tsr  # Tip speed ratio
         dl = 0.012 * B * L
-        dm = (1.0 - m) * (1.49 + m) ** 0.5 / (9.76 * (1.0 + m))
+        dm = (1.0 - m) * sqrt(1.49 + m) / (9.76 * (1.0 + m))
 
         xh = r0 * (da + dl + dm) ** (- 0.5)
-        xn = xh * (0.212 + 0.145 * m) ** 0.5 * (1.0 - (0.134 + 0.124 * m) ** 0.5) / (1.0 - (0.212 + 0.145 * m) ** 0.5) / (0.134 + 0.124 * m) ** 0.5
-        # print
+        xn = xh * sqrt(0.212 + 0.145 * m) * (1.0 - sqrt(0.134 + 0.124 * m)) / (1.0 - sqrt(0.212 + 0.145 * m)) / sqrt(0.134 + 0.124 * m)
         Iw = K1 * (ct ** a1) * (Ia ** a2) * (x / xn) ** a3
-        # print Iw, x, xn
         return sqrt(Iw ** 2.0 + Ia ** 2.0)
 
 

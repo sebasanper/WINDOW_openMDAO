@@ -8,10 +8,11 @@ from WakeModel.WakeMerge.RSS import WakeMergeRSS
 from src.api import AEPWorkflow
 from src.api import DeficitMatrix, CtMatrix
 from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
+from ThrustCoefficient.thrust_models import ThrustPolynomial
 
-real_angle = 180.0
+real_angle = 90.0
 artificial_angle = 45.0
-n_windspeedbins = 0
+n_windspeedbins = 1
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
 
@@ -32,27 +33,29 @@ def read_windrose(filename):
 
 
 class WorkingGroup(Group):
-    def __init__(self, power_model, fraction_model, deficit_model, merge_model):
+    def __init__(self, power_model, fraction_model, deficit_model, merge_model, thrust_model, turbulence_model):
         super(WorkingGroup, self).__init__()
         self.power_model = power_model
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
+        self.thrust_model = thrust_model
+        self.turbulence_model = turbulence_model
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        # indep2.add_output('layout', val=read_layout('horns_rev.dat'))
-        indep2.add_output('layout', val=np.array([[0, -560.0, -560.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
+        # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
                                                   [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
                                                   [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0]]))#,
                                                   # [9, 0.0, 1120.0]]))
 
-        # wd, wsc, wsh, wdp = read_windrose('weibull_windrose.dat')
+        wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12identical.dat')
 
-        wsh = [1.0, 1.0]
-        wsc = [8.0, 8.0]
-        wdp = [50.0, 50.0]
-        wd = [0.0, 180.0]
+        # wsh = [1.0, 1.0]
+        # wsc = [8.0, 8.0]
+        # wdp = [50.0, 50.0]
+        # wd = [0.0, 180.0]
         # wsh = [1.0]
         # wsc = [8.0]
         # wdp = [100.0]
@@ -62,27 +65,20 @@ class WorkingGroup(Group):
         indep2.add_output('weibull_scales', val=wsc)
         indep2.add_output('dir_probabilities', val=wdp)
         indep2.add_output('wind_directions', val=wd)  # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
-        indep2.add_output('cut_in', val=8.0)
-        indep2.add_output('cut_out', val=9.0)
+        indep2.add_output('cut_in', val=3.0)
+        indep2.add_output('cut_out', val=25.0)
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=9)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
         aep = self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
-                                                    self.fraction_model, self.deficit_model, self.merge_model))
+                                                    self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model))
 
         self.add_subsystem('dU_matrix', DeficitMatrix(n_cases))
         self.add_subsystem('ct_matrix', CtMatrix(n_cases))
 
-        self.add_subsystem('TI', Quarton(n_cases))
-
-        # self.my_recorder = SqliteRecorder("data_out_try")
-        # self.my_recorder.options['record_outputs'] = True
-        # self.my_recorder.options['record_inputs'] = True
-        # self.my_recorder.options['record_residuals'] = True
-
-        # aep.add_recorder(self.my_recorder)
+        self.add_subsystem('TI', self.turbulence_model(n_cases))
 
         self.connect('indep2.layout', 'AEP.original')
         self.connect('indep2.n_turbines', 'AEP.n_turbines')
@@ -121,13 +117,13 @@ def read_layout(layout_file):
 print clock(), "Before defining problem"
 prob = Problem()
 print clock(), "Before defining model"
-prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, WakeMergeRSS)
+prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, WakeMergeRSS, ThrustPolynomial, DanishRecommendation)
 print clock(), "Before setup"
 prob.setup()
+# prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, WakeMergeRSS, ThrustPolynomial, Frandsen)
 
 print clock(), "After setup"
-# view_model(prob)
-prob['indep2.cut_in'] = 8.5
+view_model(prob)
 start = time()
 print clock(), "Before 1st run"
 prob.run_model()

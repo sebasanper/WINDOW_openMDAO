@@ -56,6 +56,7 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
         return sqrt((x1 - x2) ** 2.0 + (y1 - y2) ** 2.0)
 
     def TI_model(self, ambient_turbulence, ct, wind_speed, spacing):
+        # This is the model itself. Create a new subclass of AbstractWakeAddedTurbulence for a specific model and only redefine this method TI_model but using the same name and inputs.
         pass
 
 

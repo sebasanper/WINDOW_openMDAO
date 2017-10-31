@@ -2,22 +2,22 @@ from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS,
     LinearBlockJac, IndepVarComp
 import numpy as np
 from order_layout import OrderLayout
-from src.AbsThrustCoefficient.abstract_thrust import ThrustCoefficient
 from input_params import max_n_turbines
 from distance import DistanceComponent
 from windspeed_deficits import SpeedDeficits, CombineSpeed
 
 
 class WakeModel(Group):
-    def __init__(self, n_cases, fraction_model, deficit_model, merge_model):
+    def __init__(self, n_cases, fraction_model, deficit_model, merge_model, thrust_model):
         super(WakeModel, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
         self.n_cases = n_cases
+        self.thrust_model = thrust_model
 
     def setup(self):
-        self.add_subsystem('linear_solve', LinearSolveWake(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model),
+        self.add_subsystem('linear_solve', LinearSolveWake(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model),
                            promotes_inputs=['turbine_radius', 'original', 'angle', 'n_turbines', 'freestream'])
         self.add_subsystem('combine', CombineSpeed(self.n_cases), promotes_inputs=['n_turbines'], promotes_outputs=['U'])
         for n in range(max_n_turbines):
@@ -26,18 +26,19 @@ class WakeModel(Group):
 
 
 class LinearSolveWake(Group):
-    def __init__(self, n_cases, fraction_model, deficit_model, merge_model):
+    def __init__(self, n_cases, fraction_model, deficit_model, merge_model, thrust_model):
         super(LinearSolveWake, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
         self.n_cases = n_cases
+        self.thrust_model = thrust_model
 
     def setup(self):
         self.add_subsystem('order_layout', OrderLayout(self.n_cases), promotes_inputs=['original', 'angle', 'n_turbines'])
 
         for n in range(max_n_turbines):
-            self.add_subsystem('ct{}'.format(n), ThrustCoefficient(n, self.n_cases), promotes_inputs=['n_turbines'])
+            self.add_subsystem('ct{}'.format(n), self.thrust_model(n, self.n_cases), promotes_inputs=['n_turbines'])
             self.add_subsystem('deficits{}'.format(n), Wake(self.n_cases, self.fraction_model, self.deficit_model, n),
                                promotes_inputs=['angle', 'turbine_radius', 'n_turbines'])
             self.add_subsystem('merge{}'.format(n), self.merge_model(self.n_cases), promotes_inputs=['n_turbines'])

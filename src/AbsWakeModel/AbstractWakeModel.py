@@ -35,7 +35,7 @@ class DetermineIfInWake(ExplicitComponent):
             if self.number < n_turbines:
                 for n in range(n_turbines):
                     if n != self.number:
-                        fractions1 = np.append(fractions1, self.wake_fraction(inputs, x_upstream=ordered[self.number][1],
+                        fractions1 = np.append(fractions1, self.wake_fraction_model(inputs, x_upstream=ordered[self.number][1],
                                                                             y_upstream=ordered[self.number][2],
                                                                             x_downstream=ordered[n][1],
                                                                             y_downstream=ordered[n][2],
@@ -81,7 +81,7 @@ class WakeDeficit(ExplicitComponent):
             deficits = np.array([])
             for ind in range(n_turbines - 1):
                 if fraction[ind] > 0.0:
-                    deficits = np.append(deficits, [fraction[ind] * self.wake_deficit(inputs, x_down=d_down[ind],
+                    deficits = np.append(deficits, [fraction[ind] * self.wake_deficit_model(inputs, x_down=d_down[ind],
                                                                                       x_cross=d_cross[ind], Ct=c_t[ind],
                                                                                       r0=r)])
                 else:
