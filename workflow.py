@@ -5,31 +5,16 @@ from time import time, clock
 from Power.power_models import PowerPolynomial
 from input_params import turbine_radius, max_n_turbines
 from WakeModel.WakeMerge.RSS import MergeRSS
-from src.api import AEPWorkflow
-from src.api import DeficitMatrix, CtMatrix
+from src.api import AEPWorkflow, TIWorkflow
 from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
 from ThrustCoefficient.thrust_models import ThrustPolynomial
+from src.Utils.read_files import read_layout, read_windrose
 
 real_angle = 90.0
 artificial_angle = 45.0
 n_windspeedbins = 1
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
-
-
-def read_windrose(filename):
-    direction = []
-    weibull_scale = []
-    weibull_shape = []
-    dir_probability = []
-    with open(filename, 'r') as windrose:
-        for line in windrose:
-            columns = line.split()
-            direction.append(float(columns[0]))
-            weibull_scale.append(float(columns[1]))
-            weibull_shape.append(float(columns[2]))
-            dir_probability.append(float(columns[3]))
-    return direction, weibull_scale, weibull_shape, dir_probability
 
 
 class WorkingGroup(Group):
@@ -72,46 +57,28 @@ class WorkingGroup(Group):
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
-        aep = self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
+        self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
                                                     self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model))
-
-        self.add_subsystem('dU_matrix', DeficitMatrix(n_cases))
-        self.add_subsystem('ct_matrix', CtMatrix(n_cases))
-
-        self.add_subsystem('TI', self.turbulence_model(n_cases))
+        self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
 
         self.connect('indep2.layout', 'AEP.original')
         self.connect('indep2.n_turbines', 'AEP.n_turbines')
-        self.connect('indep2.turbine_radius', ['AEP.turbine_radius', 'TI.radius'])
         self.connect('indep2.cut_in', 'AEP.cut_in')
         self.connect('indep2.cut_out', 'AEP.cut_out')
         self.connect('indep2.weibull_shapes', 'AEP.weibull_shapes')
         self.connect('indep2.weibull_scales', 'AEP.weibull_scales')
         self.connect('indep2.dir_probabilities', 'AEP.dir_probabilities')
         self.connect('indep2.wind_directions', 'AEP.wind_directions')
+        self.connect('indep2.turbine_radius', ['AEP.turbine_radius', 'TI.radius'])
 
         for n in range(max_n_turbines):
-            self.connect('AEP.wakemodel.linear_solve.deficits{}.dU'.format(n), 'dU_matrix.deficits{}'.format(n))
-            self.connect('AEP.wakemodel.linear_solve.ct{}.ct'.format(n), 'ct_matrix.ct{}'.format(n))
-        self.connect('dU_matrix.dU_matrix', 'TI.dU_matrix')
-        self.connect('ct_matrix.ct_matrix', 'TI.ct')
+            self.connect('AEP.wakemodel.linear_solve.deficits{}.dU'.format(n), 'TI.dU_matrix.deficits{}'.format(n))
+            self.connect('AEP.wakemodel.linear_solve.ct{}.ct'.format(n), 'TI.ct_matrix.ct{}'.format(n))
 
         self.connect('AEP.wakemodel.linear_solve.order_layout.ordered', 'TI.ordered')
         self.connect('indep2.TI_amb', 'TI.TI_amb')
         self.connect('AEP.open_cases.freestream_wind_speeds', 'TI.freestream')
         self.connect('indep2.n_turbines', 'TI.n_turbines')
-
-
-def read_layout(layout_file):
-    layout_file = open(layout_file, 'r')
-    layout = []
-    i = 0
-    for line in layout_file:
-        columns = line.split()
-        layout.append([i, float(columns[0]), float(columns[1])])
-        i += 1
-
-    return np.array(layout)
 
 
 print clock(), "Before defining problem"
