@@ -1,21 +1,30 @@
-from openmdao.api import ExplicitComponent, Group
+from openmdao.api import ExplicitComponent
 from input_params import max_n_turbines
 from numpy import sqrt
+import numpy as np
 
 
-class BaseWakeMerge(Group):
-    pass
-
-
-class AbstractWakeMerging(ExplicitComponent):
+class AbstractWakeMerge(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(AbstractWakeMerge, self).__init__()
+        self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('all_du', shape=max_n_turbines)
-
-        self.add_output('u', val=6.0)
+        self.add_input('all_deficits', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('n_turbines', val=0)
+        self.add_output('dU', shape=self.n_cases)
 
     def compute(self, inputs, outputs):
-        pass
+        # print "6 SumSquares"
+        ans = np.array([])
+        n_turbines = int(inputs['n_turbines'])
+        for case in range(self.n_cases):
+            defs = inputs['all_deficits'][case][:n_turbines]
+            ans = np.append(ans, self.merge_model(defs))
+        outputs['dU'] = ans
+
+    def merge_model(self, deficits):
+        pass  # To be defined in another subclass of AbstractWakeMerge for specific merging models.
 
 
 if __name__ == '__main__':

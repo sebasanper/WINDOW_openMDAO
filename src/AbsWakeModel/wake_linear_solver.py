@@ -47,7 +47,7 @@ class LinearSolveWake(Group):
             self.connect('order_layout.ordered', 'deficits{}.ordered'.format(n))
             self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
-            self.connect('merge{}.sqrt'.format(n), 'speed{}.dU'.format(n))
+            self.connect('merge{}.dU'.format(n), 'speed{}.dU'.format(n))
             for m in range(max_n_turbines):
                 if m > n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))

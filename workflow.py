@@ -4,7 +4,7 @@ import numpy as np
 from time import time, clock
 from Power.power_models import PowerPolynomial
 from input_params import turbine_radius, max_n_turbines
-from WakeModel.WakeMerge.RSS import WakeMergeRSS
+from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow
 from src.api import DeficitMatrix, CtMatrix
 from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
@@ -117,13 +117,13 @@ def read_layout(layout_file):
 print clock(), "Before defining problem"
 prob = Problem()
 print clock(), "Before defining model"
-prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, WakeMergeRSS, ThrustPolynomial, DanishRecommendation)
+prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, MergeRSS, ThrustPolynomial, DanishRecommendation)
 print clock(), "Before setup"
 prob.setup()
 # prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, WakeMergeRSS, ThrustPolynomial, Frandsen)
 
 print clock(), "After setup"
-view_model(prob)
+# view_model(prob)
 start = time()
 print clock(), "Before 1st run"
 prob.run_model()
