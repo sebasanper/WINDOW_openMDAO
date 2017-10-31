@@ -9,6 +9,7 @@ from src.api import AEPWorkflow, TIWorkflow
 from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
 from ThrustCoefficient.thrust_models import ThrustPolynomial
 from src.Utils.read_files import read_layout, read_windrose
+from WaterDepth.water_depth_models import RoughInterpolation
 
 real_angle = 90.0
 artificial_angle = 45.0
@@ -29,6 +30,7 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
+        self.add_subsystem('depths', RoughInterpolation())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
         indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
                                                   [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
@@ -60,6 +62,9 @@ class WorkingGroup(Group):
         self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
                                                     self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model))
         self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
+
+        self.connect('indep2.layout', 'depths.layout')
+        self.connect('indep2.n_turbines', 'depths.n_turbines')
 
         self.connect('indep2.layout', 'AEP.original')
         self.connect('indep2.n_turbines', 'AEP.n_turbines')
@@ -97,7 +102,7 @@ prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
-print prob['TI.TI_eff']
+print prob['depths.water_depths']
 
 # print prob['AEP.windrose.cases']
 # print prob['AEP.farmpower.ind_powers']
