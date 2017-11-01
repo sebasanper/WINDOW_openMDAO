@@ -19,6 +19,8 @@ class RoughInterpolation(AbstractWaterDepth):
         degree = 'linear'  # 'cubic' 'quintic'
         interpfunction = interp2d(bathymetry_grid_x, bathymetry_grid_y, bathymetry_grid_depths, kind=degree)
         water_depths = []
+        if len(layout[0]) == 3:
+            layout = [[i[1], i[2]] for i in layout]
         for coordinate in layout:
-            water_depths.append(interpfunction(coordinate[1], coordinate[2])[0])
+            water_depths.append(interpfunction(coordinate[0], coordinate[1])[0])
         return water_depths
