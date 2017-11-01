@@ -15,9 +15,10 @@ class AbstractWaterDepth(ExplicitComponent):
         n_turbines = int(inputs['n_turbines'])
         layout = inputs['layout']
 
-        ans = self.depth_model(layout[:n_turbines])
+        ans = np.array(self.depth_model(layout[:n_turbines]))
         dif = max_n_turbines - len(ans)
-        ans = np.append(ans, [0 for _ in range(dif)])
+        if dif > 0:
+            ans = np.append(ans, [0 for _ in range(dif)])
         ans = ans.reshape(max_n_turbines)
         outputs['water_depths'] = ans
 

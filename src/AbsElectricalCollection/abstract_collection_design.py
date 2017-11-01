@@ -1,5 +1,5 @@
 from openmdao.api import ExplicitComponent
-from input_params import max_n_turbines, max_n_substations, max_n_turbines_p_branch
+from input_params import max_n_turbines, max_n_substations, max_n_turbines_p_branch, max_n_branches
 import numpy as np
 
 
@@ -26,7 +26,7 @@ class AbstractElectricDesign(ExplicitComponent):
         cost, topology_dict, cable_lengths = self.topology_design_model(layout, substation_coords, n_turbines_p_cable_type)
 
         topology_list = []
-        for n in range(1, max_n_substations + 1):
+        for n in range(1, len(topology_dict) + 1):
             topology_list.append(topology_dict[n])
         # dif_sub = n_substations - len(topology)
 
@@ -62,9 +62,9 @@ class AbstractElectricDesign(ExplicitComponent):
         fill_array(topology, topology_list)
         # print topology
         # topology = topology.reshape(1, 3, 3, 2)
-        outputs['cost'] = cost
+        outputs['cost_p_cable_type'] = cost
         outputs['topology'] = topology
-        outputs['cable_lengths'] = cable_lengths
+        outputs['length_p_cable_type'] = cable_lengths
 
     def topology_design_model(self, layout, substation_coords, n_turbines_p_cable_type, n_substations):
         # Define your own model in a subclass of AbstractCollectionDesign and redefining this method.

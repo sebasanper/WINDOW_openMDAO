@@ -1,14 +1,45 @@
 from openmdao.api import ExplicitComponent
+from input_params import max_n_turbines
+import numpy as np
+
+
+class MaxTI(ExplicitComponent):
+
+    def __init__(self, n_cases):
+        super(MaxTI, self).__init__()
+        self.n_cases = n_cases
+
+    def setup(self):
+        self.add_input('all_TI', shape=(self.n_cases, max_n_turbines))
+
+        self.add_output('max_TI', shape=max_n_turbines)
+
+    def compute(self, inputs, outputs):
+        outputs['max_TI'] = np.amax(inputs['all_TI'], axis=0)
 
 
 class AbstractSupportStructureDesign(ExplicitComponent):
 
     def setup(self):
-        self.add_input('TI', val=0.08)
-        self.add_input('depth', val=20.0)
-        self.add_output('cost_support', val=5600000.0)
+        self.add_input('max_TI', shape=max_n_turbines)
+        self.add_input('depth', shape=max_n_turbines)
+        self.add_input('n_turbines', val=0)
+
+        self.add_output('cost_support', shape=max_n_turbines)
 
     def compute(self, inputs, outputs):
+        n_turbines = int(inputs['n_turbines'])
+        TI = inputs['max_TI'][:n_turbines]
+        depth = inputs['depth'][:n_turbines]
+        costs = self.support_design_model(TI, depth)
+        lendif = max_n_turbines - len(costs)
+        if lendif > 0:
+            costs = np.concatenate((costs, [0 for _ in range(lendif)]))
+        costs = costs.reshape(max_n_turbines)
+        outputs['cost_support'] = costs
+
+    def support_design_model(self, TIs, depths):
+        #  Redefine method in subclass of AbstractSupportStructureDesign with specific model that has same inputs and outputs.
         pass
 
 
