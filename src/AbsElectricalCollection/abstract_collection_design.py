@@ -1,51 +1,71 @@
 from openmdao.api import ExplicitComponent
+from input_params import max_n_turbines, max_n_substations, max_n_turbines_p_branch
+import numpy as np
 
 
-class AbstractCollectionDesign(ExplicitComponent):
-
-    def __init__(self, n_substations, n_turbines):
-        super(AbstractCollectionDesign, self).__init__()
-        self.n_substations = n_substations
-        self.n_turbines = n_turbines
+class AbstractElectricDesign(ExplicitComponent):
 
     def setup(self):
-        self.add_input('layout', shape=(self.n_turbines, 3))
-        self.add_input('n_turbines_p_cable', val=7)
-        self.add_input('substation_coordinates', shape=(self.n_substations, 2))
+        self.add_input('layout', shape=(max_n_turbines, 3))
+        self.add_input('n_turbines_p_cable_type', shape=3)
+        self.add_input('substation_coords', shape=(max_n_substations, 2))
+        self.add_input('n_substations', val=0)
+        self.add_input('n_turbines', val=0)
 
-        self.add_output('topology', val=56000000.0)
-        self.add_output('cost_collection', val=84000000.0)
+        self.add_output('topology', shape=(max_n_substations, max_n_branches, max_n_turbines_p_branch, 2))
+        self.add_output('cost_p_cable_type', shape=3)
+        self.add_output('length_p_cable_type', shape=3)
 
     def compute(self, inputs, outputs):
+        n_turbines = int(inputs['n_turbines'])
+        layout = [[int(coord[0]), coord[1], coord[2]] for coord in inputs['layout'][:n_turbines]]
+        n_substations = int(inputs['n_substations'])
+        n_turbines_p_cable_type = [int(num) for num in inputs['n_turbines_p_cable_type']]
+        substation_coords = inputs['substation_coords'][:n_substations]
+
+        cost, topology_dict, cable_lengths = self.topology_design_model(layout, substation_coords, n_turbines_p_cable_type)
+
+        topology_list = []
+        for n in range(1, max_n_substations + 1):
+            topology_list.append(topology_dict[n])
+        # dif_sub = n_substations - len(topology)
+
+        from itertools import izip_longest
+
+        def find_shape(seq):
+            try:
+                len_ = len(seq)
+            except TypeError:
+                return ()
+            shapes = [find_shape(subseq) for subseq in seq]
+            return (len_,) + tuple(max(sizes) for sizes in izip_longest(*shapes,
+                                                                        fillvalue=1))
+
+        def fill_array(arr, seq):
+            if arr.ndim == 1:
+                try:
+                    len_ = len(seq)
+                except TypeError:
+                    len_ = 0
+                arr[:len_] = seq
+                arr[len_:] = np.nan
+            else:
+                for subarr, subseq in izip_longest(arr, seq, fillvalue=()):
+                    fill_array(subarr, subseq)
+        # for sub in range(n_substations):
+        #     dif_bran = max_n_branches - len(topology[sub])
+        #     for bran in range(max_n_branches):
+        #         for tur in range(max_n_turbines_p_branch):
+
+        # topology = np.array(topology_list)
+        topology = np.empty((max_n_substations, max_n_branches, max_n_turbines_p_branch, 2))
+        fill_array(topology, topology_list)
+        # print topology
+        # topology = topology.reshape(1, 3, 3, 2)
+        outputs['cost'] = cost
+        outputs['topology'] = topology
+        outputs['cable_lengths'] = cable_lengths
+
+    def topology_design_model(self, layout, substation_coords, n_turbines_p_cable_type, n_substations):
+        # Define your own model in a subclass of AbstractCollectionDesign and redefining this method.
         pass
-
-
-if __name__ == '__main__':
-    from openmdao.api import Problem, Group, IndepVarComp
-
-    class TopologyOptimiser(AbstractCollectionDesign):
-
-        def compute(self, inputs, outputs):
-            aep = inputs['AEP']
-            outputs['annual_cost_O&M'] = aep / 1000.0 * 16.0
-            outputs['availability'] = 0.94 + aep / 100000000000.0
-
-    model = Group()
-    ivc = IndepVarComp()
-
-    ivc.add_output('AEP', 698000457.0)
-    ivc.add_output('distance_shore', 23000)
-    ivc.add_output('layout', [[0, 6, 5], [1, 4, 7]])
-
-    model.add_subsystem('indep', ivc)
-    model.add_subsystem('OandMbasic', OandMBasicModel(2))
-
-    model.connect('indep.AEP', 'OandMbasic.AEP')
-    model.connect('indep.distance_shore', 'OandMbasic.distance_shore')
-    model.connect('indep.layout', 'OandMbasic.layout')
-
-    prob = Problem(model)
-    prob.setup()
-    prob.run_model()
-    print(prob['OandMbasic.annual_cost_O&M'])
-    print(prob['OandMbasic.availability'])

@@ -1,5 +1,6 @@
 from openmdao.api import ExplicitComponent
 from input_params import max_n_turbines
+import numpy as np
 
 
 class AbstractWaterDepth(ExplicitComponent):
@@ -14,7 +15,11 @@ class AbstractWaterDepth(ExplicitComponent):
         n_turbines = int(inputs['n_turbines'])
         layout = inputs['layout']
 
-        outputs['water_depths'] = self.depth_model(layout[:n_turbines])
+        ans = self.depth_model(layout[:n_turbines])
+        dif = max_n_turbines - len(ans)
+        ans = np.append(ans, [0 for _ in range(dif)])
+        ans = ans.reshape(max_n_turbines)
+        outputs['water_depths'] = ans
 
     def depth_model(self, layout):
         pass
