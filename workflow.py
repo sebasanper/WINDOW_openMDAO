@@ -13,6 +13,7 @@ from WaterDepth.water_depth_models import RoughInterpolation
 from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
 from SupportStructure.teamplay import TeamPlay
 from src.api import MaxTI
+from OandM.OandM_models import OM_model1
 
 real_angle = 90.0
 artificial_angle = 45.0
@@ -104,6 +105,7 @@ class WorkingGroup(Group):
 
         self.add_subsystem('find_max_TI', MaxTI(n_cases))
         self.add_subsystem('support', TeamPlay())
+        self.add_subsystem('OandM', OM_model1())
 
         self.connect('indep2.layout', 'depths.layout')
         self.connect('indep2.n_turbines', 'depths.n_turbines')
@@ -138,6 +140,8 @@ class WorkingGroup(Group):
         self.connect('depths.water_depths', 'support.depth')
         self.connect('find_max_TI.max_TI', 'support.max_TI')
 
+        self.connect('AEP.AEP', 'OandM.AEP')
+
 
 print clock(), "Before defining problem"
 prob = Problem()
@@ -155,8 +159,12 @@ prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
-print prob['find_max_TI.max_TI']
-print prob['support.cost_support']
+print prob['AEP.AEP']
+print prob['OandM.availability']
+print prob['OandM.annual_cost_O&M']
+
+# print prob['find_max_TI.max_TI']
+# print prob['support.cost_support']
 
 # print prob['electrical.topology']
 # print prob['electrical.cost_p_cable_type']
