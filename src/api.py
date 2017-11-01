@@ -7,4 +7,4 @@ from AbsThrustCoefficient.abstract_thrust import AbstractThrustCoefficient
 from AbsWakeModel.AbsWakeMerge.abstract_wake_merging import AbstractWakeMerge
 from AbsTurbulence.TI_workflow import TIWorkflow
 from SiteConditionsPrep.depth_process import AbstractWaterDepth
-from AbsElectricalCollection.abstract_collection_design import AbstractCollectionDesign
+from AbsElectricalCollection.abstract_collection_design import AbstractElectricDesign

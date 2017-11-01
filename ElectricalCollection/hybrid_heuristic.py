@@ -1,5 +1,6 @@
 # -----------------------------------------Input Parameters------------------------------------------------------------------
 from input_params import cable_types, turbine_rated_current
+import numpy as np
 
 
 def choose_cables(number_turbines_per_cable):
@@ -14,7 +15,7 @@ def choose_cables(number_turbines_per_cable):
 
 
 def cable_design(WT_List, central_platform_locations, number_turbines_per_cable, cable_list):
-
+    # print WT_List, central_platform_locations, number_turbines_per_cable, cable_list
     from math import hypot
     from copy import deepcopy
     from heapq import heappush, heappop, heapify
@@ -72,7 +73,8 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
                                                                                   Cable_Costi[1], substationi[key],
                                                                                   Area,
                                                                                   Crossing_penalty)
-        total_cost = 0.0
+        total_cost = np.array([0.0, 0.0, 0.0])
+        total_length = np.array([0.0, 0.0, 0.0])
         crossings = 0
 
         for key, value in list(Wind_turbinesi.items()):
@@ -80,8 +82,9 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
             Savingsi2[key], Savingsi2_finder[key], Crossings_finder[key] = savingsi(Cost0i[key], Costij[key], value, Cable_Costi[1], substationi[key], Area, Crossing_penalty)
             Routesi[key], Routingi[key], Routing_redi[key], Routing_greeni[key] = Esau_Williams_Cable_Choice(Savingsi2[key], Savingsi2_finder[key], Crossings_finder[key], Wind_turbinesi[key], Routesi[key], Routingi[key], substationi[key], Capacityi, Routing_redi[key], Routing_greeni[key], Costi[key], Cable_Costi)
             Routesi[key], Routingi[key] = RouteOpt_Hybrid(Routingi[key], substationi[key], Costi[key], Capacityi, Routesi[key], Wind_turbinesi[key])
-            cost, total_length = plotting(substationi[key], Wind_turbinesi[key], Routingi[key], Routing_redi[key], Routing_greeni[key], Cable_Costi)
+            cost, length = plotting(substationi[key], Wind_turbinesi[key], Routingi[key], Routing_redi[key], Routing_greeni[key], Cable_Costi)
             total_cost += cost
+            total_length += length
 
             for route in Routingi[key]:
                 if edge_crossings_area([route[0], route[1]], Wind_turbinesi[key], substationi[key], Area)[0] is True:
@@ -603,6 +606,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
                 arc1 = [i, 0]
                 arc2 = [i, Costij[j][1]]
                 crossings_arc1 = edge_crossings_area(arc1, Wind_turbinesi, central_platform_location, Area)[1]
+                # print arc2, Wind_turbinesi, central_platform_location, Area
                 crossings_arc2 = edge_crossings_area(arc2, Wind_turbinesi, central_platform_location, Area)[1]
                 Crossingsi_finder[(arc1[0], arc1[1])] = crossings_arc1
                 Crossingsi_finder[(arc2[0], arc2[1])] = crossings_arc2
@@ -758,7 +762,6 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
         cable_length = cable_length1blue
 
         if len(Cable_Costi) == 2:
-            cable_length1red = 0
             arcs1 = []
             arcs2 = []
             for i in Routing_red:
@@ -808,7 +811,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
                                             arcs1[2 * j][1] - arcs1[2 * j + 1][1])
             cable_length = cable_length1blue + cable_length1red + cable_length1green
             cable_cost = Cable_Costi[1] * cable_length1blue + Cable_Costi[2] * cable_length1red + Cable_Costi[3] * cable_length1green
-        return cable_cost, cable_length
+        return [Cable_Costi[1] * cable_length1blue, Cable_Costi[2] * cable_length1red, Cable_Costi[3] * cable_length1green], [cable_length1blue, cable_length1red, cable_length1green]
 
     def cable_cost(central_platform_location, Wind_turbinesi, Routing, Routing_red, Routing_green, Cable_Costi):
         Routing_blue = [i for i in Routing if i not in Routing_red]
@@ -845,13 +848,16 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
 
     # Submethods return x and y coordinates of a turbine if it's ID is known. The OHVS must also be included
     def give_coordinates(turbineID, turbines, central_platform_location):
+        # print turbineID, turbines, central_platform_location
         if turbineID == 0:
             x = central_platform_location[0]
             y = central_platform_location[1]
         else:
-            turbine = turbines[turbineID - 1]
-            x = turbine[1]
-            y = turbine[2]
+            for i in range(len(turbines)):
+                if turbines[i][0] == turbineID:
+                    # turbine = turbines[turbineID - 1]
+                    x = turbines[i][1]
+                    y = turbines[i][2]
         return x, y
 
     return set_cable_topology(NT, WT_List, central_platform_locations, cable_list)
