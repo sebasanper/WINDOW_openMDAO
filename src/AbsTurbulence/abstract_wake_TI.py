@@ -37,7 +37,7 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
                 if sum(row) == 0:
                     ct_case_closest = 0
                 else:
-                    ct_case_closest = rowct[max_index]                    
+                    ct_case_closest = rowct[max_index]
                 spacing = self.distance(ordered[n][1], ordered[n][2], ordered[max_index][1], ordered[max_index][2]) / diameter
                 # print n, row, max_index, rowct, ct_case_closest, n, max_index, spacing, ordered[n][1], ordered[n][2], ordered[max_index][1], ordered[max_index][2]
                 if ct_case_closest == 0:
@@ -45,11 +45,13 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
                 else:
                     ans = self.TI_model(TI_amb_case, ct_case_closest, freestream_case, spacing)
                 TI_case = np.append(TI_case, ans)
+            TI_case = zip(*sorted(zip(ordered[:, 0], TI_case)))[1]
             lendif = max_n_turbines - len(TI_case)
             if lendif > 0:
                 TI_case = np.concatenate((TI_case, [0 for _ in range(lendif)]))
             TI_eff = np.append(TI_eff, TI_case)
         TI_eff = TI_eff.reshape(self.n_cases, max_n_turbines)
+
         outputs['TI_eff'] = TI_eff
 
     def distance(self, x1, y1, x2, y2):
