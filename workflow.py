@@ -13,6 +13,7 @@ from WaterDepth.water_depth_models import RoughInterpolation
 from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
 from SupportStructure.teamplay import TeamPlay
 from src.api import MaxTI
+from OandM.OandM_models import OM_model1
 
 real_angle = 90.0
 artificial_angle = 45.0
@@ -96,7 +97,7 @@ class WorkingGroup(Group):
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
-        self.add_subsystem('AEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
+        self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
                                                     self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model))
         self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
 
@@ -104,27 +105,28 @@ class WorkingGroup(Group):
 
         self.add_subsystem('find_max_TI', MaxTI(n_cases))
         self.add_subsystem('support', TeamPlay())
+        self.add_subsystem('OandM', OM_model1())
 
         self.connect('indep2.layout', 'depths.layout')
         self.connect('indep2.n_turbines', 'depths.n_turbines')
 
-        self.connect('indep2.layout', 'AEP.original')
-        self.connect('indep2.n_turbines', 'AEP.n_turbines')
-        self.connect('indep2.cut_in', 'AEP.cut_in')
-        self.connect('indep2.cut_out', 'AEP.cut_out')
-        self.connect('indep2.weibull_shapes', 'AEP.weibull_shapes')
-        self.connect('indep2.weibull_scales', 'AEP.weibull_scales')
-        self.connect('indep2.dir_probabilities', 'AEP.dir_probabilities')
-        self.connect('indep2.wind_directions', 'AEP.wind_directions')
-        self.connect('indep2.turbine_radius', ['AEP.turbine_radius', 'TI.radius'])
+        self.connect('indep2.layout', 'AeroAEP.original')
+        self.connect('indep2.n_turbines', 'AeroAEP.n_turbines')
+        self.connect('indep2.cut_in', 'AeroAEP.cut_in')
+        self.connect('indep2.cut_out', 'AeroAEP.cut_out')
+        self.connect('indep2.weibull_shapes', 'AeroAEP.weibull_shapes')
+        self.connect('indep2.weibull_scales', 'AeroAEP.weibull_scales')
+        self.connect('indep2.dir_probabilities', 'AeroAEP.dir_probabilities')
+        self.connect('indep2.wind_directions', 'AeroAEP.wind_directions')
+        self.connect('indep2.turbine_radius', ['AeroAEP.turbine_radius', 'TI.radius'])
 
         for n in range(max_n_turbines):
-            self.connect('AEP.wakemodel.linear_solve.deficits{}.dU'.format(n), 'TI.dU_matrix.deficits{}'.format(n))
-            self.connect('AEP.wakemodel.linear_solve.ct{}.ct'.format(n), 'TI.ct_matrix.ct{}'.format(n))
+            self.connect('AeroAEP.wakemodel.linear_solve.deficits{}.dU'.format(n), 'TI.dU_matrix.deficits{}'.format(n))
+            self.connect('AeroAEP.wakemodel.linear_solve.ct{}.ct'.format(n), 'TI.ct_matrix.ct{}'.format(n))
 
-        self.connect('AEP.wakemodel.linear_solve.order_layout.ordered', 'TI.ordered')
+        self.connect('AeroAEP.wakemodel.linear_solve.order_layout.ordered', 'TI.ordered')
         self.connect('indep2.TI_amb', 'TI.TI_amb')
-        self.connect('AEP.open_cases.freestream_wind_speeds', 'TI.freestream')
+        self.connect('AeroAEP.open_cases.freestream_wind_speeds', 'TI.freestream')
         self.connect('indep2.n_turbines', 'TI.n_turbines')
 
         self.connect('indep2.layout', 'electrical.layout')
@@ -137,6 +139,8 @@ class WorkingGroup(Group):
         self.connect('TI.TI_eff', 'find_max_TI.all_TI')
         self.connect('depths.water_depths', 'support.depth')
         self.connect('find_max_TI.max_TI', 'support.max_TI')
+
+        self.connect('AeroAEP.AEP', 'OandM.AEP')
 
 
 print clock(), "Before defining problem"
@@ -155,8 +159,12 @@ prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
-print prob['find_max_TI.max_TI']
-print prob['support.cost_support']
+print prob['AeroAEP.AEP']
+print prob['OandM.availability']
+print prob['OandM.annual_cost_O&M']
+
+# print prob['find_max_TI.max_TI']
+# print prob['support.cost_support']
 
 # print prob['electrical.topology']
 # print prob['electrical.cost_p_cable_type']
