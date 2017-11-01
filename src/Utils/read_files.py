@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def read_layout(layout_file):
     layout_file = open(layout_file, 'r')
     layout = []

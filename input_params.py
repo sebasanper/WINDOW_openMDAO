@@ -1,8 +1,8 @@
 from numpy import sqrt
 
-max_n_turbines = max_n_branches = max_n_turbines_p_branch = 10
+max_n_turbines = max_n_branches = max_n_turbines_p_branch = 80
 turbine_radius = 40.0
-max_n_substations = 2
+max_n_substations = 1
 
 
 # Turbine parameters
@@ -33,6 +33,7 @@ warranty_percentage = 15.0  # [%]
 
 
 #  Plant parameters
+central_platform = [[0, 585000.0, 5809000.0]]
 ref_height_wind_speed = 62.0
 alpha = 0.10  # Approximate mean value of fits to data in ECN report and paper of Tambke (EWEC 2004)
 hat = 0.8  # Horns Rev website: Tides are approximately 1.2 m; Paper ICCE: appr. 1.5 m - A little more than half of this is taken for 'extrapolation'
