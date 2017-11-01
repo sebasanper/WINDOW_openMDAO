@@ -14,7 +14,7 @@ class PowerPolynomial(AbstractPower):
             power = 2000000.0
         else:
             power = 0.0
-            return power
+        return power
 
 
 if __name__ == '__main__':
