@@ -5,14 +5,13 @@ from time import time, clock
 from Power.power_models import PowerPolynomial
 from input_params import turbine_radius, max_n_turbines
 from WakeModel.WakeMerge.RSS import MergeRSS
-from src.api import AEPWorkflow, TIWorkflow
+from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
 from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
 from ThrustCoefficient.thrust_models import ThrustPolynomial
 from src.Utils.read_files import read_layout, read_windrose
 from WaterDepth.water_depth_models import RoughInterpolation
 from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
 from SupportStructure.teamplay import TeamPlay
-from src.api import MaxTI
 from OandM.OandM_models import OM_model1
 
 real_angle = 90.0
@@ -34,7 +33,6 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        self.add_subsystem('depths', RoughInterpolation())
         # indep2.add_output('layout', val=read_layout('horns_rev9.dat'))
         indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
                                                   [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
@@ -94,6 +92,7 @@ class WorkingGroup(Group):
         indep2.add_output('n_turbines_p_cable_type', val=[2, 0, 0])
         indep2.add_output('substation_coords', val=[[500.0, 500.0], [496845.0, 5731342.0]])
         indep2.add_output('n_substations', val=1)
+        indep2.add_output('electrical_efficiency', val=0.99)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
@@ -104,8 +103,10 @@ class WorkingGroup(Group):
         self.add_subsystem('electrical', TopologyHybridHeuristic())
 
         self.add_subsystem('find_max_TI', MaxTI(n_cases))
+        self.add_subsystem('depths', RoughInterpolation())
         self.add_subsystem('support', TeamPlay())
         self.add_subsystem('OandM', OM_model1())
+        self.add_subsystem('AEP', AEP())
 
         self.connect('indep2.layout', 'depths.layout')
         self.connect('indep2.n_turbines', 'depths.n_turbines')
@@ -141,6 +142,9 @@ class WorkingGroup(Group):
         self.connect('find_max_TI.max_TI', 'support.max_TI')
 
         self.connect('AeroAEP.AEP', 'OandM.AEP')
+        self.connect('OandM.availability', 'AEP.availability')
+        self.connect('AeroAEP.AEP', 'AEP.aeroAEP')
+        self.connect('indep2.electrical_efficiency', 'AEP.electrical_efficiency')
 
 
 print clock(), "Before defining problem"
@@ -160,8 +164,9 @@ print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
 print prob['AeroAEP.AEP']
-print prob['OandM.availability']
-print prob['OandM.annual_cost_O&M']
+print prob['AEP.AEP']
+# print prob['OandM.availability']
+# print prob['OandM.annual_cost_O&M']
 
 # print prob['find_max_TI.max_TI']
 # print prob['support.cost_support']
