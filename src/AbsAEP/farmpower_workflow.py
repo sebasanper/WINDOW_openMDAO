@@ -63,6 +63,9 @@ class PowersToAEP(ExplicitComponent):
         powers = inputs['powers']
         probs = inputs['probabilities']
         energies = powers * probs * 8760.0
+        # with open('energies_out.dat', 'w') as out:
+        #     for n in range(self.windrose_cases):
+        #         out.write('{} {} {}\n'.format(powers[n], probs[n], energies[n]))
         outputs['energies'] = energies
         outputs['AEP'] = sum(energies)
         print clock(), "Last line compute AEP energies"

@@ -7,8 +7,10 @@ def choose_cables(number_turbines_per_cable):
     cables_info = cable_types
     cable_list = []
     for number in number_turbines_per_cable:
+        print number
         for cable in cables_info:
             if turbine_rated_current * number <= cable[1]:
+                print number, cable[2]
                 cable_list.append([number, cable[2] + 365.0])
                 break
     return cable_list
@@ -39,6 +41,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
 
     # ---------------------------------------Main--------------------------------------------------------------------------------
     def set_cable_topology(NT, WT_List, central_platform_locations, cable_list):
+        print cable_list
         Wind_turbines = []
         for WT in WT_List:
             Wind_turbines.append([WT[0] + 1, WT[1], WT[2]])
@@ -745,6 +748,8 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
         Routing_blue = [i for i in Routing if i not in Routing_red]
         Routing_blue = [i for i in Routing_blue if i not in Routing_green]
         cable_length1blue = 0
+        cable_length1red = 0
+        cable_length1green = 0
         arcs1 = []
         arcs2 = []
         for i in Routing_blue:
@@ -762,6 +767,8 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
         cable_length = cable_length1blue
 
         if len(Cable_Costi) == 2:
+            cable_length1green = 0
+            cable_length1red = 0
             arcs1 = []
             arcs2 = []
             for i in Routing_red:

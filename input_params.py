@@ -2,11 +2,11 @@ from numpy import sqrt
 
 max_n_turbines = max_n_branches = max_n_turbines_p_branch = 80
 turbine_radius = 40.0
-max_n_substations = 1
+max_n_substations = 3
 
 
 # Turbine parameters
-turbine_rated_power = 3600000.0
+turbine_rated_power = 2000000.0
 turbine_voltage = 33000.0
 turbine_rated_current = sqrt(3.0) * turbine_rated_power / (turbine_voltage)  # A = Power * sqrt(3) / Voltage. 3 phase current per line.
 
@@ -33,7 +33,7 @@ warranty_percentage = 15.0  # [%]
 
 
 #  Plant parameters
-central_platform = [[0, 585000.0, 5809000.0]]
+central_platform = [[0, 429500, 6147600], [1,1,1], [2,2,2]]
 ref_height_wind_speed = 62.0
 alpha = 0.10  # Approximate mean value of fits to data in ECN report and paper of Tambke (EWEC 2004)
 hat = 0.8  # Horns Rev website: Tides are approximately 1.2 m; Paper ICCE: appr. 1.5 m - A little more than half of this is taken for 'extrapolation'
@@ -87,3 +87,5 @@ rho_copper = 8940  # [kg/m^3]
 rho_xlpe = 940  # [kg/m^3]
 epsilon_0 = 8.85e-12  # [F/m]
 epsilon_r = 2.3  # [-] (XLPE)
+
+

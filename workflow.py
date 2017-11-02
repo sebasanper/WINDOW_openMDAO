@@ -18,8 +18,8 @@ from Finance.LCOE import LCOE
 from input_params import i as interest_rate, central_platform
 
 real_angle = 30.0
-artificial_angle = 15.0
-n_windspeedbins = 10
+artificial_angle = 30.0
+n_windspeedbins = 1
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
 
@@ -61,7 +61,7 @@ class WorkingGroup(Group):
         indep2.add_output('cut_out', val=25.0)
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=80)
-        indep2.add_output('n_turbines_p_cable_type', val=[2, 0, 0])
+        indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=1)
         indep2.add_output('electrical_efficiency', val=0.99)
@@ -141,8 +141,6 @@ class WorkingGroup(Group):
         self.connect('indep2.operational_lifetime', 'lcoe.operational_lifetime')
         self.connect('indep2.interest_rate', 'lcoe.interest_rate')
 
-        # self.connect('')
-
 
 print clock(), "Before defining problem"
 prob = Problem()
@@ -150,7 +148,6 @@ print clock(), "Before defining model"
 prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, MergeRSS, ThrustPolynomial, DanishRecommendation)
 print clock(), "Before setup"
 prob.setup()
-# prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, WakeMergeRSS, ThrustPolynomial, Frandsen)
 
 print clock(), "After setup"
 # view_model(prob)
@@ -160,11 +157,15 @@ prob.run_model()
 print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
-print prob['AeroAEP.AEP']
-print prob['AEP.AEP']
-print prob['Costs.investment_costs']
-print prob['Costs.decommissioning_costs']
-print prob['lcoe.LCOE']
+
+# print prob['AeroAEP.energies']
+
+with open('all_outputs.dat', 'w') as out:
+    out.write("{}".format(prob.model.list_outputs()))
+# print prob['AeroAEP.AEP']
+# print prob['Costs.investment_costs']
+# print prob['Costs.decommissioning_costs']
+# print prob['lcoe.LCOE']
 # print prob['OandM.availability']
 # print prob['OandM.annual_cost_O&M']
 
