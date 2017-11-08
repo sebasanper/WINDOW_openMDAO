@@ -37,11 +37,11 @@ class CombineSpeed(ExplicitComponent):
     def setup(self):
 
         for n in range(max_n_turbines):
-            self.add_input('U{}'.format(n), shape=self.n_cases)
+            self.add_input('power{}'.format(n), shape=self.n_cases)
         self.add_input('ordered_layout', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
 
-        self.add_output('U', shape=(self.n_cases, max_n_turbines))
+        self.add_output('p', shape=(self.n_cases, max_n_turbines))
 
     def compute(self, inputs, outputs):
         ans = np.array([])
@@ -52,7 +52,7 @@ class CombineSpeed(ExplicitComponent):
             indices = [i[0] for i in ordered_layout]
             # print indices
             # print inputs['U0'], inputs['U1'], inputs['U2']
-            final = [[indices[n], inputs['U{}'.format(int(n))][case]] for n in range(len(indices))]
+            final = [[indices[n], inputs['power{}'.format(int(n))][case]] for n in range(len(indices))]
             # print final
             array_speeds = [speed[1] for speed in sorted(final)]
             # print array_speeds
@@ -63,5 +63,5 @@ class CombineSpeed(ExplicitComponent):
         ans = ans.reshape(self.n_cases, max_n_turbines)
         # for n in range(self.n_cases):
         #     inputs['U{}'.format(n)] = []
-        outputs['U'] = np.array(ans)
+        outputs['p'] = np.array(ans)
         # print outputs['U'], "Combined Wind Speeds U"

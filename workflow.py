@@ -2,12 +2,10 @@ from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder
 import numpy as np
 from time import time, clock
-from Power.power_models import PowerPolynomial
 from input_params import turbine_radius, max_n_turbines, max_n_substations
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
-from Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
-from ThrustCoefficient.thrust_models import ThrustPolynomial
+from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
 from src.Utils.read_files import read_layout, read_windrose
 from WaterDepth.water_depth_models import RoughInterpolation
 from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
@@ -17,32 +15,30 @@ from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
 from input_params import i as interest_rate, central_platform
 
-real_angle = 30.0
-artificial_angle = 30.0
+real_angle = 180.0
+artificial_angle = 90.0
 n_windspeedbins = 1
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
 
 
 class WorkingGroup(Group):
-    def __init__(self, power_model, fraction_model, deficit_model, merge_model, thrust_model, turbulence_model):
+    def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
         super(WorkingGroup, self).__init__()
-        self.power_model = power_model
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
-        self.thrust_model = thrust_model
         self.turbulence_model = turbulence_model
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', val=read_layout('horns_rev.dat'))
-        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
-        #                                           [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
-        #                                           [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
-        #                                           [9, 1160.0, 1160.0]]))
+        # indep2.add_output('layout', val=read_layout('horns_rev.dat'))
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
+                                                  [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
+                                                  [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0]]))#,
+                                                  # [9, 1160.0, 1160.0]]))
 
-        wd, wsc, wsh, wdp = read_windrose('unique_weibull.dat')
+        wd, wsc, wsh, wdp = read_windrose('weibull_2.dat')
 
         # wsh = [1.0, 1.0]
         # wsc = [8.0, 8.0]
@@ -57,11 +53,11 @@ class WorkingGroup(Group):
         indep2.add_output('weibull_scales', val=wsc)
         indep2.add_output('dir_probabilities', val=wdp)
         indep2.add_output('wind_directions', val=wd)  # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
-        indep2.add_output('cut_in', val=3.0)
-        indep2.add_output('cut_out', val=25.0)
+        indep2.add_output('cut_in', val=8.0)
+        indep2.add_output('cut_out', val=8.5)
         indep2.add_output('turbine_radius', val=turbine_radius)
-        indep2.add_output('n_turbines', val=80)
-        indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
+        indep2.add_output('n_turbines', val=9)
+        indep2.add_output('n_turbines_p_cable_type', val=[2, 1, 0])
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=1)
         indep2.add_output('electrical_efficiency', val=0.99)
@@ -71,8 +67,7 @@ class WorkingGroup(Group):
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
 
-        self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.power_model,
-                                                    self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model))
+        self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.fraction_model, self.deficit_model, self.merge_model))
         self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
 
         self.add_subsystem('electrical', TopologyHybridHeuristic())
@@ -100,7 +95,7 @@ class WorkingGroup(Group):
 
         for n in range(max_n_turbines):
             self.connect('AeroAEP.wakemodel.linear_solve.deficits{}.dU'.format(n), 'TI.dU_matrix.deficits{}'.format(n))
-            self.connect('AeroAEP.wakemodel.linear_solve.ct{}.ct'.format(n), 'TI.ct_matrix.ct{}'.format(n))
+            self.connect('AeroAEP.wakemodel.linear_solve.turbine{}.ct'.format(n), 'TI.ct_matrix.ct{}'.format(n))
 
         self.connect('AeroAEP.wakemodel.linear_solve.order_layout.ordered', 'TI.ordered')
         self.connect('indep2.TI_amb', 'TI.TI_amb')
@@ -145,7 +140,7 @@ class WorkingGroup(Group):
 print clock(), "Before defining problem"
 prob = Problem()
 print clock(), "Before defining model"
-prob.model = WorkingGroup(PowerPolynomial, JensenWakeFraction, JensenWakeDeficit, MergeRSS, ThrustPolynomial, DanishRecommendation)
+prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
 print clock(), "Before setup"
 prob.setup()
 

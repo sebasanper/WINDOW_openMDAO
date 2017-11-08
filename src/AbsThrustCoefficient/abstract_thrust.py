@@ -11,7 +11,7 @@ class AbstractThrustCoefficient(ExplicitComponent):
         self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('n_turbines', val=5)
+        self.add_input('n_turbines', val=0)
         for n in range(max_n_turbines):
             if n < self.number:
                 self.add_input('U{}'.format(n), shape=self.n_cases)

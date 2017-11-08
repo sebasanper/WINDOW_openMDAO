@@ -5,52 +5,51 @@ from order_layout import OrderLayout
 from input_params import max_n_turbines
 from distance import DistanceComponent
 from windspeed_deficits import SpeedDeficits, CombineSpeed
+from Turbine.TurbineGroup import Turbine
 
 
 class WakeModel(Group):
-    def __init__(self, n_cases, fraction_model, deficit_model, merge_model, thrust_model):
+    def __init__(self, n_cases, fraction_model, deficit_model, merge_model):
         super(WakeModel, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
         self.n_cases = n_cases
-        self.thrust_model = thrust_model
 
     def setup(self):
-        self.add_subsystem('linear_solve', LinearSolveWake(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model),
+        self.add_subsystem('linear_solve', LinearSolveWake(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model),
                            promotes_inputs=['turbine_radius', 'original', 'angle', 'n_turbines', 'freestream'])
-        self.add_subsystem('combine', CombineSpeed(self.n_cases), promotes_inputs=['n_turbines'], promotes_outputs=['U'])
+        self.add_subsystem('combine', CombineSpeed(self.n_cases), promotes_inputs=['n_turbines'], promotes_outputs=['p'])
         for n in range(max_n_turbines):
-            self.connect('linear_solve.speed{}.U'.format(n), 'combine.U{}'.format(n))
+            self.connect('linear_solve.turbine{}.power'.format(n), 'combine.power{}'.format(n))
         self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
 
 
 class LinearSolveWake(Group):
-    def __init__(self, n_cases, fraction_model, deficit_model, merge_model, thrust_model):
+    def __init__(self, n_cases, fraction_model, deficit_model, merge_model):
         super(LinearSolveWake, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
         self.n_cases = n_cases
-        self.thrust_model = thrust_model
 
     def setup(self):
         self.add_subsystem('order_layout', OrderLayout(self.n_cases), promotes_inputs=['original', 'angle', 'n_turbines'])
 
         for n in range(max_n_turbines):
-            self.add_subsystem('ct{}'.format(n), self.thrust_model(n, self.n_cases), promotes_inputs=['n_turbines'])
+            self.add_subsystem('turbine{}'.format(n), Turbine(n, self.n_cases), promotes_inputs=['n_turbines'])
             self.add_subsystem('deficits{}'.format(n), Wake(self.n_cases, self.fraction_model, self.deficit_model, n),
                                promotes_inputs=['angle', 'turbine_radius', 'n_turbines'])
             self.add_subsystem('merge{}'.format(n), self.merge_model(self.n_cases), promotes_inputs=['n_turbines'])
             self.add_subsystem('speed{}'.format(n), SpeedDeficits(self.n_cases), promotes_inputs=['freestream'])
 
             self.connect('order_layout.ordered', 'deficits{}.ordered'.format(n))
-            self.connect('ct{}.ct'.format(n), 'deficits{}.ct'.format(n))
+            self.connect('turbine{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.dU'.format(n), 'speed{}.dU'.format(n))
             for m in range(max_n_turbines):
                 if m > n:
-                    self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
+                    self.connect('speed{}.U'.format(n), 'turbine{}.U{}'.format(m, n))
         # self.linear_solver = LinearRunOnce()
         # self.nonlinear_solver = NonlinearBlockGS()
         # self.nonlinear_solver.options['maxiter'] = 30

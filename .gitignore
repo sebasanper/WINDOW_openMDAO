@@ -19,8 +19,6 @@ sellar/angle_speedhorns8nl\.dat
 
 sellar/distribcomp\.py
 
-*.dat
-
 nonlinear_fixed
 
 linear_variable

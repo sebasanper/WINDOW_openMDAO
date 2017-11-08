@@ -7,7 +7,7 @@ from time import clock
 
 
 class AEPWorkflow(Group):
-    def __init__(self, real_angle, artificial_angle, n_windspeedbins, power_model, fraction_model, deficit_model, merge_model, thrust_model):
+    def __init__(self, real_angle, artificial_angle, n_windspeedbins, fraction_model, deficit_model, merge_model):
         super(AEPWorkflow, self).__init__()
         self.real_angle = real_angle
         self.artificial_angle = artificial_angle
@@ -18,8 +18,6 @@ class AEPWorkflow(Group):
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
-        self.power_model = power_model
-        self.thrust_model = thrust_model
 
     def setup(self):
         self.add_subsystem('windrose', WindrosePreprocessor(self.real_angle, self.artificial_angle,
@@ -29,9 +27,8 @@ class AEPWorkflow(Group):
                                                                                                     'dir_probabilities',
                                                                                                     'wind_directions'])
         self.add_subsystem('open_cases', OpenCases(self.n_cases))
-        self.add_subsystem('wakemodel', WakeModel(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model, self.thrust_model),
+        self.add_subsystem('wakemodel', WakeModel(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model),
                            promotes_inputs=['turbine_radius', 'original', 'n_turbines'])
-        self.add_subsystem('power', self.power_model(self.n_cases), promotes_inputs=['n_turbines'])
         self.add_subsystem('farmpower', FarmAeroPower(self.n_cases), promotes_inputs=['n_turbines'])
         self.add_subsystem('energy', PowersToAEP(self.artificial_angle, self.n_windspeedbins),
                            promotes_outputs=['energies', 'AEP'])
@@ -40,8 +37,7 @@ class AEPWorkflow(Group):
         self.connect('windrose.probabilities', 'energy.probabilities')
         self.connect('open_cases.freestream_wind_speeds', 'wakemodel.freestream')
         self.connect('open_cases.wind_directions', 'wakemodel.angle')
-        self.connect('wakemodel.U', 'power.U')
-        self.connect('power.p', 'farmpower.ind_powers')
+        self.connect('wakemodel.p', 'farmpower.ind_powers')
         self.connect('farmpower.farm_power', 'energy.powers')
 
 
