@@ -43,16 +43,18 @@ class LinearSolveWake(Group):
             self.add_subsystem('merge{}'.format(n), self.merge_model(self.n_cases), promotes_inputs=['n_turbines'])
             self.add_subsystem('speed{}'.format(n), SpeedDeficits(self.n_cases), promotes_inputs=['freestream'])
 
+        for n in range(max_n_turbines):
             self.connect('order_layout.ordered', 'deficits{}.ordered'.format(n))
             self.connect('turbine{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.dU'.format(n), 'speed{}.dU'.format(n))
             for m in range(max_n_turbines):
-                if m > n:
+                if m >= n:
                     self.connect('speed{}.U'.format(n), 'turbine{}.U{}'.format(m, n))
             if n > 0:
                 self.connect('turbine{}.ct'.format(n - 1), 'turbine{}.prev_turbine_ct'.format(n))
                 self.connect('turbine{}.power'.format(n - 1), 'turbine{}.prev_turbine_p'.format(n))
+
         # self.linear_solver = LinearRunOnce()
         # self.nonlinear_solver = NonlinearBlockGS()
         # self.nonlinear_solver.options['maxiter'] = 30

@@ -10,7 +10,7 @@ class AbstractWakeMerge(ExplicitComponent):
         self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('all_deficits', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('all_deficits', shape=(self.n_cases, max_n_turbines))
         self.add_input('n_turbines', val=0)
         self.add_output('dU', shape=self.n_cases)
 

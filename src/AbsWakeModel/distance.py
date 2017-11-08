@@ -14,8 +14,8 @@ class DistanceComponent(ExplicitComponent):
         self.add_input('angle', shape=self.n_cases)
         self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
-        self.add_output('dist_down', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_output('dist_cross', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_output('dist_down', shape=(self.n_cases, max_n_turbines))
+        self.add_output('dist_cross', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='fd')
@@ -36,13 +36,13 @@ class DistanceComponent(ExplicitComponent):
                     d_down1, d_cross1 = distance(ordered[case][self.number], ordered[case][n], angle)
                     d_cross = np.append(d_cross, [d_cross1])
                     d_down = np.append(d_down, [d_down1])
-            lendif = max_n_turbines - len(d_cross) - 1
+            lendif = max_n_turbines - len(d_cross)
             d_down = np.concatenate((d_down, [0 for _ in range(lendif)]))
             d_cross = np.concatenate((d_cross, [0 for _ in range(lendif)]))
             d_down2 = np.append(d_down2, d_down)
             d_cross2 = np.append(d_cross2, d_cross)
-        d_down2 = d_down2.reshape(self.n_cases, max_n_turbines - 1)
-        d_cross2 = d_cross2.reshape(self.n_cases, max_n_turbines - 1)
+        d_down2 = d_down2.reshape(self.n_cases, max_n_turbines)
+        d_cross2 = d_cross2.reshape(self.n_cases, max_n_turbines)
         outputs['dist_down'] = d_down2
         outputs['dist_cross'] = d_cross2
         # print outputs['dist_down'], "Output1"

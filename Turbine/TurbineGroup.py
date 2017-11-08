@@ -15,10 +15,10 @@ class Turbine(ExplicitComponent):
         for n in range(max_n_turbines):
             if n < self.number:
                 self.add_input('U{}'.format(n), shape=self.n_cases)
-        self.add_input('prev_turbine_ct', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_input('prev_turbine_p', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_output('ct', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_output('power', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('prev_turbine_ct', shape=(self.n_cases, max_n_turbines))
+        self.add_input('prev_turbine_p', shape=(self.n_cases, max_n_turbines))
+        self.add_output('ct', shape=(self.n_cases, max_n_turbines))
+        self.add_output('power', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
 
@@ -27,6 +27,7 @@ class Turbine(ExplicitComponent):
         # for n in range(max_n_turbines):
         #     if n != self.number:
                 # print inputs['U{}'.format(n)], "Input U{}".format(n)
+
         c_t_ans = np.array([])
         power_ans = np.array([])
         for case in range(self.n_cases):
@@ -35,24 +36,27 @@ class Turbine(ExplicitComponent):
             n_turbines = int(inputs['n_turbines'])
             c_t = np.array([])
             power = np.array([])
+            # if self.number == 0:
+            #     ct, p = self.turbine_model(8.5)
+            #     c_t = np.append(c_t, [ct])
+            #     power = np.append(power, [p])
             for n in range(n_turbines):
                 if n < self.number < n_turbines:
                     if n == self.number - 1:
-                        print "called turbine model"
                         ct, p = self.turbine_model(inputs['U{}'.format(n)][case])
                     else:
                         ct = prev_turbine_ct[n]
                         p = prev_turbine_p[n]
                     c_t = np.append(c_t, [ct])
                     power = np.append(power, [p])
-            lendif = max_n_turbines - len(c_t) - 1
+            lendif = max_n_turbines - len(c_t)
             # print c_t
             c_t = np.concatenate((c_t, [0 for _ in range(lendif)]))
             power = np.concatenate((power, [0 for _ in range(lendif)]))
             c_t_ans = np.append(c_t_ans, c_t)
             power_ans = np.append(power_ans, power)
-        c_t_ans = c_t_ans.reshape(self.n_cases, max_n_turbines - 1)
-        power_ans = power_ans.reshape(self.n_cases, max_n_turbines - 1)
+        c_t_ans = c_t_ans.reshape(self.n_cases, max_n_turbines)
+        power_ans = power_ans.reshape(self.n_cases, max_n_turbines)
         # print c_t_ans
         outputs['ct'] = c_t_ans
         outputs['power'] = power_ans

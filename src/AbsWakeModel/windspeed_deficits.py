@@ -37,7 +37,7 @@ class CombineSpeed(ExplicitComponent):
     def setup(self):
 
         for n in range(max_n_turbines):
-            self.add_input('power{}'.format(n), shape=(self.n_cases, max_n_turbines - 1))
+            self.add_input('power{}'.format(n), shape=(self.n_cases, max_n_turbines))
         self.add_input('ordered_layout', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
 
@@ -53,7 +53,7 @@ class CombineSpeed(ExplicitComponent):
             indices = [i[0] for i in ordered_layout]
             # print indices
             # print inputs['U0'], inputs['U1'], inputs['U2']
-            final = [[indices[n], power_in[n-1]] for n in range(len(indices))]
+            final = [[indices[n], power_in[n]] for n in range(len(indices))]
             # print final
             array_speeds = [speed[1] for speed in sorted(final)]
             # print array_speeds
