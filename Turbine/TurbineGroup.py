@@ -1,5 +1,6 @@
 from openmdao.api import ExplicitComponent
 from input_params import max_n_turbines, turbine_rated_power
+import numpy as np
 
 
 class Turbine(ExplicitComponent):
@@ -14,7 +15,8 @@ class Turbine(ExplicitComponent):
         for n in range(max_n_turbines):
             if n < self.number:
                 self.add_input('U{}'.format(n), shape=self.n_cases)
-
+        self.add_input('prev_turbine_ct', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('prev_turbine_p', shape=(self.n_cases, max_n_turbines - 1))
         self.add_output('ct', shape=(self.n_cases, max_n_turbines - 1))
         self.add_output('power', shape=(self.n_cases, max_n_turbines - 1))
 
@@ -25,14 +27,22 @@ class Turbine(ExplicitComponent):
         # for n in range(max_n_turbines):
         #     if n != self.number:
                 # print inputs['U{}'.format(n)], "Input U{}".format(n)
-        ans = np.array([])
+        c_t_ans = np.array([])
+        power_ans = np.array([])
         for case in range(self.n_cases):
+            prev_turbine_p = inputs['prev_turbine_p'][case]
+            prev_turbine_ct = inputs['prev_turbine_ct'][case]
             n_turbines = int(inputs['n_turbines'])
             c_t = np.array([])
             power = np.array([])
             for n in range(n_turbines):
                 if n < self.number < n_turbines:
-                    ct, p = self.turbine_model(inputs['U{}'.format(n)][case])
+                    if n == self.number - 1:
+                        print "called turbine model"
+                        ct, p = self.turbine_model(inputs['U{}'.format(n)][case])
+                    else:
+                        ct = prev_turbine_ct[n]
+                        p = prev_turbine_p[n]
                     c_t = np.append(c_t, [ct])
                     power = np.append(power, [p])
             lendif = max_n_turbines - len(c_t) - 1
