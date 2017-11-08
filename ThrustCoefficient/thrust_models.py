@@ -6,7 +6,7 @@ from src.api import AbstractThrustCoefficient
 class ThrustPolynomial(AbstractThrustCoefficient):
 
     def ct_model(self, u):
-        print "called ct model"
+        # print u
         if u < 4.0:
             ans = 0.1
         elif u <= 25.0:
