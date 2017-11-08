@@ -36,7 +36,7 @@ class CombineSpeed(ExplicitComponent):
 
     def setup(self):
 
-        for n in range(max_n_turbines):
+        for n in range(max_n_turbines+1):
             self.add_input('power{}'.format(n), shape=(self.n_cases, max_n_turbines))
         self.add_input('ordered_layout', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
@@ -47,7 +47,9 @@ class CombineSpeed(ExplicitComponent):
         ans = np.array([])
         n_turbines = int(inputs['n_turbines'])
         for case in range(self.n_cases):
-            power_in = inputs['power{}'.format(n_turbines - 1)][case]
+            # print inputs['power0'], inputs['power1'], inputs['power2'], inputs['power3']
+            power_in = inputs['power{}'.format(n_turbines)][case]
+            print power_in
             ordered_layout = inputs['ordered_layout'][case][:n_turbines].tolist()
             # print ordered_layout
             indices = [i[0] for i in ordered_layout]

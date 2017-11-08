@@ -20,7 +20,7 @@ class WakeModel(Group):
         self.add_subsystem('linear_solve', LinearSolveWake(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model),
                            promotes_inputs=['turbine_radius', 'original', 'angle', 'n_turbines', 'freestream'])
         self.add_subsystem('combine', CombineSpeed(self.n_cases), promotes_inputs=['n_turbines'], promotes_outputs=['p'])
-        for n in range(max_n_turbines):
+        for n in range(max_n_turbines+1):
             self.connect('linear_solve.turbine{}.power'.format(n), 'combine.power{}'.format(n))
         self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
 
@@ -49,11 +49,16 @@ class LinearSolveWake(Group):
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.dU'.format(n), 'speed{}.dU'.format(n))
             for m in range(max_n_turbines):
-                if m >= n:
+                if n < m:
                     self.connect('speed{}.U'.format(n), 'turbine{}.U{}'.format(m, n))
             if n > 0:
                 self.connect('turbine{}.ct'.format(n - 1), 'turbine{}.prev_turbine_ct'.format(n))
                 self.connect('turbine{}.power'.format(n - 1), 'turbine{}.prev_turbine_p'.format(n))
+
+        self.add_subsystem('turbine{}'.format(max_n_turbines), Turbine(max_n_turbines, self.n_cases), promotes_inputs=['n_turbines'])
+        self.connect('speed{}.U'.format(max_n_turbines-1), 'turbine{}.U{}'.format(max_n_turbines, max_n_turbines-1))
+        self.connect('turbine{}.power'.format(max_n_turbines - 1), 'turbine{}.prev_turbine_p'.format(max_n_turbines))
+
 
         # self.linear_solver = LinearRunOnce()
         # self.nonlinear_solver = NonlinearBlockGS()
