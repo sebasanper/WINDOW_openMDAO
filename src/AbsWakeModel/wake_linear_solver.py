@@ -51,6 +51,9 @@ class LinearSolveWake(Group):
             for m in range(max_n_turbines):
                 if m > n:
                     self.connect('speed{}.U'.format(n), 'ct{}.U{}'.format(m, n))
+            
+            if n > 0:
+                self.connect('ct{}.ct'.format(n - 1), 'ct{}.prev_ct'.format(n))
         # self.linear_solver = LinearRunOnce()
         # self.nonlinear_solver = NonlinearBlockGS()
         # self.nonlinear_solver.options['maxiter'] = 30
