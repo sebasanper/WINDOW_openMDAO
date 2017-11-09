@@ -4,7 +4,7 @@ import numpy as np
 from order_layout import OrderLayout
 from input_params import max_n_turbines
 from distance import DistanceComponent
-from windspeed_deficits import SpeedDeficits, CombineSpeed
+from windspeed_deficits import SpeedDeficits, CombineOutputs
 from Turbine.TurbineGroup import Turbine
 
 
@@ -19,9 +19,10 @@ class WakeModel(Group):
     def setup(self):
         self.add_subsystem('linear_solve', LinearSolveWake(self.n_cases, self.fraction_model, self.deficit_model, self.merge_model),
                            promotes_inputs=['turbine_radius', 'original', 'angle', 'n_turbines', 'freestream'])
-        self.add_subsystem('combine', CombineSpeed(self.n_cases), promotes_inputs=['n_turbines'], promotes_outputs=['p'])
-        for n in range(max_n_turbines+1):
+        self.add_subsystem('combine', CombineOutputs(self.n_cases), promotes_inputs=['n_turbines'], promotes_outputs=['p'])
+        for n in range(max_n_turbines + 1):
             self.connect('linear_solve.turbine{}.power'.format(n), 'combine.power{}'.format(n))
+            self.connect('linear_solve.turbine{}.ct'.format(n), 'combine.ct{}'.format(n))
         self.connect('linear_solve.order_layout.ordered', 'combine.ordered_layout')
 
 
@@ -48,9 +49,8 @@ class LinearSolveWake(Group):
             self.connect('turbine{}.ct'.format(n), 'deficits{}.ct'.format(n))
             self.connect('deficits{}.dU'.format(n), 'merge{}.all_deficits'.format(n))
             self.connect('merge{}.dU'.format(n), 'speed{}.dU'.format(n))
-            for m in range(max_n_turbines):
-                if n < m:
-                    self.connect('speed{}.U'.format(n), 'turbine{}.U{}'.format(m, n))
+            for m in range(n + 1, max_n_turbines):
+                self.connect('speed{}.U'.format(n), 'turbine{}.U{}'.format(m, n))
             if n > 0:
                 self.connect('turbine{}.ct'.format(n - 1), 'turbine{}.prev_turbine_ct'.format(n))
                 self.connect('turbine{}.power'.format(n - 1), 'turbine{}.prev_turbine_p'.format(n))
@@ -58,6 +58,7 @@ class LinearSolveWake(Group):
         self.add_subsystem('turbine{}'.format(max_n_turbines), Turbine(max_n_turbines, self.n_cases), promotes_inputs=['n_turbines'])
         self.connect('speed{}.U'.format(max_n_turbines-1), 'turbine{}.U{}'.format(max_n_turbines, max_n_turbines-1))
         self.connect('turbine{}.power'.format(max_n_turbines - 1), 'turbine{}.prev_turbine_p'.format(max_n_turbines))
+        self.connect('turbine{}.ct'.format(max_n_turbines - 1), 'turbine{}.prev_turbine_ct'.format(max_n_turbines))
 
 
         # self.linear_solver = LinearRunOnce()
@@ -92,8 +93,6 @@ class TotalWake(Group):
         self.n_cases = n_cases
 
     def setup(self):
-        k = self.add_subsystem('k_indep', IndepVarComp())
-        k.add_output('k_jensen', val=0.04)
         self.add_subsystem('fraction', self.fraction_model(self.number, self.n_cases),
                            promotes_inputs=['ordered', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'])
         self.add_subsystem('deficit', self.deficit_model(self.n_cases),
@@ -101,5 +100,3 @@ class TotalWake(Group):
                            promotes_outputs=['dU'])
 
         self.connect('fraction.fractions', 'deficit.fractions')
-        self.connect('k_indep.k_jensen', 'fraction.k')
-        self.connect('k_indep.k_jensen', 'deficit.k')

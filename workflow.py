@@ -35,8 +35,8 @@ class WorkingGroup(Group):
         # indep2.add_output('layout', val=read_layout('horns_rev.dat'))
         indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
                                                   [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
-                                                  [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0]]))#,
-                                                  # [9, 1160.0, 1160.0]]))
+                                                  [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
+                                                  [9, 1160.0, 1160.0]]))
 
         wd, wsc, wsh, wdp = read_windrose('weibull_2.dat')
 
@@ -138,23 +138,24 @@ class WorkingGroup(Group):
         # self.connect('indep2.interest_rate', 'lcoe.interest_rate')
 
 
-print clock(), "Before defining problem"
+# print clock(), "Before defining problem"
 prob = Problem()
-print clock(), "Before defining model"
+# print clock(), "Before defining model"
 prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
-print clock(), "Before setup"
+# print clock(), "Before setup"
 prob.setup()
 
-print clock(), "After setup"
+# print clock(), "After setup"
 # view_model(prob)
-start = time()
-print clock(), "Before 1st run"
+# start = time()
+# print clock(), "Before 1st run"
 prob.run_model()
-print clock(), "After 1st run"
-print time() - start, "seconds", clock()
+# print clock(), "After 1st run"
+# print time() - start, "seconds", clock()
 
 
 print prob['AeroAEP.wakemodel.p']
+print prob['AeroAEP.wakemodel.combine.ct']
 
 with open('all_outputs.dat', 'w') as out:
     out.write("{}".format(prob.model.list_outputs(out_stream=None)))

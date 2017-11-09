@@ -12,9 +12,11 @@ class Turbine(ExplicitComponent):
 
     def setup(self):
         self.add_input('n_turbines', val=0)
-        for n in range(max_n_turbines):
-            if n < self.number:
+        if self.number < max_n_turbines:
+            for n in range(self.number):
                 self.add_input('U{}'.format(n), shape=self.n_cases)
+        else:
+            self.add_input('U{}'.format(max_n_turbines - 1), shape=self.n_cases)
         if self.number > 0:
             self.add_input('prev_turbine_ct', shape=(self.n_cases, max_n_turbines))
             self.add_input('prev_turbine_p', shape=(self.n_cases, max_n_turbines))
@@ -42,16 +44,14 @@ class Turbine(ExplicitComponent):
             #     ct, p = self.turbine_model(8.5)
             #     c_t = np.append(c_t, [ct])
             #     power = np.append(power, [p])
-            for n in range(n_turbines+1):
-                if n < self.number < n_turbines+1:
-                    if n == self.number - 1:
-                        print n, self.number, inputs['U{}'.format(n)][case]
-                        ct, p = self.turbine_model(inputs['U{}'.format(n)][case])
-                    else:
-                        ct = prev_turbine_ct[n]
-                        p = prev_turbine_p[n]
-                    c_t = np.append(c_t, [ct])
-                    power = np.append(power, [p])
+            for n in range(self.number):
+                if n == self.number - 1:
+                    ct, p = self.turbine_model(inputs['U{}'.format(n)][case])
+                else:
+                    ct = prev_turbine_ct[n]
+                    p = prev_turbine_p[n]
+                c_t = np.append(c_t, [ct])
+                power = np.append(power, [p])
             lendif = max_n_turbines - len(c_t)
             # print c_t
             c_t = np.concatenate((c_t, [0 for _ in range(lendif)]))
