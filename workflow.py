@@ -137,9 +137,9 @@ class WorkingGroup(Group):
         self.connect('indep2.interest_rate', 'lcoe.interest_rate')
 
 
-print clock(), "Before defining problem"
+# print clock(), "Before defining problem"
 prob = Problem()
-print clock(), "Before defining model"
+# print clock(), "Before defining model"
 prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
 print clock(), "Before setup"
 prob.setup()
@@ -147,9 +147,9 @@ prob.setup()
 print clock(), "After setup"
 # view_model(prob)
 start = time()
-print clock(), "Before 1st run"
+# print clock(), "Before 1st run"
 prob.run_model()
-print clock(), "After 1st run"
+# print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
 
@@ -196,7 +196,7 @@ print prob['lcoe.LCOE']
 print "second run"
 start = time()
 print clock(), "Before 2nd run"
-prob['indep2.cut_in'] = 8.4
+prob['indep2.cut_in'] = 3.1
 prob.run_model()
 print clock(), "After 2nd run"
 print time() - start, "seconds", clock()
@@ -206,7 +206,7 @@ print prob['lcoe.LCOE']
 print "third run"
 start = time()
 print clock(), "Before 3rd run"
-prob['indep2.cut_in'] = 8.3
+prob['indep2.cut_in'] = 3.2
 prob.run_model()
 print clock(), "After 3rd run"
 print time() - start, "seconds", clock()
