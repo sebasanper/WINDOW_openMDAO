@@ -32,7 +32,7 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', val=read_layout('horns_rev.dat'))
+        indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
         # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
         #                                           [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
         #                                           [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
@@ -56,7 +56,7 @@ class WorkingGroup(Group):
         indep2.add_output('cut_in', val=3.0)
         indep2.add_output('cut_out', val=25.0)
         indep2.add_output('turbine_radius', val=turbine_radius)
-        indep2.add_output('n_turbines', val=80)
+        indep2.add_output('n_turbines', val=3)
         indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=1)
@@ -145,10 +145,10 @@ print clock(), "Before setup"
 prob.setup()
 
 print clock(), "After setup"
-# view_model(prob)
+view_model(prob)
 start = time()
 # print clock(), "Before 1st run"
-prob.run_model()
+# prob.run_model()
 # print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
