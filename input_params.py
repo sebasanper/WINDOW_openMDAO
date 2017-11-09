@@ -1,6 +1,6 @@
 from numpy import sqrt
 
-max_n_turbines = max_n_branches = max_n_turbines_p_branch = 9
+max_n_turbines = max_n_branches = max_n_turbines_p_branch = 80
 turbine_radius = 40.0
 max_n_substations = 3
 

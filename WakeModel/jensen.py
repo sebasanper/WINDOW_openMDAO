@@ -8,21 +8,17 @@ from input_params import max_n_turbines
 class JensenWakeDeficit(WakeDeficit):
     def setup(self):
         super(JensenWakeDeficit, self).setup()
-        self.add_input('k', val=0.04)
 
     def wake_deficit_model(self, inputs, *args, **kwargs):
-        k_jensen = inputs['k']
-        return wake_deficit1(k_jensen=k_jensen, *args, **kwargs)
+        return wake_deficit1(k_jensen=0.04, *args, **kwargs)
 
 
 class JensenWakeFraction(DetermineIfInWake):
     def setup(self):
         super(JensenWakeFraction, self).setup()
-        self.add_input('k', val=0.04)
 
     def wake_fraction_model(self, inputs, *args, **kwargs):
-        k_jensen = inputs['k']
-        return determine_if_in_wake(k_jensen=k_jensen, *args, **kwargs)
+        return determine_if_in_wake(k_jensen=0.04, *args, **kwargs)
 
 
 def wake_deficit1(x_down, x_cross, Ct, k_jensen, r0):

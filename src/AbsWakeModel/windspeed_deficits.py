@@ -29,42 +29,51 @@ class SpeedDeficits(ExplicitComponent):
         # print outputs['U'], "Output U"
 
 
-class CombineSpeed(ExplicitComponent):
+class CombineOutputs(ExplicitComponent):
     def __init__(self, n_cases):
-        super(CombineSpeed, self).__init__()
+        super(CombineOutputs, self).__init__()
         self.n_cases = n_cases
 
     def setup(self):
 
-        for n in range(max_n_turbines+1):
+        for n in range(max_n_turbines + 1):
             self.add_input('power{}'.format(n), shape=(self.n_cases, max_n_turbines))
+            self.add_input('ct{}'.format(n), shape=(self.n_cases, max_n_turbines))
         self.add_input('ordered_layout', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
 
         self.add_output('p', shape=(self.n_cases, max_n_turbines))
+        self.add_output('ct', shape=(self.n_cases, max_n_turbines))
 
     def compute(self, inputs, outputs):
         ans = np.array([])
+        ans_ct = np.array([])
         n_turbines = int(inputs['n_turbines'])
         for case in range(self.n_cases):
             # print inputs['power0'], inputs['power1'], inputs['power2'], inputs['power3']
             power_in = inputs['power{}'.format(n_turbines)][case]
-            print power_in
+            ct_in = inputs['ct{}'.format(n_turbines)][case]
             ordered_layout = inputs['ordered_layout'][case][:n_turbines].tolist()
             # print ordered_layout
             indices = [i[0] for i in ordered_layout]
             # print indices
             # print inputs['U0'], inputs['U1'], inputs['U2']
             final = [[indices[n], power_in[n]] for n in range(len(indices))]
+            final_ct = [[indices[n], ct_in[n]] for n in range(len(indices))]
             # print final
-            array_speeds = [speed[1] for speed in sorted(final)]
+            array_power = [power[1] for power in sorted(final)]
+            array_ct = [c_t[1] for c_t in sorted(final_ct)]
             # print array_speeds
-            lendif = max_n_turbines - len(array_speeds)
+            lendif = max_n_turbines - len(array_power)
             if lendif > 0:
-                array_speeds = np.concatenate((array_speeds, [0 for _ in range(lendif)]))
-            ans = np.append(ans, array_speeds)
+                array_power = np.concatenate((array_power, [0 for _ in range(lendif)]))
+                array_ct = np.concatenate((array_ct, [0 for _ in range(lendif)]))
+            ans = np.append(ans, array_power)
+            ans_ct = np.append(ans_ct, array_ct)
         ans = ans.reshape(self.n_cases, max_n_turbines)
+        ans_ct = ans_ct.reshape(self.n_cases, max_n_turbines)
         # for n in range(self.n_cases):
         #     inputs['U{}'.format(n)] = []
         outputs['p'] = np.array(ans)
+        outputs['ct'] = np.array(ans_ct)
         # print outputs['U'], "Combined Wind Speeds U"

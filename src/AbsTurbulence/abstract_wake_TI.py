@@ -12,8 +12,8 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
     def setup(self):
         self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('TI_amb', shape=self.n_cases)
-        self.add_input('ct', shape=(self.n_cases, max_n_turbines, max_n_turbines))
-        self.add_input('dU_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines))
+        self.add_input('ct', shape=(self.n_cases, max_n_turbines, max_n_turbines+1))
+        self.add_input('dU_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines+1))
         self.add_input('freestream', shape=self.n_cases)
         self.add_input('n_turbines', val=0)
         self.add_input('radius', val=0.0)
@@ -69,8 +69,8 @@ class DeficitMatrix(ExplicitComponent):
 
     def setup(self):
         for n in range(max_n_turbines):
-            self.add_input('deficits{}'.format(n), shape=(self.n_cases, max_n_turbines - 1))
-        self.add_output('dU_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines))
+            self.add_input('deficits{}'.format(n), shape=(self.n_cases, max_n_turbines))
+        self.add_output('dU_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines+1))
 
     def compute(self, inputs, outputs):
         matrix = np.array([])
@@ -81,7 +81,7 @@ class DeficitMatrix(ExplicitComponent):
                 row = np.insert(row, n, 0)
                 matrix_case = np.append(matrix_case, row)
             matrix = np.append(matrix, matrix_case)
-        matrix = matrix.reshape(self.n_cases, max_n_turbines, max_n_turbines)
+        matrix = matrix.reshape(self.n_cases, max_n_turbines, max_n_turbines+1)
         outputs['dU_matrix'] = matrix
 
 
@@ -92,8 +92,8 @@ class CtMatrix(ExplicitComponent):
 
     def setup(self):
         for n in range(max_n_turbines):
-            self.add_input('ct{}'.format(n), shape=(self.n_cases, max_n_turbines - 1))
-        self.add_output('ct_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines))
+            self.add_input('ct{}'.format(n), shape=(self.n_cases, max_n_turbines))
+        self.add_output('ct_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines+1))
 
     def compute(self, inputs, outputs):
         matrix = np.array([])
@@ -104,7 +104,7 @@ class CtMatrix(ExplicitComponent):
                 row = np.insert(row, n, 0)
                 matrix_case = np.append(matrix_case, row)
             matrix = np.append(matrix, matrix_case)
-        matrix = matrix.reshape(self.n_cases, max_n_turbines, max_n_turbines)
+        matrix = matrix.reshape(self.n_cases, max_n_turbines, max_n_turbines+1)
         outputs['ct_matrix'] = matrix
 
 
