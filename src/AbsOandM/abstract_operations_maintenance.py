@@ -3,20 +3,15 @@ from openmdao.api import ExplicitComponent
 
 class AbstractOandM(ExplicitComponent):
 
-    def __init__(self, n_turbines):
-        super(AbstractOandM, self).__init__()
-        self.n_turbines = n_turbines
-
     def setup(self):
-        self.add_input('layout', shape=(self.n_turbines, 3))
-        self.add_input('distance_shore', val=20000.0)
-        self.add_input('AEP', val=57000000.0)
+        self.add_input('AEP', val=0.0)
 
-        self.add_output('annual_cost_O&M', val=56000000.0)
-        self.add_output('availability', val=0.94)
+        self.add_output('annual_cost_O&M', val=0.0)
+        self.add_output('availability', val=0.0)
 
     def compute(self, inputs, outputs):
-        pass
+        AEP = inputs['AEP']
+        outputs['annual_cost_O&M'], outputs['availability'] = self.OandM_model(AEP)
 
 
 if __name__ == '__main__':

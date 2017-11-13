@@ -1,9 +1,8 @@
 from area import AreaReal
 from src.api import DetermineIfInWake, WakeDeficit
-from numpy import deg2rad, tan, sqrt, cos, sin
+from numpy import deg2rad, sqrt, cos, sin
 import numpy as np
 from input_params import max_n_turbines
-from openmdao.api import Group, IndepVarComp
 
 
 class JensenWakeDeficit(WakeDeficit):
@@ -11,18 +10,17 @@ class JensenWakeDeficit(WakeDeficit):
         super(JensenWakeDeficit, self).setup()
         self.add_input('k', val=0.04)
 
-    def wake_deficit(self, inputs, *args, **kwargs):
+    def wake_deficit_model(self, inputs, *args, **kwargs):
         k_jensen = inputs['k']
         return wake_deficit1(k_jensen=k_jensen, *args, **kwargs)
-        # self.wake_deficit == wake_deficit1(d_down[ind], d_cross[ind], c_t[ind], k, r)
 
 
 class JensenWakeFraction(DetermineIfInWake):
     def setup(self):
-        self.add_input('k', val=0.04)
         super(JensenWakeFraction, self).setup()
+        self.add_input('k', val=0.04)
 
-    def wake_fraction(self, inputs, *args, **kwargs):
+    def wake_fraction_model(self, inputs, *args, **kwargs):
         k_jensen = inputs['k']
         return determine_if_in_wake(k_jensen=k_jensen, *args, **kwargs)
 

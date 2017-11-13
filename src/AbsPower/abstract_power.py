@@ -4,32 +4,57 @@ import numpy as np
 
 
 class AbstractPower(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(AbstractPower, self).__init__()
+        self.n_cases = n_cases
 
     def setup(self):
-        self.add_input('U', shape=max_n_turbines)
+        self.add_input('U', shape=(self.n_cases, max_n_turbines))
         self.add_input('n_turbines', val=1)
 
-        self.add_output('p', shape=max_n_turbines)
+        self.add_output('p', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
+        # self.declare_partials('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
-        pass
+        ans = np.array([])
+        for case in range(self.n_cases):
+            n_turbines = int(inputs['n_turbines'])
+            u = inputs['U'][case][:n_turbines]
+            p = np.array([])
+            for u0 in u:
+                power = self.power_model(u0)
+                p = np.append(p, [power])
+            lendif = max_n_turbines - len(p)
+            if lendif > 0:
+                p = np.concatenate((p, [0 for _ in range(lendif)]))
+            ans = np.append(ans, p)
+        ans = ans.reshape(self.n_cases, max_n_turbines)
+        outputs['p'] = ans
 
 
 class FarmAeroPower(ExplicitComponent):
+    def __init__(self, n_cases):
+        super(FarmAeroPower, self).__init__()
+        self.n_cases = n_cases
+
     def setup(self):
-        self.add_input('ind_powers', shape=max_n_turbines)
+        self.add_input('ind_powers', shape=(self.n_cases, max_n_turbines))
         self.add_input('n_turbines', val=1)
 
-        self.add_output('farm_power', val=0.0)
+        self.add_output('farm_power', shape=self.n_cases)
         # Finite difference all partials.
         # self.declare_partials('*', '*', method='cs')
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
-        outputs['farm_power'] = sum(inputs['ind_powers'][:n_turbines])  # Alternative without using n_turbines. 
+        ans = np.array([])
+        for case in range(self.n_cases):
+            farm_output = sum(inputs['ind_powers'][case][:n_turbines])  # Alternative without using n_turbines.
+            ans = np.append(ans, farm_output)
+        ans = ans.reshape(self.n_cases)
+        outputs['farm_power'] = ans
 
 
 if __name__ == '__main__':
