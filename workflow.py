@@ -53,8 +53,8 @@ class WorkingGroup(Group):
         indep2.add_output('weibull_scales', val=wsc)
         indep2.add_output('dir_probabilities', val=wdp)
         indep2.add_output('wind_directions', val=wd)  # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
-        indep2.add_output('cut_in', val=3.0)
-        indep2.add_output('cut_out', val=25.0)
+        indep2.add_output('cut_in', val=8.5)
+        indep2.add_output('cut_out', val=8.5)
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=3)
         indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
@@ -91,6 +91,7 @@ class WorkingGroup(Group):
         self.connect('indep2.weibull_scales', 'AeroAEP.weibull_scales')
         self.connect('indep2.dir_probabilities', 'AeroAEP.dir_probabilities')
         self.connect('indep2.wind_directions', 'AeroAEP.wind_directions')
+        # self.connect('indep2.turbine_radius', 'AeroAEP.turbine_radius')
         self.connect('indep2.turbine_radius', ['AeroAEP.turbine_radius', 'TI.radius'])
 
         for n in range(max_n_turbines):
@@ -145,10 +146,10 @@ print clock(), "Before setup"
 prob.setup()
 
 print clock(), "After setup"
-view_model(prob)
+# view_model(prob) # Uncomment to view N2 chart.
 start = time()
 # print clock(), "Before 1st run"
-# prob.run_model()
+prob.run_model()
 # print clock(), "After 1st run"
 print time() - start, "seconds", clock()
 
