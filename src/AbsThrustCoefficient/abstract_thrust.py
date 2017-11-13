@@ -12,6 +12,7 @@ class AbstractThrustCoefficient(ExplicitComponent):
 
     def setup(self):
         self.add_input('n_turbines', val=0)
+        self.add_input('prev_ct', shape=(self.n_cases, max_n_turbines - 1))
         for n in range(max_n_turbines):
             if n < self.number:
                 self.add_input('U{}'.format(n), shape=self.n_cases)
@@ -30,9 +31,14 @@ class AbstractThrustCoefficient(ExplicitComponent):
         for case in range(self.n_cases):
             n_turbines = int(inputs['n_turbines'])
             c_t = np.array([])
+            prev_ct = inputs['prev_ct'][case]
             for n in range(n_turbines):
                 if n < self.number < n_turbines:
-                    c_t = np.append(c_t, [self.ct_model(inputs['U{}'.format(n)][case])])
+                    if n == self.number - 1:
+                        print "called ct_model"
+                        c_t = np.append(c_t, [self.ct_model(inputs['U{}'.format(n)][case])])
+                    else:
+                        c_t = np.append(c_t, [prev_ct[n]])
             lendif = max_n_turbines - len(c_t) - 1
             # print c_t
             c_t = np.concatenate((c_t, [0 for _ in range(lendif)]))
@@ -41,19 +47,6 @@ class AbstractThrustCoefficient(ExplicitComponent):
         # print ans
         outputs['ct'] = ans
         # print ans, "Output Ct"
-
-
-def ct(v):
-    if v < 4.0:
-        ans = np.array([0.1])
-    elif v <= 25.0:
-        val = 7.3139922126945e-7 * v ** 6.0 - 6.68905596915255e-5 * v ** 5.0 \
-              + 2.3937885e-3 * v ** 4.0 - 0.0420283143 * v ** 3.0 + 0.3716111285 * v ** 2.0 \
-              - 1.5686969749 * v + 3.2991094727
-        ans = np.array([val])
-    else:
-        ans = np.array([0.1])
-    return ans
 
 
 if __name__ == '__main__':
