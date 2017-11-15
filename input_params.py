@@ -3,7 +3,8 @@ from numpy import sqrt
 max_n_turbines = max_n_branches = max_n_turbines_p_branch = 3
 turbine_radius = 40.0
 max_n_substations = 3
-
+n_quatrilaterials = 2
+separation_value_y = 430000
 
 # Turbine parameters
 turbine_rated_power = 2000000.0

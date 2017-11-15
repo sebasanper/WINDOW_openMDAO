@@ -13,6 +13,7 @@ from SupportStructure.teamplay import TeamPlay
 from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
+from constraints import MinDistance, WithinBoundaries
 
 real_angle = 360.0
 artificial_angle = 360.0
@@ -29,6 +30,7 @@ class NumberLayout(ExplicitComponent):
     def compute(self, inputs, outputs):
         orig_layout = inputs["orig_layout"]
         outputs["number_layout"] = [[n, orig_layout[n][0], orig_layout[n][1]] for n in range(len(orig_layout))]
+
 
 class WorkingGroup(Group):
     # def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
