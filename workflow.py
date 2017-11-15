@@ -23,7 +23,7 @@ print n_cases, "Number of cases"
 
 class WorkingGroup(Group):
     # def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
-    def __init__(self, JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation):
+    def __init__(self, fraction_model=JensenWakeFraction, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
@@ -139,84 +139,85 @@ class WorkingGroup(Group):
         self.connect('indep2.interest_rate', 'lcoe.interest_rate')
 
 
-# print clock(), "Before defining problem"
-prob = Problem()
-# print clock(), "Before defining model"
-prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
-print clock(), "Before setup"
-prob.setup()
+if __name__ == '__main__':
+    # print clock(), "Before defining problem"
+    prob = Problem()
+    # print clock(), "Before defining model"
+    prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
+    print clock(), "Before setup"
+    prob.setup()
 
-print clock(), "After setup"
-# view_model(prob) # Uncomment to view N2 chart.
-start = time()
-# print clock(), "Before 1st run"
-prob.run_model()
-# print clock(), "After 1st run"
-print time() - start, "seconds", clock()
-
-
-# print prob['AeroAEP.wakemodel.p']
-# print prob['AeroAEP.wakemodel.combine.ct']
-print prob['lcoe.LCOE']
-
-# with open('all_outputs.dat', 'w') as out:
-#     out.write("{}".format(prob.model.list_outputs(out_stream=None)))
-# print prob['AeroAEP.AEP']
-# print prob['Costs.investment_costs']
-# print prob['Costs.decommissioning_costs']
-# print prob['lcoe.LCOE']
-# print prob['OandM.availability']
-# print prob['OandM.annual_cost_O&M']
-
-# print prob['find_max_TI.max_TI']
-# print prob['support.cost_support']
-
-# print prob['electrical.topology']
-# print prob['electrical.cost_p_cable_type']
-# print prob['electrical.length_p_cable_type']
-
-# print prob['AEP.windrose.cases']
-# print prob['AEP.farmpower.ind_powers']
-# print prob['AEP.wakemodel.U']
-# print prob['AEP.wakemodel.linear_solve.deficits0.dU']
-# print prob['AEP.wakemodel.linear_solve.deficits1.dU']
-# print prob['AEP.wakemodel.linear_solve.deficits2.dU']
-# print prob['AEP.wakemodel.linear_solve.deficits3.dU']
-# print prob['AEP.wakemodel.linear_solve.deficits4.dU']
-# print prob['AEP.wakemodel.linear_solve.ct0.ct']
-# print prob['AEP.wakemodel.linear_solve.ct1.ct']
-# print prob['AEP.wakemodel.linear_solve.ct2.ct']
-# print prob['AEP.wakemodel.linear_solve.ct3.ct']
-# print prob['AEP.wakemodel.linear_solve.ct4.ct']
-# print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_down']
-# print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_cross']
-# ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
-# print ordered
-# print prob['indep2.layout']
-# print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
-
-print "second run"
-start = time()
-print clock(), "Before 2nd run"
-prob['indep2.wind_directions'] = 0.0
-prob.run_model()
-print clock(), "After 2nd run"
-print time() - start, "seconds", clock()
-print prob['lcoe.LCOE']
+    print clock(), "After setup"
+    # view_model(prob) # Uncomment to view N2 chart.
+    start = time()
+    # print clock(), "Before 1st run"
+    prob.run_model()
+    # print clock(), "After 1st run"
+    print time() - start, "seconds", clock()
 
 
-print "third run"
-start = time()
-print clock(), "Before 3rd run"
-prob['indep2.wind_directions'] = 270.0
-prob.run_model()
-print clock(), "After 3rd run"
-print time() - start, "seconds", clock()
-print prob['lcoe.LCOE']
+    # print prob['AeroAEP.wakemodel.p']
+    # print prob['AeroAEP.wakemodel.combine.ct']
+    print prob['lcoe.LCOE']
+
+    # with open('all_outputs.dat', 'w') as out:
+    #     out.write("{}".format(prob.model.list_outputs(out_stream=None)))
+    # print prob['AeroAEP.AEP']
+    # print prob['Costs.investment_costs']
+    # print prob['Costs.decommissioning_costs']
+    # print prob['lcoe.LCOE']
+    # print prob['OandM.availability']
+    # print prob['OandM.annual_cost_O&M']
+
+    # print prob['find_max_TI.max_TI']
+    # print prob['support.cost_support']
+
+    # print prob['electrical.topology']
+    # print prob['electrical.cost_p_cable_type']
+    # print prob['electrical.length_p_cable_type']
+
+    # print prob['AEP.windrose.cases']
+    # print prob['AEP.farmpower.ind_powers']
+    # print prob['AEP.wakemodel.U']
+    # print prob['AEP.wakemodel.linear_solve.deficits0.dU']
+    # print prob['AEP.wakemodel.linear_solve.deficits1.dU']
+    # print prob['AEP.wakemodel.linear_solve.deficits2.dU']
+    # print prob['AEP.wakemodel.linear_solve.deficits3.dU']
+    # print prob['AEP.wakemodel.linear_solve.deficits4.dU']
+    # print prob['AEP.wakemodel.linear_solve.ct0.ct']
+    # print prob['AEP.wakemodel.linear_solve.ct1.ct']
+    # print prob['AEP.wakemodel.linear_solve.ct2.ct']
+    # print prob['AEP.wakemodel.linear_solve.ct3.ct']
+    # print prob['AEP.wakemodel.linear_solve.ct4.ct']
+    # print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_down']
+    # print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_cross']
+    # ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
+    # print ordered
+    # print prob['indep2.layout']
+    # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
+
+    print "second run"
+    start = time()
+    print clock(), "Before 2nd run"
+    prob['indep2.wind_directions'] = 0.0
+    prob.run_model()
+    print clock(), "After 2nd run"
+    print time() - start, "seconds", clock()
+    print prob['lcoe.LCOE']
 
 
-# with open("angle_power.dat", "w") as out:
-#     for n in range(n_cases):
-#         out.write("{} {} {} {} {}\n".format(prob['AEP.open_cases.wind_directions'][n], prob['AEP.open_cases.freestream_wind_speeds'][n], prob['AEP.windrose.probabilities'][n], prob['AEP.farmpower.farm_power'][n], prob['AEP.energies'][n]))
-# print prob['AEP.AEP']
-# print sum(prob['AEP.windrose.probabilities'])
+    print "third run"
+    start = time()
+    print clock(), "Before 3rd run"
+    prob['indep2.wind_directions'] = 270.0
+    prob.run_model()
+    print clock(), "After 3rd run"
+    print time() - start, "seconds", clock()
+    print prob['lcoe.LCOE']
+
+
+    # with open("angle_power.dat", "w") as out:
+    #     for n in range(n_cases):
+    #         out.write("{} {} {} {} {}\n".format(prob['AEP.open_cases.wind_directions'][n], prob['AEP.open_cases.freestream_wind_speeds'][n], prob['AEP.windrose.probabilities'][n], prob['AEP.farmpower.farm_power'][n], prob['AEP.energies'][n]))
+    # print prob['AEP.AEP']
+    # print sum(prob['AEP.windrose.probabilities'])
