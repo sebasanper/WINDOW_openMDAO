@@ -64,4 +64,4 @@ class PowersToAEP(ExplicitComponent):
         #         out.write('{} {} {}\n'.format(powers[n], probs[n], energies[n]))
         outputs['energies'] = energies
         outputs['AEP'] = sum(energies)
-        print clock(), "Last line compute AEP energies"
+        # print clock(), "Last line compute AEP energies"
