@@ -1,5 +1,5 @@
 from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
-from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder
+from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
 from input_params import turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform
@@ -21,6 +21,15 @@ n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
 
 
+class NumberLayout(ExplicitComponent):
+    def setup(self):
+        self.add_input("orig_layout", shape=(max_n_turbines, 2))
+        self.add_output("number_layout", shape=(max_n_turbines, 3))
+
+    def compute(self, inputs, outputs):
+        orig_layout = inputs["orig_layout"]
+        outputs["number_layout"] = [[n, orig_layout[n][0], orig_layout[n][1]] for n in range(len(orig_layout))]
+
 class WorkingGroup(Group):
     # def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
     def __init__(self, fraction_model=JensenWakeFraction, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation):
@@ -33,7 +42,7 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]])),
+        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0]])),
         #                                           [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
         #                                           [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
         #                                           [9, 1160.0, 1160.0]]))
@@ -67,6 +76,7 @@ class WorkingGroup(Group):
         indep2.add_output('interest_rate', val=interest_rate)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
+        self.add_subsystem('numberlayout', NumberLayout())
 
         self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.fraction_model, self.deficit_model, self.merge_model))
         self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
@@ -82,9 +92,10 @@ class WorkingGroup(Group):
         self.add_subsystem('Costs', TeamPlayCostModel())
         self.add_subsystem('lcoe', LCOE())
 
-        self.connect('indep2.layout', 'depths.layout')
+        self.connect("indep2.layout", "numberlayout.orig_layout")
+        self.connect('numberlayout.number_layout', 'depths.layout')
 
-        self.connect('indep2.layout', 'AeroAEP.original')
+        self.connect('numberlayout.number_layout', 'AeroAEP.original')
         self.connect('indep2.n_turbines', 'AeroAEP.n_turbines')
         self.connect('indep2.cut_in', 'AeroAEP.cut_in')
         self.connect('indep2.cut_out', 'AeroAEP.cut_out')
@@ -104,7 +115,7 @@ class WorkingGroup(Group):
         self.connect('AeroAEP.open_cases.freestream_wind_speeds', 'TI.freestream')
         self.connect('indep2.n_turbines', 'TI.n_turbines')
 
-        self.connect('indep2.layout', 'electrical.layout')
+        self.connect('numberlayout.number_layout', 'electrical.layout')
         self.connect('indep2.n_turbines_p_cable_type', 'electrical.n_turbines_p_cable_type')
         self.connect('indep2.substation_coords', 'electrical.substation_coords')
         self.connect('indep2.n_substations', 'electrical.n_substations')

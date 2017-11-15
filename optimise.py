@@ -10,7 +10,7 @@ model = prob.model = WorkingGroup()
 prob.driver = ScipyOptimizer()
 prob.driver.options['optimizer'] = "SLSQP"
 
-model.add_design_var('indep2.layout', lower=np.array([[0, 0.0, 0.0], [1, 0.0, 0.0], [2, 0.0, 0.0]]), upper=np.array([[3, 1120.0, 0.0], [4, 1120.0, 0.0], [5, 1120.0, 0.0]]))
+model.add_design_var('indep2.layout', lower=np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]), upper=np.array([[1120.0, 1120.0], [1120.0, 1120.0], [1120.0, 1120.0]]))
 model.add_objective('lcoe.LCOE')
 # model.add_constraint('indep2.cut_in', upper=10.0)
 
