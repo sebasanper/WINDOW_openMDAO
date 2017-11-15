@@ -2,7 +2,7 @@ from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder
 import numpy as np
 from time import time, clock
-from input_params import turbine_radius, max_n_turbines, max_n_substations
+from input_params import turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
 from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
@@ -13,17 +13,17 @@ from SupportStructure.teamplay import TeamPlay
 from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
-from input_params import i as interest_rate, central_platform
 
-real_angle = 30.0
-artificial_angle = 30.0
-n_windspeedbins = 10
+real_angle = 360.0
+artificial_angle = 360.0
+n_windspeedbins = 1
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
 
 
 class WorkingGroup(Group):
-    def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
+    # def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
+    def __init__(self, JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
@@ -32,22 +32,22 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        # indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0],
+        # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
+        indep2.add_output('layout', val=np.array([[0, 0.0, 0.0], [1, 560.0, 0.0], [2, 1120.0, 0.0]])),
         #                                           [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
         #                                           [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
         #                                           [9, 1160.0, 1160.0]]))
 
-        wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
+        # wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
 
         # wsh = [1.0, 1.0]
         # wsc = [8.0, 8.0]
         # wdp = [50.0, 50.0]
         # wd = [0.0, 180.0]
-        # wsh = [1.0]
-        # wsc = [8.0]
-        # wdp = [100.0]
-        # wd = [90.0]
+        wsh = [1.0]
+        wsc = [8.0]
+        wdp = [100.0]
+        wd = [90.0]
 
         indep2.add_output('weibull_shapes', val=wsh)
         indep2.add_output('weibull_scales', val=wsc)
@@ -57,7 +57,8 @@ class WorkingGroup(Group):
         indep2.add_output('cut_out', val=8.5)
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=3)
-        indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
+        # indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
+        indep2.add_output('n_turbines_p_cable_type', val=[2, 1, 0])
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=1)
         indep2.add_output('electrical_efficiency', val=0.99)
@@ -197,7 +198,7 @@ print prob['lcoe.LCOE']
 print "second run"
 start = time()
 print clock(), "Before 2nd run"
-prob['indep2.cut_in'] = 3.1
+prob['indep2.wind_directions'] = 0.0
 prob.run_model()
 print clock(), "After 2nd run"
 print time() - start, "seconds", clock()
@@ -207,7 +208,7 @@ print prob['lcoe.LCOE']
 print "third run"
 start = time()
 print clock(), "Before 3rd run"
-prob['indep2.cut_in'] = 3.2
+prob['indep2.wind_directions'] = 270.0
 prob.run_model()
 print clock(), "After 3rd run"
 print time() - start, "seconds", clock()
