@@ -6,9 +6,9 @@ from workflow import WorkingGroup
 prob = Problem()
 model = prob.model = WorkingGroup()
 
-# prob.driver = pyOptSparseDriver()
-prob.driver = ScipyOptimizer()
-prob.driver.options['optimizer'] = "SLSQP"
+prob.driver = pyOptSparseDriver()
+# prob.driver = ScipyOptimizer()
+prob.driver.options['optimizer'] = "NSGA2"
 
 model.add_design_var('indep2.layout', lower=np.array([[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]), upper=np.array([[1120.0, 1120.0], [1120.0, 1120.0], [1120.0, 1120.0]]))
 model.add_objective('lcoe.LCOE')
@@ -20,3 +20,4 @@ prob.setup(check=False)
 prob.run_driver()
 
 print(prob['indep2.layout'])
+print(prob['lcoe.LCOE'])
