@@ -2,7 +2,7 @@ from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
-from input_params import turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform
+from input_params import turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, area
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
 from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
@@ -13,6 +13,7 @@ from SupportStructure.teamplay import TeamPlay
 from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
+from constraints import MinDistance, WithinBoundaries
 
 real_angle = 360.0
 artificial_angle = 360.0
@@ -30,6 +31,7 @@ class NumberLayout(ExplicitComponent):
         orig_layout = inputs["orig_layout"]
         outputs["number_layout"] = [[n, orig_layout[n][0], orig_layout[n][1]] for n in range(len(orig_layout))]
 
+
 class WorkingGroup(Group):
     # def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
     def __init__(self, fraction_model=JensenWakeFraction, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation):
@@ -41,8 +43,10 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
+        indep2.add_output("area", val=area)
+        indep2.add_output("layout", val=np.array([[-1000.0, -1800.0], [-1010.0, -1810.0], [-2456.0, -2000.0]]))
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0]])),
+        # indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0]])),
         #                                           [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
         #                                           [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
         #                                           [9, 1160.0, 1160.0]]))
@@ -92,7 +96,16 @@ class WorkingGroup(Group):
         self.add_subsystem('Costs', TeamPlayCostModel())
         self.add_subsystem('lcoe', LCOE())
 
+        self.add_subsystem('constraint_distance', MinDistance())
+        self.add_subsystem('constraint_boundary', WithinBoundaries())
+
         self.connect("indep2.layout", "numberlayout.orig_layout")
+
+        self.connect("indep2.layout", "constraint_distance.orig_layout")
+        self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
+        self.connect("indep2.layout", "constraint_boundary.layout")
+        self.connect("indep2.area", "constraint_boundary.area")
+
         self.connect('numberlayout.number_layout', 'depths.layout')
 
         self.connect('numberlayout.number_layout', 'AeroAEP.original')
@@ -151,25 +164,33 @@ class WorkingGroup(Group):
 
 
 if __name__ == '__main__':
+    def print_nice(string, value):
+        header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
+        header += str(value) + "\n"
+        header += "=" * (22 + len(string))
+        print header
     # print clock(), "Before defining problem"
     prob = Problem()
     # print clock(), "Before defining model"
     prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
-    print clock(), "Before setup"
+    # print clock(), "Before setup"
     prob.setup()
 
-    print clock(), "After setup"
-    # view_model(prob) # Uncomment to view N2 chart.
+    # print clock(), "After setup"
+    view_model(prob) # Uncomment to view N2 chart.
     start = time()
     # print clock(), "Before 1st run"
     prob.run_model()
     # print clock(), "After 1st run"
-    print time() - start, "seconds", clock()
+    # print time() - start, "seconds", clock()
 
 
     # print prob['AeroAEP.wakemodel.p']
     # print prob['AeroAEP.wakemodel.combine.ct']
-    print prob['lcoe.LCOE']
+    # print prob['lcoe.LCOE']
+    print_nice('number boundary', prob['constraint_boundary.n_constraint_violations'])
+    print_nice('mag boudary', prob['constraint_boundary.magnitude_violations'])
+    print_nice('number distance', prob['constraint_distance.n_constraint_violations'])
 
     # with open('all_outputs.dat', 'w') as out:
     #     out.write("{}".format(prob.model.list_outputs(out_stream=None)))
@@ -205,26 +226,26 @@ if __name__ == '__main__':
     # ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
     # print ordered
     # print prob['indep2.layout']
-    # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
+    # # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
 
-    print "second run"
-    start = time()
-    print clock(), "Before 2nd run"
-    prob['indep2.wind_directions'] = 0.0
-    prob.run_model()
-    print clock(), "After 2nd run"
-    print time() - start, "seconds", clock()
-    print prob['lcoe.LCOE']
+    # print "second run"
+    # start = time()
+    # print clock(), "Before 2nd run"
+    # prob['indep2.wind_directions'] = 0.0
+    # prob.run_model()
+    # print clock(), "After 2nd run"
+    # print time() - start, "seconds", clock()
+    # print prob['lcoe.LCOE']
 
 
-    print "third run"
-    start = time()
-    print clock(), "Before 3rd run"
-    prob['indep2.wind_directions'] = 270.0
-    prob.run_model()
-    print clock(), "After 3rd run"
-    print time() - start, "seconds", clock()
-    print prob['lcoe.LCOE']
+    # print "third run"
+    # start = time()
+    # print clock(), "Before 3rd run"
+    # prob['indep2.wind_directions'] = 270.0
+    # prob.run_model()
+    # print clock(), "After 3rd run"
+    # print time() - start, "seconds", clock()
+    # print prob['lcoe.LCOE']
 
 
     # with open("angle_power.dat", "w") as out:
