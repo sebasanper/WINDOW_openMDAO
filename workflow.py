@@ -177,7 +177,7 @@ if __name__ == '__main__':
     prob.setup()
 
     # print clock(), "After setup"
-    # view_model(prob) # Uncomment to view N2 chart.
+    view_model(prob) # Uncomment to view N2 chart.
     start = time()
     # print clock(), "Before 1st run"
     prob.run_model()
