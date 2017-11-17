@@ -2,7 +2,7 @@ from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
-from input_params import turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, area
+from input_params import turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, areas
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
 from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
@@ -14,6 +14,7 @@ from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
 from constraints import MinDistance, WithinBoundaries
+from regular_parameterised import RegularLayout
 
 real_angle = 360.0
 artificial_angle = 360.0
@@ -43,7 +44,11 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
-        indep2.add_output("area", val=area)
+        indep2.add_output("areas", val=areas)
+        indep2.add_output("downwind_spacing", val=480.0)
+        indep2.add_output("crosswind_spacing", val=250.0)
+        indep2.add_output("odd_row_shift_spacing", val=0.0)
+        indep2.add_output("layout_angle", val=0.0)
         indep2.add_output("layout", val=np.array([[-1000.0, -1800.0], [-1010.0, -1810.0], [-2456.0, -2000.0]]))
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
         # indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0]])),
@@ -80,6 +85,7 @@ class WorkingGroup(Group):
         indep2.add_output('interest_rate', val=interest_rate)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
+        self.add_subsystem("regular_layout", RegularLayout())
         self.add_subsystem('numberlayout', NumberLayout())
 
         self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.fraction_model, self.deficit_model, self.merge_model))
@@ -98,18 +104,21 @@ class WorkingGroup(Group):
 
         self.add_subsystem('constraint_distance', MinDistance())
         self.add_subsystem('constraint_boundary', WithinBoundaries())
-
+        # Uncomment below for parameterised regular layout given a quadrilateral area(s), and comment the next line out.
+        # self.connect("regular_layout.regular_layout", "numberlayout.orig_layout")
         self.connect("indep2.layout", "numberlayout.orig_layout")
 
         self.connect("indep2.layout", "constraint_distance.orig_layout")
         self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
         self.connect("indep2.layout", "constraint_boundary.layout")
-        self.connect("indep2.area", "constraint_boundary.area")
+        self.connect("indep2.areas", "constraint_boundary.areas")
 
         self.connect('numberlayout.number_layout', 'depths.layout')
 
         self.connect('numberlayout.number_layout', 'AeroAEP.original')
-        self.connect('indep2.n_turbines', 'AeroAEP.n_turbines')
+        # Uncomment below for parameterised regular layout given a quadrilateral area(s), and comment the next line out.
+        # self.connect("regular_layout.n_turbines_regular", ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
+        self.connect('indep2.n_turbines', ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
         self.connect('indep2.cut_in', 'AeroAEP.cut_in')
         self.connect('indep2.cut_out', 'AeroAEP.cut_out')
         self.connect('indep2.weibull_shapes', 'AeroAEP.weibull_shapes')
@@ -126,15 +135,12 @@ class WorkingGroup(Group):
         self.connect('AeroAEP.wakemodel.linear_solve.order_layout.ordered', 'TI.ordered')
         self.connect('indep2.TI_amb', 'TI.TI_amb')
         self.connect('AeroAEP.open_cases.freestream_wind_speeds', 'TI.freestream')
-        self.connect('indep2.n_turbines', 'TI.n_turbines')
 
         self.connect('numberlayout.number_layout', 'electrical.layout')
         self.connect('indep2.n_turbines_p_cable_type', 'electrical.n_turbines_p_cable_type')
         self.connect('indep2.substation_coords', 'electrical.substation_coords')
         self.connect('indep2.n_substations', 'electrical.n_substations')
-        self.connect('indep2.n_turbines', 'electrical.n_turbines')
 
-        self.connect('indep2.n_turbines', 'support.n_turbines')
         self.connect('TI.TI_eff', 'find_max_TI.all_TI')
         self.connect('depths.water_depths', 'support.depth')
         self.connect('find_max_TI.max_TI', 'support.max_TI')
@@ -146,7 +152,6 @@ class WorkingGroup(Group):
 
         self.connect('platform_depth.water_depths', 'Costs.depth_central_platform', src_indices=[0])
 
-        self.connect('indep2.n_turbines', 'Costs.n_turbines')
         self.connect('indep2.n_substations', 'Costs.n_substations')
         self.connect('electrical.length_p_cable_type', 'Costs.length_p_cable_type')
         self.connect('electrical.cost_p_cable_type', 'Costs.cost_p_cable_type')

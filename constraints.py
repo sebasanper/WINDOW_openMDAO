@@ -28,7 +28,7 @@ class MinDistance(ExplicitComponent):
 class WithinBoundaries(ExplicitComponent):
     def setup(self):
         self.add_input("layout", shape=(max_n_turbines, 2))
-        self.add_input("area", shape=(n_quadrilaterals, 4, 2))
+        self.add_input("areas", shape=(n_quadrilaterals, 4, 2))
 
         self.add_output("n_constraint_violations", val=0)
         self.add_output("magnitude_violations", val=0.0)
@@ -39,7 +39,7 @@ class WithinBoundaries(ExplicitComponent):
         for n in range(n_quadrilaterals):
             square = [[[n, 0.0], [n + 1, 0.0], [n + 1, 1.0], [n, 1.0]]]
             squares.append(square)
-        area = inputs["area"]
+        area = inputs["areas"]
         print square[0], area[0]
         maps = [AreaMapping(area[n], square[n]) for n in range(n_quadrilaterals)]
         count = 0
