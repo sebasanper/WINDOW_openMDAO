@@ -13,6 +13,7 @@ class MinDistance(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         layout = inputs["orig_layout"]
+        print layout
         radius = inputs["turbine_radius"]
         count = 0
         for t1 in range(len(layout)):
@@ -40,7 +41,6 @@ class WithinBoundaries(ExplicitComponent):
             square = [[[n, 0.0], [n + 1, 0.0], [n + 1, 1.0], [n, 1.0]]]
             squares.append(square)
         area = inputs["areas"]
-        print square[0], area[0]
         maps = [AreaMapping(area[n], square[n]) for n in range(n_quadrilaterals)]
         count = 0
         magnitude = 0.0
@@ -66,7 +66,7 @@ class WithinBoundaries(ExplicitComponent):
             magnitude += mapped_turbine[0] - 1.0
             count = 1
         if mapped_turbine[1] < 0:
-            magnitude += - mapped_turbine[0]
+            magnitude += - mapped_turbine[1]
             count = 1
         elif mapped_turbine[1] > 1.0:
             magnitude += mapped_turbine[1] - 1.0

@@ -51,7 +51,7 @@ class WorkingGroup(Group):
         # indep2.add_output("layout_angle", val=0.0)
         # indep2.add_output("layout", val=np.array([[- 1000.0, - 1800.0], [- 1010.0, - 1810.0], [- 2456.0, - 2000.0]]))
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0]]))#,
+        indep2.add_output('layout', val=np.array([[0.0, 0.0], [100.0, 0.0], [200.0, 0.0]]))#,
         #                                           [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
         #                                           [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
         #                                           [9, 1160.0, 1160.0]]))
