@@ -45,13 +45,13 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         indep2.add_output("areas", val=areas)
-        indep2.add_output("downwind_spacing", val=480.0)
-        indep2.add_output("crosswind_spacing", val=250.0)
-        indep2.add_output("odd_row_shift_spacing", val=0.0)
-        indep2.add_output("layout_angle", val=0.0)
-        indep2.add_output("layout", val=np.array([[- 1000.0, - 1800.0], [- 1010.0, - 1810.0], [- 2456.0, - 2000.0]]))
+        # indep2.add_output("downwind_spacing", val=480.0)
+        # indep2.add_output("crosswind_spacing", val=250.0)
+        # indep2.add_output("odd_row_shift_spacing", val=0.0)
+        # indep2.add_output("layout_angle", val=0.0)
+        # indep2.add_output("layout", val=np.array([[- 1000.0, - 1800.0], [- 1010.0, - 1810.0], [- 2456.0, - 2000.0]]))
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        # indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0]])),
+        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0]]))#,
         #                                           [3, 0.0, 560.0], [4, 560.0, 560.0], [5, 1120.0, 560.0],
         #                                           [6, 0.0, 1120.0], [7, 560.0, 1120.0], [8, 1120.0, 1120.0],
         #                                           [9, 1160.0, 1160.0]]))
@@ -85,8 +85,10 @@ class WorkingGroup(Group):
         indep2.add_output('interest_rate', val=interest_rate)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
-        self.add_subsystem("regular_layout", RegularLayout())
+        # self.add_subsystem("regular_layout", RegularLayout())
         self.add_subsystem('numberlayout', NumberLayout())
+        self.add_subsystem('depths', RoughInterpolation(max_n_turbines))
+        self.add_subsystem('platform_depth', RoughInterpolation(max_n_substations))
 
         self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.fraction_model, self.deficit_model, self.merge_model))
         self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
@@ -94,11 +96,9 @@ class WorkingGroup(Group):
         self.add_subsystem('electrical', TopologyHybridHeuristic())
 
         self.add_subsystem('find_max_TI', MaxTI(n_cases))
-        self.add_subsystem('depths', RoughInterpolation(max_n_turbines))
         self.add_subsystem('support', TeamPlay())
         self.add_subsystem('OandM', OM_model1())
         self.add_subsystem('AEP', AEP())
-        self.add_subsystem('platform_depth', RoughInterpolation(max_n_substations))
         self.add_subsystem('Costs', TeamPlayCostModel())
         self.add_subsystem('lcoe', LCOE())
 
