@@ -1,7 +1,7 @@
 from numpy import sqrt
 import numpy as np
 
-max_n_turbines = max_n_branches = max_n_turbines_p_branch = 3
+max_n_turbines = max_n_branches = max_n_turbines_p_branch = 9
 turbine_radius = 40.0
 max_n_substations = 3
 n_quadrilaterals = 1
@@ -9,6 +9,7 @@ separation_value_y = 430000
 # area = [[[479700.0, 5732100], [503100.0, 5739600.0], [510000.0, 5731200.0], [491800.0, 5720600.0]], [[491800.0, 5720600.0], [510000.0, 5731200.0], [506700.0, 5715050.0], [502400.0, 5711000.0]]]
 areas = np.array([[[0, 0], [1120, 0.0], [1120.0, 1120.0], [0.0, 1120.0]]])
 # np.array([[[- 2000.0, - 2000.0], [0.0, - 2000.0], [3000.0, - 1000.0], [- 3000.0, 500.0]], [[- 3000.0, - 4000.0], [2000, - 4000.0], [0.0, - 2000.0], [- 2000.0, - 2000.0]]])
+areas = np.array([[[0.0, 0.0], [1120.0, 0.0], [1120.0, 1120.0], [0.0, 1120.0]]])
 # Turbine parameters
 turbine_rated_power = 2000000.0
 turbine_voltage = 33000.0
