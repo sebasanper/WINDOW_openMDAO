@@ -9,17 +9,25 @@ class MinDistance(ExplicitComponent):
         self.add_input("orig_layout", shape=(max_n_turbines, 2))
         self.add_input("turbine_radius", val=0.0)
         self.add_output("n_constraint_violations", val=0)
+        self.add_output("magnitude_violations", val=0)
 
+        #self.declare_partals(of='magnitude_violations', wrt=['turbine_radius', 'orig_layout'], method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs["orig_layout"]
-        print layout
+        # print layout
         radius = inputs["turbine_radius"]
         count = 0
+        magnitude = 0
         for t1 in range(len(layout)):
             for t2 in range(t1 + 1, len(layout)):
-                count += self.distance(layout[t1], layout[t2]) <= 2.0 * radius
+                dist = self.distance(layout[t1], layout[t2])
+                viol = dist <= 2.0 * radius
+                if viol > 0:
+                    count += viol
+                    magnitude += self.distance(layout[t1], layout[t2])
         outputs["n_constraint_violations"] = count
+        outputs["magnitude_violations"] = magnitude
 
 
     def distance(self, t1, t2):
@@ -33,6 +41,8 @@ class WithinBoundaries(ExplicitComponent):
 
         self.add_output("n_constraint_violations", val=0)
         self.add_output("magnitude_violations", val=0.0)
+        
+        #self.declare_partals(of='magnitude_violations', wrt=['areas', 'layout'], method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs["layout"]
@@ -45,10 +55,10 @@ class WithinBoundaries(ExplicitComponent):
         count = 0
         magnitude = 0.0
         for t in layout:
-            if t[1] < separation_value_y:
-                mapped = maps[0].transform_to_rectangle(t[0], t[1])
-            else:
-                mapped = maps[1].transform_to_rectangle(t[0], t[1])
+            # if t[1]:# < separation_value_y:
+            mapped = maps[0].transform_to_rectangle(t[0], t[1])
+            # else:
+            #     mapped = maps[1].transform_to_rectangle(t[0], t[1])
             c, m = self.inarea(mapped)
             count += c
             magnitude += m

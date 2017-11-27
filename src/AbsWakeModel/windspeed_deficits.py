@@ -13,6 +13,8 @@ class SpeedDeficits(ExplicitComponent):
         self.add_input('freestream', shape=self.n_cases)
         self.add_output('U', shape=self.n_cases)
 
+        #self.declare_partals(of='U', wrt=['dU', 'freestream'], method='fd')
+
     def compute(self, inputs, outputs):
         # print "8 Speed"
         ans = np.array([])
@@ -39,11 +41,16 @@ class CombineOutputs(ExplicitComponent):
         for n in range(max_n_turbines + 1):
             self.add_input('power{}'.format(n), shape=(self.n_cases, max_n_turbines))
             self.add_input('ct{}'.format(n), shape=(self.n_cases, max_n_turbines))
+
+            #self.declare_partals(of=['p', 'ct'], wrt=['power{}'.format(n), 'ct{}'.format(n)], method='fd')
+            
         self.add_input('ordered_layout', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('n_turbines', val=1)
 
         self.add_output('p', shape=(self.n_cases, max_n_turbines))
         self.add_output('ct', shape=(self.n_cases, max_n_turbines))
+
+        #self.declare_partals(of=['p', 'ct'], wrt=['ordered_layout', 'n_turbines'], method='fd')
 
     def compute(self, inputs, outputs):
         ans = np.array([])

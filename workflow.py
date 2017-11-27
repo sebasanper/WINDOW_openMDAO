@@ -16,9 +16,9 @@ from Finance.LCOE import LCOE
 from constraints import MinDistance, WithinBoundaries
 from regular_parameterised import RegularLayout
 
-real_angle = 360.0
-artificial_angle = 360.0
-n_windspeedbins = 1
+real_angle = 90.0
+artificial_angle = 90.0
+n_windspeedbins = 0
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print n_cases, "Number of cases"
 
@@ -51,21 +51,21 @@ class WorkingGroup(Group):
         # indep2.add_output("layout_angle", val=0.0)
         # indep2.add_output("layout", val=np.array([[- 1000.0, - 1800.0], [- 1010.0, - 1810.0], [- 2456.0, - 2000.0]]))
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
+        indep2.add_output('layout', val=np.array([[0.0, 0.0], [100.0, 10.0], [200.0, 500.0],
                                                   [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
-                                                  [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))
+                                                  [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))#,
         #                                           [9, 1160.0, 1160.0]]))
 
         # wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
 
-        # wsh = [1.0, 1.0]
-        # wsc = [8.0, 8.0]
-        # wdp = [50.0, 50.0]
-        # wd = [0.0, 180.0]
-        wsh = [1.0]
-        wsc = [8.0]
-        wdp = [100.0]
-        wd = [90.0]
+        wsh = [1.0, 1.0, 1.0, 1.0]
+        wsc = [8.0, 8.0, 8.0, 8.0]
+        wdp = [25.0, 25.0, 25.0, 25.0]
+        wd = [0.0, 90.0, 180.0, 270.0]
+        # wsh = [1.0]
+        # wsc = [8.0]
+        # wdp = [100.0]
+        # wd = [90.0]
 
         indep2.add_output('weibull_shapes', val=wsh)
         indep2.add_output('weibull_scales', val=wsc)
@@ -168,6 +168,7 @@ class WorkingGroup(Group):
         self.connect('indep2.interest_rate', 'lcoe.interest_rate')
 
 
+
 if __name__ == '__main__':
     def print_nice(string, value):
         header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
@@ -179,12 +180,24 @@ if __name__ == '__main__':
     # print clock(), "Before defining model"
     prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
     # print clock(), "Before setup"
+    prob.model.approx_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'], method='fd', step=1e-7, form='central', step_calc='rel')
     prob.setup()
 
     # print clock(), "After setup"
-    view_model(prob) # Uncomment to view N2 chart.
+    # view_model(prob) # Uncomment to view N2 chart.
     start = time()
-    # print clock(), "Before 1st run"
+
+
+    prob.setup()
+    # prob.run_model()
+    # prob.check_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'])
+
+    # of = ['lcoe.LCOE']
+    # wrt = ['indep2.layout']
+    # derivs = prob.compute_totals(of=of, wrt=wrt)
+
+    # print(derivs['lcoe.LCOE', 'indep2.layout'])
+    # # print clock(), "Before 1st run"
     # prob.run_model()
     # print clock(), "After 1st run"
     # print time() - start, "seconds", clock()
@@ -193,10 +206,6 @@ if __name__ == '__main__':
     # print prob['AeroAEP.wakemodel.p']
     # print prob['AeroAEP.wakemodel.combine.ct']
     # print prob['lcoe.LCOE']
-    print_nice('number boundary', prob['constraint_boundary.n_constraint_violations'])
-    print_nice('mag boudary', prob['constraint_boundary.magnitude_violations'])
-    print_nice('number distance', prob['constraint_distance.n_constraint_violations'])
-
     # with open('all_outputs.dat', 'w') as out:
     #     out.write("{}".format(prob.model.list_outputs(out_stream=None)))
     # print prob['AeroAEP.AEP']

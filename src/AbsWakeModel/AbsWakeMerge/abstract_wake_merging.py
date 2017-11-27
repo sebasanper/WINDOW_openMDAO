@@ -14,6 +14,8 @@ class AbstractWakeMerge(ExplicitComponent):
         self.add_input('n_turbines', val=0)
         self.add_output('dU', shape=self.n_cases)
 
+        #self.declare_partals(of='dU', wrt=['all_deficits', 'n_turbines'], method='fd')
+
     def compute(self, inputs, outputs):
         # print "6 SumSquares"
         ans = np.array([])

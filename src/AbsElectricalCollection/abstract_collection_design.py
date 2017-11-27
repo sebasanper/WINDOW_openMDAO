@@ -16,6 +16,8 @@ class AbstractElectricDesign(ExplicitComponent):
         self.add_output('cost_p_cable_type', shape=3)
         self.add_output('length_p_cable_type', shape=3)
 
+        #self.declare_partals(of=['topology', 'cost_p_cable_type', 'length_p_cable_type'], wrt=['layout', 'n_turbines_p_cable_type', 'substation_coords', 'n_substations', 'n_turbines'], method='fd')
+
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
         layout = [[int(coord[0]), coord[1], coord[2]] for coord in inputs['layout'][:n_turbines]]

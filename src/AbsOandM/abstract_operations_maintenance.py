@@ -9,6 +9,8 @@ class AbstractOandM(ExplicitComponent):
         self.add_output('annual_cost_O&M', val=0.0)
         self.add_output('availability', val=0.0)
 
+        #self.declare_partals(of=['annual_cost_O&M', 'availability'], wrt='AEP', method='fd')
+
     def compute(self, inputs, outputs):
         AEP = inputs['AEP']
         outputs['annual_cost_O&M'], outputs['availability'] = self.OandM_model(AEP)

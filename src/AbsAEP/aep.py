@@ -10,5 +10,7 @@ class AEP(ExplicitComponent):
 
         self.add_output('AEP', val=0.0)
 
+        #self.declare_partals(of='AEP', wrt=['aeroAEP', 'availability', 'electrical_efficiency'], method='fd')
+
     def compute(self, inputs, outputs):
         outputs['AEP'] = inputs['aeroAEP'] * inputs['availability'] * inputs['electrical_efficiency']

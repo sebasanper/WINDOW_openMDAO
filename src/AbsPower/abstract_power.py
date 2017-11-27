@@ -15,7 +15,7 @@ class AbstractPower(ExplicitComponent):
         self.add_output('p', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
-        # self.declare_partials('*', '*', method='fd')
+        # #self.declare_partals('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         ans = np.array([])
@@ -45,7 +45,7 @@ class FarmAeroPower(ExplicitComponent):
 
         self.add_output('farm_power', shape=self.n_cases)
         # Finite difference all partials.
-        # self.declare_partials('*', '*', method='cs')
+        #self.declare_partals(of='farm_power', wrt=['ind_powers', 'n_turbines'], method='fd')
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])

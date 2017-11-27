@@ -20,6 +20,8 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
 
         self.add_output('TI_eff', shape=(self.n_cases, max_n_turbines))
 
+        #self.declare_partals(of='TI_eff', wrt=['radius', 'n_turbines', 'freestream', 'dU_matrix', 'ct', 'TI_amb', 'ordered'], method='fd')
+
     def compute(self, inputs, outputs):
         TI_eff = np.array([])
         n_turbines = int(inputs['n_turbines'])
@@ -70,7 +72,9 @@ class DeficitMatrix(ExplicitComponent):
     def setup(self):
         for n in range(max_n_turbines):
             self.add_input('deficits{}'.format(n), shape=(self.n_cases, max_n_turbines))
+            #self.declare_partals(of='dU_matrix', wrt='deficits{}'.format(n), method='fd')
         self.add_output('dU_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines+1))
+
 
     def compute(self, inputs, outputs):
         matrix = np.array([])
@@ -93,6 +97,7 @@ class CtMatrix(ExplicitComponent):
     def setup(self):
         for n in range(max_n_turbines):
             self.add_input('ct{}'.format(n), shape=(self.n_cases, max_n_turbines))
+            #self.declare_partals(of='ct_matrix', wrt='ct{}'.format(n), method='fd')
         self.add_output('ct_matrix', shape=(self.n_cases, max_n_turbines, max_n_turbines+1))
 
     def compute(self, inputs, outputs):

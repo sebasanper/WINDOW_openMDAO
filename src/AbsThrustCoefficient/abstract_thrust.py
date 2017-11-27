@@ -20,7 +20,7 @@ class AbstractThrustCoefficient(ExplicitComponent):
         self.add_output('ct', shape=(self.n_cases, max_n_turbines - 1))
 
         # Finite difference all partials.
-        # self.declare_partials('*', '*', method='fd')
+        # #self.declare_partals('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
         # print "2 Thrust"
