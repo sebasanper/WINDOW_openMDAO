@@ -18,7 +18,7 @@ class DistanceComponent(ExplicitComponent):
         self.add_output('dist_cross', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
-        # self.declare_partials('*', '*', method='fd')
+        #self.declare_partals(of=['dist_down', 'dist_cross'], wrt=['angle', 'ordered', 'n_turbines'], method='fd')
 
     def compute(self, inputs, outputs):
         d_down2 = []

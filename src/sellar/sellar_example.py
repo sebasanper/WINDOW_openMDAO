@@ -19,7 +19,7 @@ class SellarDis1(ExplicitComponent):
         self.add_output('y1', val=4.0)
 
         # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
+        #self.declare_partals('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
 
@@ -44,7 +44,7 @@ class SellarDis2(ExplicitComponent):
         self.add_output('y2', val=-4.0)
 
         # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
+        #self.declare_partals('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
 

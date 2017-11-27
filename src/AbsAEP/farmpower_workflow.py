@@ -55,6 +55,8 @@ class PowersToAEP(ExplicitComponent):
         self.add_output('energies', shape=self.windrose_cases)
         self.add_output('AEP', val=0.0)
 
+        #self.declare_partals(of=['AEP', 'energies'], wrt=['powers', 'probabilities'], method='fd')
+
     def compute(self, inputs, outputs):
         powers = inputs['powers']
         probs = inputs['probabilities']

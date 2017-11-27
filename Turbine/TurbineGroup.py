@@ -15,15 +15,19 @@ class Turbine(ExplicitComponent):
         if self.number < max_n_turbines:
             for n in range(self.number):
                 self.add_input('U{}'.format(n), shape=self.n_cases)
+                #self.declare_partals(of=['ct', 'power'], wrt=['U{}'.format(n)], method='fd')
         else:
             self.add_input('U{}'.format(max_n_turbines - 1), shape=self.n_cases)
+            #self.declare_partals(of=['ct', 'power'], wrt=['U{}'.format(max_n_turbines - 1)], method='fd')
         if self.number > 0:
             self.add_input('prev_turbine_ct', shape=(self.n_cases, max_n_turbines))
             self.add_input('prev_turbine_p', shape=(self.n_cases, max_n_turbines))
+            #self.declare_partals(of=['ct', 'power'], wrt=['prev_turbine_ct', 'prev_turbine_p'], method='fd')
         self.add_output('ct', shape=(self.n_cases, max_n_turbines))
         self.add_output('power', shape=(self.n_cases, max_n_turbines))
 
         # Finite difference all partials.
+        #self.declare_partals(of=['ct', 'power'], wrt=['n_turbines'], method='fd')
 
     def compute(self, inputs, outputs):
         # print "2 Turbine"
