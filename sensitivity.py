@@ -42,41 +42,41 @@ n = 20
 
 def sensitivity_one():
     # layout = np.array([[float(randint(0, 1120)), float(randint(0, 1120))] for _ in range(9)])
-    r = 4
-    with open("sensitivity_one_{}y+.dat".format(r), "w") as out:
-        layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
+    r = 3
+    with open("small{}y+.dat".format(r), "w") as out:
+        for i in range(1,n):
+            layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
                       [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
                       [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]])
-        for i in range(n):
             print(i)
-            layout[r][1] += i * 10.0
+            layout[r][1] += 1.0 / float(i)
             lcoe = fit(layout)
             out.write("{} {}\n".format(i, lcoe))
-    with open("sensitivity_one_{}x+.dat".format(r), "w") as out:
-        layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
+    with open("small{}x+.dat".format(r), "w") as out:
+        for i in range(1,n):
+            layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
                       [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
                       [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]])
-        for i in range(n):
             print(i)
-            layout[r][0] += i * 10.0
+            layout[r][0] += 1.0 / float(i)
             lcoe = fit(layout)
             out.write("{} {}\n".format(i, lcoe))
-    with open("sensitivity_one_{}y-.dat".format(r), "w") as out:
-        layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
+    with open("small{}y-.dat".format(r), "w") as out:
+        for i in range(1,n):
+            layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
                       [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
                       [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]])
-        for i in range(n):
             print(i)
-            layout[r][1] -= i * 10.0
+            layout[r][1] -= 1.0 / float(i)
             lcoe = fit(layout)
             out.write("{} {}\n".format(i, lcoe))
-    with open("sensitivity_one_{}x-.dat".format(r), "w") as out:
-        layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
+    with open("small{}x-.dat".format(r), "w") as out:
+        for i in range(1,n):
+            layout = np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
                       [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
                       [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]])
-        for i in range(n):
             print(i)
-            layout[r][0] -= i * 10.0
+            layout[r][0] -= 1.0 / float(i)
             lcoe = fit(layout)
             out.write("{} {}\n".format(i, lcoe))
 

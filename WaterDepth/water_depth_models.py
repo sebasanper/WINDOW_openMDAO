@@ -9,7 +9,7 @@ class RoughInterpolation(AbstractWaterDepth):
         bathymetry_grid_y = []
         bathymetry_grid_depths = []
 
-        with open("bathymetry.dat", "r") as bathymetry_file:
+        with open("bathymetry2.dat", "r") as bathymetry_file:
             for line in bathymetry_file:
                 cols = line.split()
                 bathymetry_grid_x.append(float(cols[0]))
