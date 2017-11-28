@@ -38,7 +38,7 @@ warranty_percentage = 15.0  # [%]
 
 #  Plant parameters
 # central_platform = [[0, 1000.0, 1000.0], [1,1,1], [2,2,2]]
-central_platform = [[0, 1120.0, 1120.0]]
+central_platform = [[0, 1000.0, 1000.0]]
 # central_platform = [[0, 429500, 6147600], [1,1,1], [2,2,2]]
 ref_height_wind_speed = 62.0
 alpha = 0.10  # Approximate mean value of fits to data in ECN report and paper of Tambke (EWEC 2004)

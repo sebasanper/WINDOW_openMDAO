@@ -22,6 +22,6 @@ class RoughInterpolation(AbstractWaterDepth):
         if len(layout[0]) == 3:
             layout = [[i[1], i[2]] for i in layout]
         for coordinate in layout:
-            # water_depths.append(interpfunction(coordinate[0], coordinate[1])[0])
-            water_depths.append(20.0)
+            water_depths.append(interpfunction(coordinate[0], coordinate[1])[0])  # Minimum water depth 6 m.
+            # water_depths.append(5.8)
         return water_depths

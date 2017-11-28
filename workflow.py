@@ -20,7 +20,7 @@ real_angle = 90.0
 artificial_angle = 90.0
 n_windspeedbins = 0
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
-print n_cases, "Number of cases"
+print (n_cases, "Number of cases")
 
 
 class NumberLayout(ExplicitComponent):
@@ -51,7 +51,7 @@ class WorkingGroup(Group):
         # indep2.add_output("layout_angle", val=0.0)
         # indep2.add_output("layout", val=np.array([[- 1000.0, - 1800.0], [- 1010.0, - 1810.0], [- 2456.0, - 2000.0]]))
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        indep2.add_output('layout', val=np.array([[0.0, 0.0], [100.0, 10.0], [200.0, 500.0],
+        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
                                                   [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
                                                   [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))#,
         #                                           [9, 1160.0, 1160.0]]))
@@ -169,26 +169,26 @@ class WorkingGroup(Group):
 
 
 
-if __name__ == '__main__':
-    def print_nice(string, value):
-        header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
-        header += str(value) + "\n"
-        header += "=" * (22 + len(string))
-        print header
-    # print clock(), "Before defining problem"
-    prob = Problem()
-    # print clock(), "Before defining model"
-    prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
-    # print clock(), "Before setup"
-    prob.model.approx_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'], method='fd', step=1e-7, form='central', step_calc='rel')
-    prob.setup()
+# if __name__ == '__main__':
+#     def print_nice(string, value):
+#         header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
+#         header += str(value) + "\n"
+#         header += "=" * (22 + len(string))
+#         print header
+#     # print clock(), "Before defining problem"
+#     prob = Problem()
+#     # print clock(), "Before defining model"
+#     prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
+#     # print clock(), "Before setup"
+#     prob.model.approx_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'], method='fd', step=1e-7, form='central', step_calc='rel')
+#     prob.setup()
 
-    # print clock(), "After setup"
-    # view_model(prob) # Uncomment to view N2 chart.
-    start = time()
+#     # print clock(), "After setup"
+#     # view_model(prob) # Uncomment to view N2 chart.
+#     start = time()
 
 
-    prob.setup()
+#     prob.setup()
     # prob.run_model()
     # prob.check_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'])
 
