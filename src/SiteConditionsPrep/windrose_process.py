@@ -26,7 +26,7 @@ class WindrosePreprocessor(ExplicitComponent):
         self.add_output('probabilities', shape=self.n_cases)
 
     def compute(self, inputs, outputs):
-        print clock(), "1st line compute Windrose"
+        # print clock(), "1st line compute Windrose"
         # print "WINDROSE OUTPUT"
         cut_in = inputs['cut_in']
         cut_out = inputs['cut_out']
