@@ -6,7 +6,7 @@ from input_params import turbine_radius, max_n_turbines, max_n_substations, i as
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
 from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
-# from src.Utils.read_files import read_layout, read_windrose
+from src.Utils.read_files import read_layout, read_windrose
 from WaterDepth.water_depth_models import RoughInterpolation
 from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
 from SupportStructure.teamplay import TeamPlay
@@ -16,8 +16,8 @@ from Finance.LCOE import LCOE
 from constraints import MinDistance, WithinBoundaries
 from regular_parameterised import RegularLayout
 
-real_angle = 90.0
-artificial_angle = 90.0
+real_angle = 30.0
+artificial_angle = 30.0
 n_windspeedbins = 0
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print (n_cases, "Number of cases")
@@ -56,12 +56,12 @@ class WorkingGroup(Group):
                                                   [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))#,
         #                                           [9, 1160.0, 1160.0]]))
 
-        # wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
+        wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
 
-        wsh = [1.0, 1.0, 1.0, 1.0]
-        wsc = [8.0, 8.0, 8.0, 8.0]
-        wdp = [25.0, 25.0, 25.0, 25.0]
-        wd = [0.0, 90.0, 180.0, 270.0]
+        # wsh = [1.0, 1.0, 1.0, 1.0]
+        # wsc = [8.0, 8.0, 8.0, 8.0]
+        # wdp = [25.0, 25.0, 25.0, 25.0]
+        # wd = [0.0, 90.0, 180.0, 270.0]
         # wsh = [1.0]
         # wsc = [8.0]
         # wdp = [100.0]
@@ -74,7 +74,7 @@ class WorkingGroup(Group):
         indep2.add_output('cut_in', val=8.5)
         indep2.add_output('cut_out', val=8.5)
         indep2.add_output('turbine_radius', val=turbine_radius)
-        indep2.add_output('n_turbines', val=9)
+        indep2.add_output('n_turbines', val=2)
         # indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
         indep2.add_output('n_turbines_p_cable_type', val=[2, 1, 0])
         indep2.add_output('substation_coords', val=central_platform)
@@ -169,27 +169,27 @@ class WorkingGroup(Group):
 
 
 
-# if __name__ == '__main__':
-#     def print_nice(string, value):
-#         header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
-#         header += str(value) + "\n"
-#         header += "=" * (22 + len(string))
-#         print header
-#     # print clock(), "Before defining problem"
-#     prob = Problem()
-#     # print clock(), "Before defining model"
-#     prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
-#     # print clock(), "Before setup"
+if __name__ == '__main__':
+    def print_nice(string, value):
+        header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
+        header += str(value) + "\n"
+        header += "=" * (22 + len(string))
+        print header
+    print_nice("Before defining problem", clock())
+    prob = Problem()
+    prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
+    # print clock(), "Before setup"
 #     prob.model.approx_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'], method='fd', step=1e-7, form='central', step_calc='rel')
+    print_nice("Before setup", clock())
+    prob.setup()
+
+    print clock(), "After setup"
+    # view_model(prob) # Uncomment to view N2 chart.
+    start = time()
+
+
 #     prob.setup()
-
-#     # print clock(), "After setup"
-#     # view_model(prob) # Uncomment to view N2 chart.
-#     start = time()
-
-
-#     prob.setup()
-    # prob.run_model()
+    prob.run_model()
     # prob.check_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'])
 
     # of = ['lcoe.LCOE']
@@ -199,11 +199,9 @@ class WorkingGroup(Group):
     # print(derivs['lcoe.LCOE', 'indep2.layout'])
     # # print clock(), "Before 1st run"
     # prob.run_model()
-    # print clock(), "After 1st run"
-    # print time() - start, "seconds", clock()
+    print_nice("After first run", time() - start)
 
-
-    # print prob['AeroAEP.wakemodel.p']
+    print_nice("Power", prob['AeroAEP.wakemodel.p'])
     # print prob['AeroAEP.wakemodel.combine.ct']
     # print prob['lcoe.LCOE']
     # with open('all_outputs.dat', 'w') as out:
@@ -242,13 +240,13 @@ class WorkingGroup(Group):
     # print prob['indep2.layout']
     # # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
 
-    # print "second run"
-    # start = time()
+    print "second run"
+    start = time()
     # print clock(), "Before 2nd run"
     # prob['indep2.wind_directions'] = 0.0
-    # prob.run_model()
-    # print clock(), "After 2nd run"
-    # print time() - start, "seconds", clock()
+    prob.run_model()
+    print clock(), "After 2nd run"
+    print time() - start, "seconds", clock()
     # print prob['lcoe.LCOE']
 
 
