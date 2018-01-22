@@ -1,16 +1,21 @@
 from numpy import sqrt
+import numpy as np
 
 max_n_turbines = max_n_branches = max_n_turbines_p_branch = 9
 turbine_radius = 40.0
-max_n_substations = 3
-
-
+max_n_substations = 1
+n_quadrilaterals = 1
+separation_value_y = 1200.0
+# area = [[[479700.0, 5732100], [503100.0, 5739600.0], [510000.0, 5731200.0], [491800.0, 5720600.0]], [[491800.0, 5720600.0], [510000.0, 5731200.0], [506700.0, 5715050.0], [502400.0, 5711000.0]]]
+areas = np.array([[[0, 0], [1120, 0.0], [1120.0, 1120.0], [0.0, 1120.0]]])
+# np.array([[[- 2000.0, - 2000.0], [0.0, - 2000.0], [3000.0, - 1000.0], [- 3000.0, 500.0]], [[- 3000.0, - 4000.0], [2000, - 4000.0], [0.0, - 2000.0], [- 2000.0, - 2000.0]]])
+areas = np.array([[[0.0, 0.0], [1120.0, 0.0], [1120.0, 1120.0], [0.0, 1120.0]]])
 # Turbine parameters
 turbine_rated_power = 2000000.0
 turbine_voltage = 33000.0
-turbine_rated_current = sqrt(3.0) * turbine_rated_power / (turbine_voltage)  # A = Power * sqrt(3) / Voltage. 3 phase current per line.
+turbine_rated_current = turbine_rated_power / (turbine_voltage  * sqrt(3.0))  # A = Power / sqrt(3) / Voltage. 3 phase current per line.
 
-cable_types = [[95, 300, 206], [120, 340, 221], [150, 375, 236], [185, 420, 256], [240, 480, 287], [300, 530, 316], [400, 590, 356], [500, 655, 406], [630, 715, 459], [800, 775, 521], [1000, 825, 579]]
+cable_types = [[95, 300, 206], [120, 340, 221], [150, 375, 236], [185, 420, 256], [240, 480, 287], [300, 530, 316], [400, 590, 356], [500, 655, 406], [630, 715, 459], [800, 775, 521], [1000, 825, 579]] # Current, cross section, cost
 
 hub_height = 90.0
 
@@ -24,7 +29,7 @@ front_area_nacelle = 14.0  # [m^2] Vestas V80 brochure: height for transport 4 m
 max_thrust = 475000.0  # [N] Maximum thrust determined from thrust coefficient curve multiplied with 1.5 amplification factor (determined by Otto for NREL 5 MW turbine)
 yaw_to_hub_height = 2.0  # [m] Vestas V80 brochure: height for transport 4 m - On picture, the axis appears to be in the middle of the nacelle.
 mass = 98500.0  # [kg] 79 tonne nacelle + 3x 6.5 tonne blades
-mass_eccentricity = -2.0  # [m] - in x-direction, so negative when upwind of tower centre - Just a guess - Vestas V80 brochure: Length of nacelle = 10.4 m
+mass_eccentricity = - 2.0  # [m] - in x-direction, so negative when upwind of tower centre - Just a guess - Vestas V80 brochure: Length of nacelle = 10.4 m
 yaw_diameter = 2.26  # [m] From OWTES V66
 wind_speed_at_max_thrust = 12.0  # [m/s] Horns rev website: 13 m/s - Vestas V80 brochure: 16 m/s, but max thrust appears at 12 m/s
 generator_voltage = 690.0  # [V] There are 480 and 690 voltage versions of the V80. The higher voltage is assumed, considering the need of high voltage in the connections to the public grid.
@@ -33,7 +38,9 @@ warranty_percentage = 15.0  # [%]
 
 
 #  Plant parameters
-central_platform = [[0, 429500, 6147600], [1,1,1], [2,2,2]]
+# central_platform = [[0, 1000.0, 1000.0], [1,1,1], [2,2,2]]
+central_platform = [[0, 1000.0, 1000.0]]
+# central_platform = [[0, 429500, 6147600], [1,1,1], [2,2,2]]
 ref_height_wind_speed = 62.0
 alpha = 0.10  # Approximate mean value of fits to data in ECN report and paper of Tambke (EWEC 2004)
 hat = 0.8  # Horns Rev website: Tides are approximately 1.2 m; Paper ICCE: appr. 1.5 m - A little more than half of this is taken for 'extrapolation'

@@ -12,6 +12,7 @@ class AbstractWaterDepth(ExplicitComponent):
         self.add_input('layout', shape=(self.n_turbines, 3))
 
         self.add_output('water_depths', shape=max_n_turbines)
+        #self.declare_partals(of='water_depths', wrt='layout', method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs['layout']

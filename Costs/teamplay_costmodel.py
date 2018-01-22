@@ -16,6 +16,8 @@ class TeamPlayCostModel(ExplicitComponent):
         self.add_output('investment_costs', val=0.0)
         self.add_output('decommissioning_costs', val=0.0)
 
+        #self.declare_partals(of=['investment_costs', 'decommissioning_costs'], wrt=['n_substations', 'n_turbines', 'length_p_cable_type', 'cost_p_cable_type', 'support_structure_costs', 'depth_central_platform'], method='fd')
+
     def compute(self, inputs, outputs):
         n_substations = inputs['n_substations']
         n_turbines = inputs['n_turbines']

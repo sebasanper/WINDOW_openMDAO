@@ -14,6 +14,8 @@ class MaxTI(ExplicitComponent):
 
         self.add_output('max_TI', shape=max_n_turbines)
 
+        #self.declare_partals(of='max_TI', wrt='all_TI', method='fd')
+
     def compute(self, inputs, outputs):
         outputs['max_TI'] = np.amax(inputs['all_TI'], axis=0)
 

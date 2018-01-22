@@ -36,7 +36,7 @@ class Plane1(ExplicitComponent):
         self.add_output('y', val=7.0)
 
         # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
+        #self.declare_partals('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
 
@@ -59,7 +59,7 @@ class Plane2(ExplicitComponent):
         self.add_output('x', val=6.0)
 
         # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
+        #self.declare_partals('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
 
@@ -82,7 +82,7 @@ class Plane3(ExplicitComponent):
         self.add_input('x', val=8.0)
 
         # Finite difference all partials.
-        self.declare_partials('*', '*', method='fd')
+        #self.declare_partals('*', '*', method='fd')
 
     def compute(self, inputs, outputs):
 

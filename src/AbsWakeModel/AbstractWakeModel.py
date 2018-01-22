@@ -13,11 +13,13 @@ class DetermineIfInWake(ExplicitComponent):
         self.add_input('ordered', shape=(self.n_cases, max_n_turbines, 3))
         self.add_input('angle', shape=self.n_cases)
         self.add_input('n_turbines', val=1)
-        self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines))
+        self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines))
         self.add_input('turbine_radius', val=0.0)
 
-        self.add_output('fractions', shape=(self.n_cases, max_n_turbines - 1), val=0)
+        self.add_output('fractions', shape=(self.n_cases, max_n_turbines), val=0)
+
+        #self.declare_partals(of='fractions', wrt=['ordered', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'], method='fd')
 
     def compute(self, inputs, outputs):
         # print "4 Determine"
@@ -44,10 +46,10 @@ class DetermineIfInWake(ExplicitComponent):
                                                                             crosswind_d=crosswind_d[i],
                                                                             radius=r))
                         i += 1
-            lendif = max_n_turbines - len(fractions1) - 1
+            lendif = max_n_turbines - len(fractions1)
             fractions1 = np.concatenate((fractions1, [0 for _ in range(lendif)]))
             fractions = np.append(fractions, fractions1)
-        fractions = fractions.reshape(self.n_cases, max_n_turbines - 1)
+        fractions = fractions.reshape(self.n_cases, max_n_turbines)
         outputs['fractions'] = fractions
         # print outputs['fraction'], "Output"
 
@@ -59,12 +61,15 @@ class WakeDeficit(ExplicitComponent):
 
     def setup(self):
         self.add_input('turbine_radius', val=0.0)
-        self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_input('ct', shape=(self.n_cases, max_n_turbines - 1))
-        self.add_input('fractions', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_input('downwind_d', shape=(self.n_cases, max_n_turbines))
+        self.add_input('crosswind_d', shape=(self.n_cases, max_n_turbines))
+        self.add_input('ct', shape=(self.n_cases, max_n_turbines))
+        self.add_input('fractions', shape=(self.n_cases, max_n_turbines))
         self.add_input('n_turbines', val=1)
-        self.add_output('dU', shape=(self.n_cases, max_n_turbines - 1))
+        self.add_output('dU', shape=(self.n_cases, max_n_turbines))
+
+        #self.declare_partals(of='dU', wrt=['fractions', 'ct', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'], method='fd')
+        
 
     def compute(self, inputs, outputs):
         # print "5 WakeDeficit"
@@ -79,17 +84,17 @@ class WakeDeficit(ExplicitComponent):
             # print c_t, "Input1 ct"
             # print fraction, "Input2 fraction"
             deficits = np.array([])
-            for ind in range(n_turbines - 1):
+            for ind in range(n_turbines):
                 if fraction[ind] > 0.0:
                     deficits = np.append(deficits, [fraction[ind] * self.wake_deficit_model(inputs, x_down=d_down[ind],
                                                                                       x_cross=d_cross[ind], Ct=c_t[ind],
                                                                                       r0=r)])
                 else:
                     deficits = np.append(deficits, [0.0])
-            lendif = max_n_turbines - len(deficits) - 1
+            lendif = max_n_turbines - len(deficits)
             deficits = np.concatenate((deficits, [0 for _ in range(lendif)]))
             du = np.append(du, deficits)
 
-        du = du.reshape(self.n_cases, max_n_turbines - 1)
+        du = du.reshape(self.n_cases, max_n_turbines)
         outputs['dU'] = du
         # print outputs['dU'], "Output"
