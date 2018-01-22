@@ -9,7 +9,7 @@ class RoughInterpolation(AbstractWaterDepth):
         bathymetry_grid_y = []
         bathymetry_grid_depths = []
 
-        with open("bathymetry.dat", "r") as bathymetry_file:
+        with open("bathymetry2.dat", "r") as bathymetry_file:
             for line in bathymetry_file:
                 cols = line.split()
                 bathymetry_grid_x.append(float(cols[0]))
@@ -22,6 +22,6 @@ class RoughInterpolation(AbstractWaterDepth):
         if len(layout[0]) == 3:
             layout = [[i[1], i[2]] for i in layout]
         for coordinate in layout:
-            # water_depths.append(interpfunction(coordinate[0], coordinate[1])[0])
-            water_depths.append(20.0)
+            water_depths.append(interpfunction(coordinate[0], coordinate[1])[0])  # Minimum water depth 6 m.
+            # water_depths.append(5.8)
         return water_depths
