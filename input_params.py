@@ -6,10 +6,7 @@ turbine_radius = 40.0
 max_n_substations = 1
 n_quadrilaterals = 1
 separation_value_y = 1200.0
-# area = [[[479700.0, 5732100], [503100.0, 5739600.0], [510000.0, 5731200.0], [491800.0, 5720600.0]], [[491800.0, 5720600.0], [510000.0, 5731200.0], [506700.0, 5715050.0], [502400.0, 5711000.0]]]
 areas = np.array([[[0, 0], [1120, 0.0], [1120.0, 1120.0], [0.0, 1120.0]]])
-# np.array([[[- 2000.0, - 2000.0], [0.0, - 2000.0], [3000.0, - 1000.0], [- 3000.0, 500.0]], [[- 3000.0, - 4000.0], [2000, - 4000.0], [0.0, - 2000.0], [- 2000.0, - 2000.0]]])
-areas = np.array([[[0.0, 0.0], [1120.0, 0.0], [1120.0, 1120.0], [0.0, 1120.0]]])
 # Turbine parameters
 turbine_rated_power = 2000000.0
 turbine_voltage = 33000.0
@@ -94,4 +91,12 @@ rho_xlpe = 940  # [kg/m^3]
 epsilon_0 = 8.85e-12  # [F/m]
 epsilon_r = 2.3  # [-] (XLPE)
 
-
+def separation_equation_y(x):  # values y greater than f(x) use mapping 1, else mapping 0
+    if len(areas) > 1:
+        m = (areas[1][0][1] - areas[1][1][1]) / (areas[1][0][0] - areas[1][1][0])
+        yy = areas[1][0][1]
+        xx = areas[1][0][0]
+        b = yy - m * xx
+        return m * x + b
+    else:
+        return - 10000000.0
