@@ -186,7 +186,7 @@ if __name__ == '__main__':
     view_model(prob) # Uncomment to view N2 chart.
     start = time()
 
-    # prob.run_model()
+    prob.run_model()
     # prob.check_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'])
 
     # of = ['lcoe.LCOE']
@@ -196,9 +196,9 @@ if __name__ == '__main__':
     # print(derivs['lcoe.LCOE', 'indep2.layout'])
     print_nice("After first run", time() - start)
 
-    print_nice("Power", prob['AeroAEP.wakemodel.p'])
+    print_nice("Power", prob['lcoe.LCOE'])
     # print prob['AeroAEP.wakemodel.combine.ct']
-    # print prob['lcoe.LCOE']
+    # prob['indep2.cutin'] = 9.
     # with open('all_outputs.dat', 'w') as out:
     #     out.write("{}".format(prob.model.list_outputs(out_stream=None)))
     # print prob['AeroAEP.AEP']
@@ -235,12 +235,12 @@ if __name__ == '__main__':
     # print prob['indep2.layout']
     # # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
 
-    print "second run"
-    start = time()
-    # print clock(), "Before 2nd run"
-    prob.run_model()
-    print clock(), "After 2nd run"
-    print time() - start, "seconds", clock()
+    # print "second run"
+    # start = time()
+    # # print clock(), "Before 2nd run"
+    # prob.run_model()
+    # print clock(), "After 2nd run"
+    # print time() - start, "seconds", clock()
     # print prob['lcoe.LCOE']
 
     # with open("angle_power.dat", "w") as out:
