@@ -20,7 +20,6 @@ real_angle = 30.0
 artificial_angle = 30.0
 n_windspeedbins = 0
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
-print (n_cases, "Number of cases")
 
 
 class NumberLayout(ExplicitComponent):
@@ -34,7 +33,6 @@ class NumberLayout(ExplicitComponent):
 
 
 class WorkingGroup(Group):
-    # def __init__(self, fraction_model, deficit_model, merge_model, turbulence_model):
     def __init__(self, fraction_model=JensenWakeFraction, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
@@ -49,23 +47,12 @@ class WorkingGroup(Group):
         # indep2.add_output("crosswind_spacing", val=250.0)
         # indep2.add_output("odd_row_shift_spacing", val=0.0)
         # indep2.add_output("layout_angle", val=0.0)
-        # indep2.add_output("layout", val=np.array([[- 1000.0, - 1800.0], [- 1010.0, - 1810.0], [- 2456.0, - 2000.0]]))
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
         indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
                                                   [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
-                                                  [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))#,
-        #                                           [9, 1160.0, 1160.0]]))
+                                                  [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))
 
         wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
-
-        # wsh = [1.0, 1.0, 1.0, 1.0]
-        # wsc = [8.0, 8.0, 8.0, 8.0]
-        # wdp = [25.0, 25.0, 25.0, 25.0]
-        # wd = [0.0, 90.0, 180.0, 270.0]
-        # wsh = [1.0]
-        # wsc = [8.0]
-        # wdp = [100.0]
-        # wd = [90.0]
 
         indep2.add_output('weibull_shapes', val=wsh)
         indep2.add_output('weibull_scales', val=wsc)
@@ -75,8 +62,7 @@ class WorkingGroup(Group):
         indep2.add_output('cut_out', val=8.5)
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=2)
-        # indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
-        indep2.add_output('n_turbines_p_cable_type', val=[2, 1, 0])
+        indep2.add_output('n_turbines_p_cable_type', val=[1, 2, 0])  # In ascending order, but 0 always at the end. 0 is used for requesting only two or three cable types.
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=1)
         indep2.add_output('electrical_efficiency', val=0.99)
@@ -100,10 +86,10 @@ class WorkingGroup(Group):
         self.add_subsystem('OandM', OM_model1())
         self.add_subsystem('AEP', AEP())
         self.add_subsystem('Costs', TeamPlayCostModel())
-        self.add_subsystem('lcoe', LCOE())
 
         self.add_subsystem('constraint_distance', MinDistance())
         self.add_subsystem('constraint_boundary', WithinBoundaries())
+        self.add_subsystem('lcoe', LCOE())
         # Uncomment below for parameterised regular layout given a quadrilateral area(s), and comment the next line out.
         # self.connect("regular_layout.regular_layout", "numberlayout.orig_layout")
         self.connect("indep2.layout", "numberlayout.orig_layout")
@@ -125,7 +111,6 @@ class WorkingGroup(Group):
         self.connect('indep2.weibull_scales', 'AeroAEP.weibull_scales')
         self.connect('indep2.dir_probabilities', 'AeroAEP.dir_probabilities')
         self.connect('indep2.wind_directions', 'AeroAEP.wind_directions')
-        # self.connect('indep2.turbine_radius', 'AeroAEP.turbine_radius')
         self.connect('indep2.turbine_radius', ['AeroAEP.turbine_radius', 'TI.radius'])
 
         for n in range(max_n_turbines):
@@ -168,83 +153,9 @@ class WorkingGroup(Group):
         self.connect('indep2.interest_rate', 'lcoe.interest_rate')
 
 
-
 if __name__ == '__main__':
-    def print_nice(string, value):
-        header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
-        header += str(value) + "\n"
-        header += "=" * (22 + len(string))
-        print header
-    print_nice("Before defining problem", clock())
     prob = Problem()
     prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
-#     prob.model.approx_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'], method='fd', step=1e-7, form='central', step_calc='rel')
-    print_nice("Before setup", clock())
     prob.setup()
-
-    print clock(), "After setup"
-    view_model(prob) # Uncomment to view N2 chart.
-    start = time()
-
     prob.run_model()
-    # prob.check_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'])
-
-    # of = ['lcoe.LCOE']
-    # wrt = ['indep2.layout']
-    # derivs = prob.compute_totals(of=of, wrt=wrt)
-
-    # print(derivs['lcoe.LCOE', 'indep2.layout'])
-    print_nice("After first run", time() - start)
-
-    print_nice("Power", prob['lcoe.LCOE'])
-    # print prob['AeroAEP.wakemodel.combine.ct']
-    # prob['indep2.cutin'] = 9.
-    # with open('all_outputs.dat', 'w') as out:
-    #     out.write("{}".format(prob.model.list_outputs(out_stream=None)))
-    # print prob['AeroAEP.AEP']
-    # print prob['Costs.investment_costs']
-    # print prob['Costs.decommissioning_costs']
-    # print prob['lcoe.LCOE']
-    # print prob['OandM.availability']
-    # print prob['OandM.annual_cost_O&M']
-
-    # print prob['find_max_TI.max_TI']
-    # print prob['support.cost_support']
-
-    # print prob['electrical.topology']
-    # print prob['electrical.cost_p_cable_type']
-    # print prob['electrical.length_p_cable_type']
-
-    # print prob['AEP.windrose.cases']
-    # print prob['AEP.farmpower.ind_powers']
-    # print prob['AEP.wakemodel.U']
-    # print prob['AEP.wakemodel.linear_solve.deficits0.dU']
-    # print prob['AEP.wakemodel.linear_solve.deficits1.dU']
-    # print prob['AEP.wakemodel.linear_solve.deficits2.dU']
-    # print prob['AEP.wakemodel.linear_solve.deficits3.dU']
-    # print prob['AEP.wakemodel.linear_solve.deficits4.dU']
-    # print prob['AEP.wakemodel.linear_solve.ct0.ct']
-    # print prob['AEP.wakemodel.linear_solve.ct1.ct']
-    # print prob['AEP.wakemodel.linear_solve.ct2.ct']
-    # print prob['AEP.wakemodel.linear_solve.ct3.ct']
-    # print prob['AEP.wakemodel.linear_solve.ct4.ct']
-    # print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_down']
-    # print prob['AEP.wakemodel.linear_solve.deficits1.distance.dist_cross']
-    # ordered = prob['AEP.wakemodel.linear_solve.order_layout.ordered']
-    # print ordered
-    # print prob['indep2.layout']
-    # # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
-
-    # print "second run"
-    # start = time()
-    # # print clock(), "Before 2nd run"
-    # prob.run_model()
-    # print clock(), "After 2nd run"
-    # print time() - start, "seconds", clock()
-    # print prob['lcoe.LCOE']
-
-    # with open("angle_power.dat", "w") as out:
-    #     for n in range(n_cases):
-    #         out.write("{} {} {} {} {}\n".format(prob['AEP.open_cases.wind_directions'][n], prob['AEP.open_cases.freestream_wind_speeds'][n], prob['AEP.windrose.probabilities'][n], prob['AEP.farmpower.farm_power'][n], prob['AEP.energies'][n]))
-    # print prob['AEP.AEP']
-    # print sum(prob['AEP.windrose.probabilities'])
+    print(prob['lcoe.LCOE'], "LCOE")

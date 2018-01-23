@@ -51,7 +51,6 @@ Hs_50_year = 5.0  # Horns Rev website: Highest value in graph of Hm0 is 4.3. Som
 Hs_1_year = 3.3  # Horns Rev website: waves of more than 6 m height reached every year. Divided by 1.86 to estimate significant wave height
 current_depth_averaged_50_year = 0.8  # [m/s] Horns Rev website: Currents may reach 0.8 m/s during storms (doesn't mention return period and whether this is depth averaged)
 angle_wave_current_50_year = 20.0  # [degrees] (Arbitrary default)
-water_temperature = 15.0  # [degrees Celsius] 'Temperature-report' gives 17 degrees surface temp in August and 'Temperature variation-report' gives variation of 2 degrees (highest temperature, so: August, is the worst case)
 water_density = 1025.0  # [kg/m^3] Generic value
 d50_soil = 0.0002  # [m]  Values given as 'range' in baggrund8 IEA report and confirmed by figure 2.2. in fish IEA report
 d90_soil = 0.0005  # [m]  Values given as 'range' in baggrund8 IEA report and confirmed by figure 2.2. in fish IEA report
