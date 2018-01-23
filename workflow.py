@@ -43,11 +43,6 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         indep2.add_output("areas", val=areas)
-        # indep2.add_output("downwind_spacing", val=480.0)
-        # indep2.add_output("crosswind_spacing", val=250.0)
-        # indep2.add_output("odd_row_shift_spacing", val=0.0)
-        # indep2.add_output("layout_angle", val=0.0)
-        # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
         indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
                                                   [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
                                                   [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))
@@ -71,7 +66,6 @@ class WorkingGroup(Group):
         indep2.add_output('interest_rate', val=interest_rate)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
-        # self.add_subsystem("regular_layout", RegularLayout())
         self.add_subsystem('numberlayout', NumberLayout())
         self.add_subsystem('depths', RoughInterpolation(max_n_turbines))
         self.add_subsystem('platform_depth', RoughInterpolation(max_n_substations))
@@ -90,8 +84,6 @@ class WorkingGroup(Group):
         self.add_subsystem('constraint_distance', MinDistance())
         self.add_subsystem('constraint_boundary', WithinBoundaries())
         self.add_subsystem('lcoe', LCOE())
-        # Uncomment below for parameterised regular layout given a quadrilateral area(s), and comment the next line out.
-        # self.connect("regular_layout.regular_layout", "numberlayout.orig_layout")
         self.connect("indep2.layout", "numberlayout.orig_layout")
 
         self.connect("indep2.layout", "constraint_distance.orig_layout")
@@ -102,8 +94,6 @@ class WorkingGroup(Group):
         self.connect('numberlayout.number_layout', 'depths.layout')
 
         self.connect('numberlayout.number_layout', 'AeroAEP.original')
-        # Uncomment below for parameterised regular layout given a quadrilateral area(s), and comment the next line out.
-        # self.connect("regular_layout.n_turbines_regular", ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
         self.connect('indep2.n_turbines', ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
         self.connect('indep2.cut_in', 'AeroAEP.cut_in')
         self.connect('indep2.cut_out', 'AeroAEP.cut_out')
@@ -159,3 +149,5 @@ if __name__ == '__main__':
     prob.setup()
     prob.run_model()
     print(prob['lcoe.LCOE'], "LCOE")
+    print(prob['constraint_boundary.n_constraint_violations'], "No. Boundary constraint violations")
+    print(prob['constraint_distance.n_constraint_violations'], "No. Distance constraint violations")
