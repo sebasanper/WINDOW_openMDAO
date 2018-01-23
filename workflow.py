@@ -45,15 +45,14 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         indep2.add_output("areas", val=areas)
-        # indep2.add_output("downwind_spacing", val=480.0)
-        # indep2.add_output("crosswind_spacing", val=250.0)
-        # indep2.add_output("odd_row_shift_spacing", val=0.0)
-        # indep2.add_output("layout_angle", val=0.0)
-        # indep2.add_output("layout", val=np.array([[- 1000.0, - 1800.0], [- 1010.0, - 1810.0], [- 2456.0, - 2000.0]]))
+        indep2.add_output("downwind_spacing", val=480.0)
+        indep2.add_output("crosswind_spacing", val=250.0)
+        indep2.add_output("odd_row_shift_spacing", val=0.0)
+        indep2.add_output("layout_angle", val=0.0)
         # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
-                                                  [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
-                                                  [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))#,
+        # indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
+                                                  # [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
+                                                  # [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))#,
         #                                           [9, 1160.0, 1160.0]]))
 
         wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
@@ -85,7 +84,7 @@ class WorkingGroup(Group):
         indep2.add_output('interest_rate', val=interest_rate)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
-        # self.add_subsystem("regular_layout", RegularLayout())
+        self.add_subsystem("regular_layout", RegularLayout())
         self.add_subsystem('numberlayout', NumberLayout())
         self.add_subsystem('depths', RoughInterpolation(max_n_turbines))
         self.add_subsystem('platform_depth', RoughInterpolation(max_n_substations))
@@ -104,28 +103,32 @@ class WorkingGroup(Group):
 
         self.add_subsystem('constraint_distance', MinDistance())
         self.add_subsystem('constraint_boundary', WithinBoundaries())
+        self.connect("indep2.areas", "regular_layout.area")
+        self.connect("indep2.downwind_spacing", "regular_layout.downwind_spacing")
+        self.connect("indep2.crosswind_spacing", "regular_layout.crosswind_spacing")
+        self.connect("indep2.odd_row_shift_spacing", "regular_layout.odd_row_shift_spacing")
+        self.connect("indep2.layout_angle", "regular_layout.layout_angle")
         # Uncomment below for parameterised regular layout given a quadrilateral area(s), and comment the next line out.
-        # self.connect("regular_layout.regular_layout", "numberlayout.orig_layout")
-        self.connect("indep2.layout", "numberlayout.orig_layout")
+        self.connect("regular_layout.regular_layout", "numberlayout.orig_layout")
+        # self.connect("indep2.layout", "numberlayout.orig_layout")
 
-        self.connect("indep2.layout", "constraint_distance.orig_layout")
-        self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
-        self.connect("indep2.layout", "constraint_boundary.layout")
-        self.connect("indep2.areas", "constraint_boundary.areas")
+        # self.connect("indep2.layout", "constraint_distance.orig_layout")
+        # self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
+        # self.connect("indep2.layout", "constraint_boundary.layout")
+        # self.connect("indep2.areas", "constraint_boundary.areas")
 
         self.connect('numberlayout.number_layout', 'depths.layout')
 
         self.connect('numberlayout.number_layout', 'AeroAEP.original')
         # Uncomment below for parameterised regular layout given a quadrilateral area(s), and comment the next line out.
-        # self.connect("regular_layout.n_turbines_regular", ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
-        self.connect('indep2.n_turbines', ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
+        self.connect("regular_layout.n_turbines_regular", ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
+        # self.connect('indep2.n_turbines', ['AeroAEP.n_turbines', 'TI.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
         self.connect('indep2.cut_in', 'AeroAEP.cut_in')
         self.connect('indep2.cut_out', 'AeroAEP.cut_out')
         self.connect('indep2.weibull_shapes', 'AeroAEP.weibull_shapes')
         self.connect('indep2.weibull_scales', 'AeroAEP.weibull_scales')
         self.connect('indep2.dir_probabilities', 'AeroAEP.dir_probabilities')
         self.connect('indep2.wind_directions', 'AeroAEP.wind_directions')
-        # self.connect('indep2.turbine_radius', 'AeroAEP.turbine_radius')
         self.connect('indep2.turbine_radius', ['AeroAEP.turbine_radius', 'TI.radius'])
 
         for n in range(max_n_turbines):
@@ -183,7 +186,7 @@ if __name__ == '__main__':
     prob.setup()
 
     print clock(), "After setup"
-    view_model(prob) # Uncomment to view N2 chart.
+    # view_model(prob) # Uncomment to view N2 chart.
     start = time()
 
     # prob.run_model()
@@ -235,12 +238,12 @@ if __name__ == '__main__':
     # print prob['indep2.layout']
     # # print [[prob['AEP.wakemodel.combine.U'][i] for i in [x[0] for x in ordered]] for item  in prob['AEP.wakemodel.combine.U']]
 
-    print "second run"
-    start = time()
-    # print clock(), "Before 2nd run"
-    prob.run_model()
-    print clock(), "After 2nd run"
-    print time() - start, "seconds", clock()
+    # print "second run"
+    # start = time()
+    # # print clock(), "Before 2nd run"
+    # prob.run_model()
+    # print clock(), "After 2nd run"
+    # print time() - start, "seconds", clock()
     # print prob['lcoe.LCOE']
 
     # with open("angle_power.dat", "w") as out:
