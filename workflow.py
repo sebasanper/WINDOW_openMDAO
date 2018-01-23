@@ -178,18 +178,15 @@ if __name__ == '__main__':
     print_nice("Before defining problem", clock())
     prob = Problem()
     prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
-    # print clock(), "Before setup"
 #     prob.model.approx_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'], method='fd', step=1e-7, form='central', step_calc='rel')
     print_nice("Before setup", clock())
     prob.setup()
 
     print clock(), "After setup"
-    # view_model(prob) # Uncomment to view N2 chart.
+    view_model(prob) # Uncomment to view N2 chart.
     start = time()
 
-
-#     prob.setup()
-    prob.run_model()
+    # prob.run_model()
     # prob.check_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'])
 
     # of = ['lcoe.LCOE']
@@ -197,8 +194,6 @@ if __name__ == '__main__':
     # derivs = prob.compute_totals(of=of, wrt=wrt)
 
     # print(derivs['lcoe.LCOE', 'indep2.layout'])
-    # # print clock(), "Before 1st run"
-    # prob.run_model()
     print_nice("After first run", time() - start)
 
     print_nice("Power", prob['AeroAEP.wakemodel.p'])
@@ -243,22 +238,10 @@ if __name__ == '__main__':
     print "second run"
     start = time()
     # print clock(), "Before 2nd run"
-    # prob['indep2.wind_directions'] = 0.0
     prob.run_model()
     print clock(), "After 2nd run"
     print time() - start, "seconds", clock()
     # print prob['lcoe.LCOE']
-
-
-    # print "third run"
-    # start = time()
-    # print clock(), "Before 3rd run"
-    # prob['indep2.wind_directions'] = 270.0
-    # prob.run_model()
-    # print clock(), "After 3rd run"
-    # print time() - start, "seconds", clock()
-    # print prob['lcoe.LCOE']
-
 
     # with open("angle_power.dat", "w") as out:
     #     for n in range(n_cases):
