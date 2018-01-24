@@ -2,7 +2,7 @@ from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
-from input_params import turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, areas
+from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
 from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
@@ -15,12 +15,46 @@ from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
 from constraints import MinDistance, WithinBoundaries
 from regular_parameterised import RegularLayout
-#development branch
+from random import uniform
+from transform_quadrilateral import AreaMapping
+
 real_angle = 30.0
 artificial_angle = 30.0
 n_windspeedbins = 0
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print (n_cases, "Number of cases")
+
+squares = []
+for n in range(n_quadrilaterals):
+   square = [[1.0 / n_quadrilaterals * n, 0.0], [n * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 0.0]]
+   squares.append(square)
+borssele_mapping1 = AreaMapping(areas[0], squares[0])
+borssele_mapping2 = AreaMapping(areas[1], squares[1])
+def create_random():
+   xt, yt = 2.0, 2.0
+   while (xt < 0.0 or xt > 1.0) or (yt < 0.0 or yt > 1.0):
+      xb, yb = uniform(min(min([item[0] for item in areas[0]]), min([item[0] for item in areas[1]])), max(max([item[0] for item in areas[0]]), max([item[0] for item in areas[1]]))), uniform(min(min([item[1] for item in areas[0]]), min([item[1] for item in areas[1]])), max(max([item[1] for item in areas[0]]), max([item[1] for item in areas[1]])))
+      if yb > separation_equation_y(xb):
+        xt, yt = borssele_mapping1.transform_to_rectangle(xb, yb)
+      else:
+        xt, yt = borssele_mapping2.transform_to_rectangle(xb, yb)
+   return [xb, yb]
+
+squares = []
+for n in range(n_quadrilaterals):
+   square = [[1.0 / n_quadrilaterals * n, 0.0], [n * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 0.0]]
+   squares.append(square)
+borssele_mapping1 = AreaMapping(areas[0], squares[0])
+borssele_mapping2 = AreaMapping(areas[1], squares[1])
+def create_random():
+   xt, yt = 2.0, 2.0
+   while (xt < 0.0 or xt > 1.0) or (yt < 0.0 or yt > 1.0):
+      xb, yb = uniform(min(min([item[0] for item in areas[0]]), min([item[0] for item in areas[1]])), max(max([item[0] for item in areas[0]]), max([item[0] for item in areas[1]]))), uniform(min(min([item[1] for item in areas[0]]), min([item[1] for item in areas[1]])), max(max([item[1] for item in areas[0]]), max([item[1] for item in areas[1]])))
+      if yb > separation_equation_y(xb):
+        xt, yt = borssele_mapping1.transform_to_rectangle(xb, yb)
+      else:
+        xt, yt = borssele_mapping2.transform_to_rectangle(xb, yb)
+   return [xb, yb]
 
 
 class NumberLayout(ExplicitComponent):
@@ -44,11 +78,10 @@ class WorkingGroup(Group):
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         indep2.add_output("areas", val=areas)
-        # indep2.add_output('layout', val=read_layout('horns_rev.dat')[:3])
-        indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
-                                                  [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
-                                                  [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))#,
-        #                                           [9, 1160.0, 1160.0]]))
+        indep2.add_output('layout', val=np.array([create_random() for _ in range(max_n_turbines)]))
+        # indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
+        #                                           [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
+        #                                           [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))
 
         wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
 
@@ -68,9 +101,8 @@ class WorkingGroup(Group):
         indep2.add_output('cut_in', val=8.5)
         indep2.add_output('cut_out', val=8.5)
         indep2.add_output('turbine_radius', val=turbine_radius)
-        indep2.add_output('n_turbines', val=9)
-        # indep2.add_output('n_turbines_p_cable_type', val=[5, 7, 0])
-        indep2.add_output('n_turbines_p_cable_type', val=[1, 2, 0])
+        indep2.add_output('n_turbines', val=74)
+        indep2.add_output('n_turbines_p_cable_type', val=[1, 2, 0])  # In ascending order, but 0 always at the end. 0 is used for requesting only two or three cable types.
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=1)
         indep2.add_output('electrical_efficiency', val=0.99)
