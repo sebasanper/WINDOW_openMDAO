@@ -1,13 +1,14 @@
 from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
+from Turbine.Curves import Curves
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
-from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y
+from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
 from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
 from src.Utils.read_files import read_layout, read_windrose
-from WaterDepth.water_depth_models import RoughInterpolation
+from WaterDepth.water_depth_models import RoughInterpolation, RoughClosestNode
 from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
 from SupportStructure.teamplay import TeamPlay
 from OandM.OandM_models import OM_model1
@@ -20,7 +21,7 @@ from transform_quadrilateral import AreaMapping
 
 real_angle = 30.0
 artificial_angle = 30.0
-n_windspeedbins = 0
+n_windspeedbins = 10
 n_cases = int((360.0 / artificial_angle) * (n_windspeedbins + 1.0))
 print (n_cases, "Number of cases")
 
@@ -68,11 +69,12 @@ class NumberLayout(ExplicitComponent):
 
 
 class WorkingGroup(Group):
-    def __init__(self, fraction_model=JensenWakeFraction, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation):
+    def __init__(self, fraction_model=JensenWakeFraction, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
         self.merge_model = merge_model
+        self.turbine_model = turbine_model
         self.turbulence_model = turbulence_model
 
     def setup(self):
@@ -98,24 +100,24 @@ class WorkingGroup(Group):
         indep2.add_output('weibull_scales', val=wsc)
         indep2.add_output('dir_probabilities', val=wdp)
         indep2.add_output('wind_directions', val=wd)  # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
-        indep2.add_output('cut_in', val=8.5)
-        indep2.add_output('cut_out', val=8.5)
+        indep2.add_output('cut_in', val=cutin_wind_speed)
+        indep2.add_output('cut_out', val=cutout_wind_speed)
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=74)
-        indep2.add_output('n_turbines_p_cable_type', val=[1, 2, 0])  # In ascending order, but 0 always at the end. 0 is used for requesting only two or three cable types.
+        indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or three cable types.
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=1)
         indep2.add_output('electrical_efficiency', val=0.99)
         indep2.add_output('transm_electrical_efficiency', val=0.95)
-        indep2.add_output('operational_lifetime', val=20.0)
+        indep2.add_output('operational_lifetime', val=operational_lifetime)
         indep2.add_output('interest_rate', val=interest_rate)
 
         indep2.add_output('TI_amb', val=[0.11 for _ in range(n_cases)])
         self.add_subsystem('numberlayout', NumberLayout())
-        self.add_subsystem('depths', RoughInterpolation(max_n_turbines))
-        self.add_subsystem('platform_depth', RoughInterpolation(max_n_substations))
+        self.add_subsystem('depths', RoughClosestNode(max_n_turbines))
+        self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations))
 
-        self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.fraction_model, self.deficit_model, self.merge_model))
+        self.add_subsystem('AeroAEP', AEPWorkflow(real_angle, artificial_angle, n_windspeedbins, self.fraction_model, self.deficit_model, self.merge_model, self.turbine_model))
         self.add_subsystem('TI', TIWorkflow(n_cases, self.turbulence_model))
 
         self.add_subsystem('electrical', TopologyHybridHeuristic())
@@ -197,7 +199,7 @@ if __name__ == '__main__':
         print header
     print_nice("Before defining problem", clock())
     prob = Problem()
-    prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation)
+    prob.model = WorkingGroup(JensenWakeFraction, JensenWakeDeficit, MergeRSS, DanishRecommendation, Curves)
 #     prob.model.approx_totals(of=['lcoe.LCOE'], wrt=['indep2.layout'], method='fd', step=1e-7, form='central', step_calc='rel')
     print_nice("Before setup", clock())
     prob.setup()
@@ -216,7 +218,15 @@ if __name__ == '__main__':
     # print(derivs['lcoe.LCOE', 'indep2.layout'])
     print_nice("After first run", time() - start)
 
-    print_nice("Power", prob['lcoe.LCOE'])
+    print_nice("LCOE", prob['lcoe.LCOE'])
+    print_nice("AEP", prob['AEP.AEP'])
+    print_nice("investment costs", prob['Costs.investment_costs'])
+    print_nice("OandM.annual_cost_O&M", prob['OandM.annual_cost_O&M'])
+    print_nice("Costs.decommissioning_costs", prob['Costs.decommissioning_costs'])
+
+    print_nice("support.cost_support", sum(prob['support.cost_support']))
+    print_nice("electrical.cost_p_cable_type", prob['electrical.cost_p_cable_type'])
+
     # print prob['AeroAEP.wakemodel.combine.ct']
     # print prob['lcoe.LCOE']
     # with open('all_outputs.dat', 'w') as out:

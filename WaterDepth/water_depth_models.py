@@ -1,5 +1,7 @@
 from src.api import AbstractWaterDepth
 from scipy.interpolate import interp2d
+import pickle
+import numpy as np
 
 
 class RoughInterpolation(AbstractWaterDepth):
@@ -24,4 +26,28 @@ class RoughInterpolation(AbstractWaterDepth):
         for coordinate in layout:
             water_depths.append(interpfunction(coordinate[0], coordinate[1])[0])  # Minimum water depth 6 m.
             # water_depths.append(5.8)
+        return water_depths
+
+class RoughClosestNode(AbstractWaterDepth):
+
+    def depth_model(self, layout):
+
+        pick_file = open("WaterDepth/bathymetry.pkl", "rb")
+        bathymetry = pickle.load(pick_file)
+        pick_file.close()
+
+
+        def closest_node(node, nodes):
+            nodes = np.asarray(nodes)
+            dist_2 = np.sum((nodes - node)**2, axis=1)
+            return np.argmin(dist_2)
+
+        def depth(x, y):
+            return bathymetry[closest_node([x, y], bathymetry[:,[0, 1]])][2]
+
+        water_depths = []
+        if len(layout[0]) == 3:
+            layout = [[i[1], i[2]] for i in layout]
+        for coordinate in layout:
+            water_depths.append(depth(coordinate[0], coordinate[1]))  # Minimum water depth 6 m.
         return water_depths

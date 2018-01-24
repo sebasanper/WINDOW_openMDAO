@@ -1,6 +1,7 @@
 from input_params import max_n_turbines
 import numpy as np
 from src.api import AbstractPower
+from aero_models import AeroLookup
 
 
 class PowerPolynomial(AbstractPower):
@@ -17,26 +18,29 @@ class PowerPolynomial(AbstractPower):
         return power
 
 
+class PowerDTU10(AbstractPower):
+
+    def power_model(self, u0):
+        table_power = AeroLookup("power_dtu10.dat")
+        if wind_speed < cutin:
+            return 0.0
+        elif wind_speed <= cutout:
+            p = table_power.interpolation(wind_speed)
+            return p * 1000.0
+        else:
+            return 0.0
+
+
 if __name__ == '__main__':
-    from openmdao.api import Problem, Group, IndepVarComp, ExecComp
 
-    class PowerFidelity1(AbstractPower):
+    def power_model(u0):
+        table_power = AeroLookup("power_dtu10.dat")
+        if wind_speed < cutin:
+            return 0.0
+        elif wind_speed <= cutout:
+            p = table_power.interpolation(wind_speed)
+            return p
+        else:
+            return 0.0
 
-        def compute(self, inputs, outputs):
-
-            outputs['p'] = inputs['u'] ** 3.0
-
-    model = Group()
-    ivc = IndepVarComp()
-    ivc.add_output('u', 7.0)
-    model.add_subsystem('indep', ivc)
-    model.add_subsystem('pow', PowerFidelity1())
-    model.add_subsystem('equal', ExecComp('y=x+1'))
-
-    model.connect('indep.u', 'pow.u')
-    model.connect('pow.p', 'equal.x')
-
-    prob = Problem(model)
-    prob.setup()
-    prob.run_model()
-    print(prob['equal.y'])
+print power_model(10.5)

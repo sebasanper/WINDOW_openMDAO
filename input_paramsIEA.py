@@ -5,7 +5,7 @@ import numpy as np
 turbine_voltage = 66000.0
 turbine_rated_power = 10000000.0
 cutin_wind_speed = 4.0
-cutout_wind_speed = 25
+cutout_wind_speed = 25.0
 
 hub_height = 119.0
 solidity_rotor = 0.0516  # [-] 'Generic' value, based on Peter Jamieson's book - Figure 2.5 - P.53

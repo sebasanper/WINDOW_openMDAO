@@ -3,7 +3,7 @@ from input_params import max_n_turbines
 import numpy as np
 
 
-class AbstractPower(ExplicitComponent):
+class AbstractPower2(ExplicitComponent):
     def __init__(self, n_cases):
         super(AbstractPower, self).__init__()
         self.n_cases = n_cases
