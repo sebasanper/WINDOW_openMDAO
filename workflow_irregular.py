@@ -5,19 +5,15 @@ import numpy as np
 from time import time, clock
 from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable
 from WakeModel.WakeMerge.RSS import MergeRSS
-from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP
+from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP, NumberLayout, MinDistance, WithinBoundaries, RegularLayout, AreaMapping, read_layout, read_windrose
 from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
-from src.Utils.read_files import read_layout, read_windrose
 from WaterDepth.water_depth_models import RoughInterpolation, RoughClosestNode
 from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
 from SupportStructure.teamplay import TeamPlay
 from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
-from src.Utils.constraints import MinDistance, WithinBoundaries
-from src.Utils.regular_parameterised import RegularLayout
 from random import uniform
-from src.Utils.transform_quadrilateral import AreaMapping
 
 real_angle = 30.0
 artificial_angle = 30.0
@@ -41,32 +37,6 @@ def create_random():
         xt, yt = borssele_mapping2.transform_to_rectangle(xb, yb)
    return [xb, yb]
 
-squares = []
-for n in range(n_quadrilaterals):
-   square = [[1.0 / n_quadrilaterals * n, 0.0], [n * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 0.0]]
-   squares.append(square)
-borssele_mapping1 = AreaMapping(areas[0], squares[0])
-borssele_mapping2 = AreaMapping(areas[1], squares[1])
-def create_random():
-   xt, yt = 2.0, 2.0
-   while (xt < 0.0 or xt > 1.0) or (yt < 0.0 or yt > 1.0):
-      xb, yb = uniform(min(min([item[0] for item in areas[0]]), min([item[0] for item in areas[1]])), max(max([item[0] for item in areas[0]]), max([item[0] for item in areas[1]]))), uniform(min(min([item[1] for item in areas[0]]), min([item[1] for item in areas[1]])), max(max([item[1] for item in areas[0]]), max([item[1] for item in areas[1]])))
-      if yb > separation_equation_y(xb):
-        xt, yt = borssele_mapping1.transform_to_rectangle(xb, yb)
-      else:
-        xt, yt = borssele_mapping2.transform_to_rectangle(xb, yb)
-   return [xb, yb]
-
-
-class NumberLayout(ExplicitComponent):
-    def setup(self):
-        self.add_input("orig_layout", shape=(max_n_turbines, 2))
-        self.add_output("number_layout", shape=(max_n_turbines, 3))
-
-    def compute(self, inputs, outputs):
-        orig_layout = inputs["orig_layout"]
-        outputs["number_layout"] = [[n, orig_layout[n][0], orig_layout[n][1]] for n in range(len(orig_layout))]
-
 
 class WorkingGroup(Group):
     def __init__(self, fraction_model=JensenWakeFraction, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves):
@@ -81,11 +51,8 @@ class WorkingGroup(Group):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
         indep2.add_output("areas", val=areas)
         indep2.add_output('layout', val=np.array([create_random() for _ in range(max_n_turbines)]))
-        # indep2.add_output('layout', val=np.array([[0.0, 0.0], [560.0, 0.0], [1120.0, 0.0],
-        #                                           [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
-        #                                           [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))
 
-        wd, wsc, wsh, wdp = read_windrose('Input/weibull_windrose_12unique.dat')
+        wd, wsc, wsh, wdp = read_windrose(windrose_file)
 
         # wsh = [1.0, 1.0, 1.0, 1.0]
         # wsc = [8.0, 8.0, 8.0, 8.0]
