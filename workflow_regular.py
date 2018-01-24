@@ -13,8 +13,8 @@ from SupportStructure.teamplay import TeamPlay
 from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
-from constraints import MinDistance, WithinBoundaries
-from regular_parameterised import RegularLayout
+from src.Utils.constraints import MinDistance, WithinBoundaries
+from src.Utils.regular_parameterised import RegularLayout
 #development branch
 real_angle = 30.0
 artificial_angle = 30.0

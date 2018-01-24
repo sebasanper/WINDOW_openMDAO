@@ -32,7 +32,7 @@ class RoughClosestNode(AbstractWaterDepth):
 
     def depth_model(self, layout):
 
-        pick_file = open("WaterDepth/bathymetry.pkl", "rb")
+        pick_file = open("Input/bathymetry.pkl", "rb")
         bathymetry = pickle.load(pick_file)
         pick_file.close()
 

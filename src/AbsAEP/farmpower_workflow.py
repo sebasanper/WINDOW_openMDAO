@@ -1,6 +1,6 @@
 from openmdao.api import Group, ExplicitComponent
 from src.AbsWakeModel.wake_linear_solver import WakeModel
-from src.AbsPower.abstract_power import FarmAeroPower
+from src.AbsAEP.abstract_power import FarmAeroPower
 from src.SiteConditionsPrep.windrose_process import WindrosePreprocessor
 from src.AbsAEP.open_cases import OpenCases
 from time import clock

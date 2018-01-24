@@ -7,7 +7,7 @@ class Curves(AbsTurbine):
 
     def turbine_model(self, u):
 
-        table = AeroLookup("Turbine/power_dtu10.dat")
+        table = AeroLookup("Input/power_dtu10.dat")
         if u < cutin:
             power = 0.0
         elif u <= cutout:
@@ -16,7 +16,7 @@ class Curves(AbsTurbine):
         else:
             power = 0.0
 
-        table = AeroLookup("Turbine/ct_dtu10.dat")
+        table = AeroLookup("Input/ct_dtu10.dat")
         if u < cutin:
             ct = 0.0000001
         elif u <= cutout:

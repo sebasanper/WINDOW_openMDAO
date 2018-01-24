@@ -14,10 +14,10 @@ from SupportStructure.teamplay import TeamPlay
 from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
-from constraints import MinDistance, WithinBoundaries
-from regular_parameterised import RegularLayout
+from src.Utils.constraints import MinDistance, WithinBoundaries
+from src.Utils.regular_parameterised import RegularLayout
 from random import uniform
-from transform_quadrilateral import AreaMapping
+from src.Utils.transform_quadrilateral import AreaMapping
 
 real_angle = 30.0
 artificial_angle = 30.0
@@ -85,7 +85,7 @@ class WorkingGroup(Group):
         #                                           [0.0, 560.0], [560.0, 560.0], [1120.0, 560.0],
         #                                           [0.0, 1120.0], [560.0, 1120.0], [1120.0, 1120.0]]))
 
-        wd, wsc, wsh, wdp = read_windrose('weibull_windrose_12unique.dat')
+        wd, wsc, wsh, wdp = read_windrose('Input/weibull_windrose_12unique.dat')
 
         # wsh = [1.0, 1.0, 1.0, 1.0]
         # wsc = [8.0, 8.0, 8.0, 8.0]
