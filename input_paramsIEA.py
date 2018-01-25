@@ -24,7 +24,7 @@ generator_voltage = 4000.0  # [V] There are 480 and 690 voltage versions of the 
 purchase_price = 10000000.0  # [Euro]
 warranty_percentage = 15  # [%]
 
-# central_platform = [[498000.0, 5731000.0], [490000.0, 5725000.0], [492000.0, 5732000.0]]
+# central_platform = [[0, 498000.0, 5731000.0], [1, 490000.0, 5725000.0], [2, 492000.0, 5732000.0]]
 central_platform = [0, 498000.0, 5731000.0]
 number_turbines_per_cable = [2, 4, 7]
 n_quadrilaterals = 2
@@ -50,12 +50,12 @@ submerged_unit_weight = 10000.0  # [N/m^3] From 'friction angle-report', lighter
 V_rated_voltage = [22000, 33000, 45000, 66000, 132000, 220000]  # Rated voltage in V # User's option
 rv = 3  # User can pick each time one rated voltage. 0 represents the first place in a Python list
 
-power_factor = 1.0  # cos angle
+# power_factor = 1.0  # cos angle
 
 # cost constants
-Ap_init = [0.284, 0.411, 0.516, 0.688, 1.971, 3.181]  # must be multiplied by 10**6
-Bp_init = [0.583, 0.596, 0.612, 0.625, 0.209, 0.11]  # must be multiplied by 10**6
-Cp_init = [6.15, 4.1, 3.0, 2.05, 1.66, 1.16]  # must be multiplied by 10**6
+# Ap_init = [0.284, 0.411, 0.516, 0.688, 1.971, 3.181]  # must be multiplied by 10**6
+# Bp_init = [0.583, 0.596, 0.612, 0.625, 0.209, 0.11]  # must be multiplied by 10**6
+# Cp_init = [6.15, 4.1, 3.0, 2.05, 1.66, 1.16]  # must be multiplied by 10**6
 
 # Cable procurement costs
 
@@ -65,7 +65,7 @@ Cp_init = [6.15, 4.1, 3.0, 2.05, 1.66, 1.16]  # must be multiplied by 10**6
 
 # -------------------------------------------------- Cable Topology - INPUT -----------------------------------------------------------------------
 Crossing_penalty = 0
-Area = []
+# Area = []
 # Transmission=[[central_platform_locations[0],[463000,5918000]],[central_platform_locations[1],[463000,5918000]]]
 Transmission = []
 
