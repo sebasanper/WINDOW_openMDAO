@@ -1,4 +1,4 @@
-from input_params import solidity_rotor, cd_rotor_idle_vane, cd_nacelle, front_area_nacelle, max_thrust, yaw_to_hub_height, mass, mass_eccentricity, yaw_diameter, rotor_radius, wind_speed_at_max_thrust, generator_voltage, purchase_price, warranty_percentage
+from input_params import solidity_rotor, cd_rotor_idle_vane, cd_nacelle, front_area_nacelle, max_thrust, yaw_to_hub_height, mass, mass_eccentricity, yaw_diameter, rotor_radius, wind_speed_at_max_thrust#, generator_voltage, warranty_percentage
 
 
 class Properties:
@@ -25,16 +25,16 @@ class RNA:
     yaw_diameter = yaw_diameter  # [m] From OWTES V66
     rotor_radius = rotor_radius  # [m]
     wind_speed_at_max_thrust = wind_speed_at_max_thrust  # [m/s] Horns rev website: 13 m/s - Vestas V80 brochure: 16 m/s, but max thrust appears at 12 m/s
-    generator_voltage = generator_voltage  # [V] There are 480 and 690 voltage versions of the V80. The higher voltage is assumed, considering the need of high voltage in the connections to the public grid.
+    # generator_voltage = generator_voltage  # [V] There are 480 and 690 voltage versions of the V80. The higher voltage is assumed, considering the need of high voltage in the connections to the public grid.
     # pm_interval = pm_interval  # [h] Horns Rev website: two services per year
     # pm_duration = pm_duration  # [h] (Spare parts report: 1x 3 days, 1x 2 days. 1 day = 12 hours minus ~3 hours preparation and sailing (2x 2 hours are mentioned for CM, but during PM an extra boat is available): average: 2.5 * 9 hours)
     # pm_consumables_costs = pm_consumables_costs  # [E] (Spare parts report: 1x 1500, 1x 1000 Euro; Average: 1250 Euro)
     # people_per_crew = people_per_crew  # [-] (Spare part optimisation report p.52: 6 Vattenfall technicians in 1 shift, with 3 Vestas service personnel, so probably 2 Vattenfall and 1 Vestas people per crew - For PM 2 technicians are needed)
-    purchase_price = purchase_price  # [Euro]
-    warranty_percentage = warranty_percentage  # [%]
+    # purchase_price = purchase_price  # [Euro]
+    # warranty_percentage = warranty_percentage  # [%]
 
     # PROCESSED DATA **************************************************
-    rated_power = 0.0  # [W]
+    # rated_power = 0.0  # [W]
 
     def __init__(self):
         pass
