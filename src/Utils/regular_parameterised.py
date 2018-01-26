@@ -35,8 +35,8 @@ class RegularLayout(ExplicitComponent):
         if count < max_n_turbines:
             to_add = max_n_turbines - count
             final += [[0.0, 0.0] for _ in range(to_add)]
+        # From the entire regular layout a random sample is taken with size max_n_turbines.
         reduced = [final[i] for i in sorted(sample(range(len(final)), max_n_turbines))]
-        print reduced
         outputs["regular_layout"] = reduced
         outputs["n_turbines_regular"] = len(outputs["regular_layout"])
 

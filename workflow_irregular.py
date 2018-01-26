@@ -1,4 +1,4 @@
-print "\n" + '-' * 10 + "\nworkflow_irregular only defines the workflow to be built. \nClass WorkingGroup needs to be imported from another working directory. \nAs an example we provide a working directory in the example folder. Run IEA_borssele.py from the 'example' folder instead.\n" + '-' * 10 + "\n"
+# workflow_regular.py only defines the workflow to be built. Class WorkingGroup needs to be imported from another working directory. As an example we provide a working directory in the example folder. Run IEA_borssele_regular.py from the 'example' folder instead
 
 from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from Turbine.Curves import Curves
