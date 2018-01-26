@@ -5,4 +5,8 @@ affiliation: Wind Energy Section, Faculty of Aerospace Engineering, TU Delft, th
 email: s.sanchezperezmoreno@tudelft.nl
 
 WINDOW is an MDAO workflow to design offshore wind farms. It is written in NASA's openMDAO framework.
-The publication by the same author "How to select MDAO workflows" presented at the AIAA SciTech 2018 conference shows the XDSM of WINDOW.
+The following publication by the same author shows the Extended Design Structure Matrix of WINDOW_openMDAO.
+
+Please cite:
+Sebastian Sanchez Perez Moreno and Michiel B. Zaaijer. "How to select MDAO workflows", 2018 AIAA/ASCE/AHS/ASC Structures, Structural Dynamics, and Materials Conference, AIAA SciTech Forum, (AIAA 2018-0654) 
+https://doi.org/10.2514/6.2018-0654 
