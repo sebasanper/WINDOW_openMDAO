@@ -37,6 +37,9 @@ class RegularLayout(ExplicitComponent):
             final += [[0.0, 0.0] for _ in range(to_add)]
         # From the entire regular layout a random sample is taken with size max_n_turbines.
         reduced = [final[i] for i in sorted(sample(range(len(final)), max_n_turbines))]
+        with open("layout_draw.dat", "w") as out:
+            for item in reduced:
+                out.write("{} {}\n".format(item[0], item[1]))
         outputs["regular_layout"] = reduced
         outputs["n_turbines_regular"] = len(outputs["regular_layout"])
 
@@ -54,6 +57,10 @@ def regular_layout(dx, dy, dh, areas, angle):
     layout_final = []
     centroid_small = centroid(areas)
     angle = deg2rad(angle)
+    with open("area.dat", "w") as areaout:
+        for area in areas:
+            for n in range(4) + [0]:
+                areaout.write("{} {}\n".format(area[n][0], area[n][1]))
 
     n_rows = int((max([rotate(place, angle, centroid_small)[0] for area in areas for place in area]) - min([rotate(place, angle, centroid_small)[0] for area in areas for place in area])) / dx) + 10
     n_columns = int((max([rotate(place, angle, centroid_small)[1] for area in areas for place in area]) - min([rotate(place, angle, centroid_small)[1] for area in areas for place in area])) / dy) + 10
@@ -108,6 +115,7 @@ def regular_layout(dx, dy, dh, areas, angle):
                 count += 1
             else:
                 extra = 1
+
     return layout_final, count
 
 

@@ -26,7 +26,6 @@ class LCOE(ExplicitComponent):
         operational_lifetime = inputs['operational_lifetime']
         interest_rate = inputs['interest_rate']
 
-        print interest_rate, operational_lifetime
         annuity = 1.0 / interest_rate * (1.0 - 1.0 / (1.0 + interest_rate) ** operational_lifetime)
 
         lcoe_previous = (investment_costs * 100.0) / (annuity * (AEP / 1000.0)) + oandm_costs * 100.0 / (AEP / 1000.0) + decommissioning_costs * 100.0 * (1.0 + 0.075) ** (- operational_lifetime) / (annuity * (AEP / 1000.0))

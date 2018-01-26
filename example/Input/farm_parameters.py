@@ -26,7 +26,7 @@ cable_types = [[95, 300, 206], [120, 340, 221], [150, 375, 236], [185, 420, 256]
 layout = create_random_layout(74)
 
 # For regular layouts use the parameters below.
-downwind_spacing = 200.0  # [m]
-crosswind_spacing = 200.0  # [m]
+downwind_spacing = 2100.0  # [m]
+crosswind_spacing = 800.0  # [m]
 odd_row_shift_spacing = 0.0  # [m] How many meters to shift every other row in the crosswind direction.
 layout_angle = 0.0  # [m] Rotation angle of the entire layout.
