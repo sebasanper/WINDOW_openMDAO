@@ -1,4 +1,3 @@
-# -----------------------------------------Input Parameters------------------------------------------------------------------
 from input_params import cable_types, turbine_rated_current
 import numpy as np
 
@@ -7,41 +6,29 @@ def choose_cables(number_turbines_per_cable):
     cables_info = cable_types
     cable_list = []
     for number in number_turbines_per_cable:
-        # print number
         for cable in cables_info:
             if turbine_rated_current * number <= cable[1]:
-                # print number, cable[2]
                 cable_list.append([number, cable[2] + 365.0])
                 break
     return cable_list
 
 
 def cable_design(WT_List, central_platform_locations, number_turbines_per_cable, cable_list):
-    # print WT_List, central_platform_locations, number_turbines_per_cable, cable_list
     from math import hypot
     from copy import deepcopy
     from heapq import heappush, heappop, heapify
-    # from time import time
 
     NT = len(WT_List)
-    # List of cable types: [Capacity,Cost] in increasing order (maximum 3 cable types)
 
-    # print cable_list
-    # cable_list = [[2, 256 + 365], [4, 406 + 365]]
-    # cable_list=[[5,110],[8,180]]
-    # cable_list=[[10,406+365]]
     Crossing_penalty = 0
     Area = []
-    # Transmission = [[central_platform_locations[0], [463000, 5918000]],
-    #                 [central_platform_locations[1], [463000, 5918000]]]
     Transmission = []
 
     'Remove and return the lowest priority task. Raise KeyError if empty.'
     REMOVED = '<removed-task>'  # placeholder for a removed task
 
-    # ---------------------------------------Main--------------------------------------------------------------------------------
+    # ---------------------------------------Main----------------------------------------------
     def set_cable_topology(NT, WT_List, central_platform_locations, cable_list):
-        # print cable_list
         Wind_turbines = []
         for WT in WT_List:
             Wind_turbines.append([WT[0] + 1, WT[1], WT[2]])
@@ -52,7 +39,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
             Wind_turbinesi[i], Costi[i], distancefromsubstationi[i] = initial_values(NT, Wind_turbines, substation)
             substationi[i] = substation
             i += 1
-        # splits the Wind_turbines list in the closest substation
+        # splits the Wind_turbines list wrt their closest substation
 
         def second(x):
             return x[2]

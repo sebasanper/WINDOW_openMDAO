@@ -10,7 +10,7 @@ from AbsSupportStructure.abstract_support_design import AbstractSupportStructure
 from AbsOandM.abstract_operations_maintenance import AbstractOandM
 from AbsAEP.aep import AEP
 from AbsTurbine.AbsTurbine import AbsTurbine
-from Utils.util_components import NumberLayout
+from Utils.util_components import NumberLayout, create_random_layout
 from Utils.constraints import MinDistance, WithinBoundaries
 from Utils.regular_parameterised import RegularLayout
 from Utils.transform_quadrilateral import AreaMapping

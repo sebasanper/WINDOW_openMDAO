@@ -1,9 +1,11 @@
+print "\n" + '-' * 10 + "\nworkflow_irregular only defines the workflow to be built. \nClass WorkingGroup needs to be imported from another working directory. \nAs an example we provide a working directory in the example folder. Run IEA_borssele.py from the 'example' folder instead.\n" + '-' * 10 + "\n"
+
 from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from Turbine.Curves import Curves
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
-from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, i as interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable
+from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, n_windrose_sectors, coll_electrical_efficiency, transm_electrical_efficiency
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP, NumberLayout, MinDistance, WithinBoundaries, RegularLayout, read_layout, read_windrose
 from src.Utils.util_components import create_random_layout
@@ -16,11 +18,11 @@ from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
 from random import uniform
 
-real_angle = 360.0
+real_angle = 360.0 / n_windrose_sectors
 
 
 class WorkingGroup(Group):
-    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=360.0, windspeed_sampling_points=1, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves):
+    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=30.0, windspeed_sampling_points=1, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
@@ -33,37 +35,26 @@ class WorkingGroup(Group):
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
+
         indep2.add_output("areas", val=areas)
-        indep2.add_output('layout', val=create_random_layout(max_n_turbines))
-        windrose_file = 'Input/weibull_windrose_12unique.dat'
-        # wd, wsc, wsh, wdp = read_windrose(windrose_file)
-
-        # wsh = [1.0, 1.0, 1.0, 1.0]
-        # wsc = [8.0, 8.0, 8.0, 8.0]
-        # wdp = [25.0, 25.0, 25.0, 25.0]
-        # wd = [0.0, 90.0, 180.0, 270.0]
-        wsh = [1.0]
-        wsc = [8.0]
-        wdp = [100.0]
-        wd = [90.0]
-
-        indep2.add_output('weibull_shapes', val=wsh)
-        indep2.add_output('weibull_scales', val=wsc)
-        indep2.add_output('dir_probabilities', val=wdp)
-        indep2.add_output('wind_directions', val=wd)  # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
+        indep2.add_output('layout', val=layout)
+        indep2.add_output('weibull_shapes', val=weibull_shapes)
+        indep2.add_output('weibull_scales', val=weibull_scales)
+        indep2.add_output('dir_probabilities', val=direction_probabilities)
+        indep2.add_output('wind_directions', val=wind_directions) # Follows windrose convention N = 0, E = 90, S = 180, W = 270 deg.
         indep2.add_output('cut_in', val=cutin_wind_speed)
         indep2.add_output('cut_out', val=cutout_wind_speed)
         indep2.add_output('turbine_radius', val=turbine_radius)
-        indep2.add_output('n_turbines', val=74)
-        indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or three cable types.
+        indep2.add_output('n_turbines', val=n_turbines)
+        indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or one cable type.
         indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=len(central_platform))
-        indep2.add_output('electrical_efficiency', val=0.99)
-        indep2.add_output('transm_electrical_efficiency', val=0.95)
+        indep2.add_output('coll_electrical_efficiency', val=coll_electrical_efficiency)
+        indep2.add_output('transm_electrical_efficiency', val=transm_electrical_efficiency)
         indep2.add_output('operational_lifetime', val=operational_lifetime)
         indep2.add_output('interest_rate', val=interest_rate)
+        indep2.add_output('TI_amb', val=[TI_ambient for _ in range(self.n_cases)])
 
-        indep2.add_output('TI_amb', val=[0.11 for _ in range(self.n_cases)])
         self.add_subsystem('numberlayout', NumberLayout())
         self.add_subsystem('depths', RoughClosestNode(max_n_turbines))
         self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations))
@@ -121,7 +112,7 @@ class WorkingGroup(Group):
         self.connect('AeroAEP.AEP', 'OandM.AEP')
         self.connect('OandM.availability', 'AEP.availability')
         self.connect('AeroAEP.AEP', 'AEP.aeroAEP')
-        self.connect('indep2.electrical_efficiency', 'AEP.electrical_efficiency')
+        self.connect('indep2.coll_electrical_efficiency', 'AEP.electrical_efficiency')
 
         self.connect('platform_depth.water_depths', 'Costs.depth_central_platform', src_indices=[0])
 

@@ -16,7 +16,7 @@ class AbstractElectricDesign(ExplicitComponent):
         self.add_output('cost_p_cable_type', shape=3)
         self.add_output('length_p_cable_type', shape=3)
 
-        #self.declare_partals(of=['topology', 'cost_p_cable_type', 'length_p_cable_type'], wrt=['layout', 'n_turbines_p_cable_type', 'substation_coords', 'n_substations', 'n_turbines'], method='fd')
+        # self.declare_partials(of=['topology', 'cost_p_cable_type', 'length_p_cable_type'], wrt=['layout', 'n_turbines_p_cable_type', 'substation_coords', 'n_substations', 'n_turbines'], method='fd')
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
@@ -69,5 +69,5 @@ class AbstractElectricDesign(ExplicitComponent):
         outputs['length_p_cable_type'] = cable_lengths
 
     def topology_design_model(self, layout, substation_coords, n_turbines_p_cable_type, n_substations):
-        # Define your own model in a subclass of AbstractCollectionDesign and redefining this method.
+        # Define your own model in a subclass of AbstractElectricDesign and redefining this method.
         pass
