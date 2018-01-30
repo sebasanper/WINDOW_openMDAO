@@ -1,4 +1,5 @@
 from openmdao.api import ExplicitComponent
+from time import clock
 
 
 class LCOE(ExplicitComponent):
@@ -30,5 +31,6 @@ class LCOE(ExplicitComponent):
 
         lcoe_previous = (investment_costs * 100.0) / (annuity * (AEP / 1000.0)) + oandm_costs * 100.0 / (AEP / 1000.0) + decommissioning_costs * 100.0 * (1.0 + 0.075) ** (- operational_lifetime) / (annuity * (AEP / 1000.0))
         lcoe = lcoe_previous / transm_electrical_efficiency
-        # print(lcoe)
+        print(lcoe)
+        print(clock())
         outputs['LCOE'] = lcoe

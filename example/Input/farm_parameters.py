@@ -1,6 +1,5 @@
 from utils_iea import create_random_layout
 
-V_rated_voltage = 66000.0 # Rated voltage in V
 central_platform = [0, 498000.0, 5731000.0]
 number_turbines_per_cable = [2, 4, 7]
 Crossing_penalty = 0
@@ -15,15 +14,16 @@ frequency = 50  # [Hz]
 transmission_voltage = 220000.0  # [V]
 grid_coupling_point_voltage = 169000.0  # [V]
 
-max_n_turbines = 74
-n_turbines = 74
+max_n_turbines = 9
 
 max_n_substations = 1
 max_n_branches = max_n_turbines_p_branch = max_n_turbines
 cable_types = [[95, 300, 206], [120, 340, 221], [150, 375, 236], [185, 420, 256], [240, 480, 287], [300, 530, 316], [400, 590, 356], [500, 655, 406], [630, 715, 459], [800, 775, 521], [1000, 825, 579]]  # List of cable types: [Cross section [mm^2], Capacity [A], Cost [EUR/m]] in increasing order (maximum 3 cable types)
 
 # For irregular layouts.
-layout = create_random_layout(74)
+# layout = create_random_layout(74)
+layout = [[0.0, 0.0], [882.0, 0.0], [1764.0, 0.0], [0.0, 882.0], [882.0, 882.0], [1764.0, 882.0], [0.0, 1764.0], [882.0, 1764.0], [1764.0, 1764.0]]
+n_turbines = len(layout)
 
 # For regular layouts use the parameters below.
 downwind_spacing = 2100.0  # [m]

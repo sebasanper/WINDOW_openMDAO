@@ -66,5 +66,6 @@ class PowersToAEP(ExplicitComponent):
         #     for n in range(self.windrose_cases):
         #         out.write('{} {} {}\n'.format(powers[n], probs[n], energies[n]))
         outputs['energies'] = energies
+        # print energies
         outputs['AEP'] = sum(energies)
         # print clock(), "Last line compute AEP energies"

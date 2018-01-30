@@ -25,14 +25,16 @@ start = time()
 prob.run_model()
 print_nice("Execution time first run", time() - start)
 
-print_nice("LCOE", prob['lcoe.LCOE'])
-print_nice("AEP", prob['AEP.AEP'])
-print_nice("investment costs", prob['Costs.investment_costs'])
-print_nice("OandM.annual_cost_O&M", prob['OandM.annual_cost_O&M'])
-print_nice("Costs.decommissioning_costs", prob['Costs.decommissioning_costs'])
+print_nice("wind speeds", prob["AeroAEP.open_cases.freestream_wind_speeds"])
+print_nice("turbulences", prob['find_max_TI.max_TI'])
+print_nice("AEP", prob['AeroAEP.AEP'])
+print_nice("powers", prob["AeroAEP.farmpower.ind_powers"])
+# print_nice("investment costs", prob['Costs.investment_costs'])
+# print_nice("OandM.annual_cost_O&M", prob['OandM.annual_cost_O&M'])
+# print_nice("Costs.decommissioning_costs", prob['Costs.decommissioning_costs'])
 
-print_nice("support.cost_support", sum(prob['support.cost_support']))
-print_nice("electrical.cost_p_cable_type", prob['electrical.cost_p_cable_type'])
+# print_nice("support.cost_support", sum(prob['support.cost_support']))
+# print_nice("electrical.cost_p_cable_type", prob['electrical.cost_p_cable_type'])
 
 # print "second run"
 # start = time()
