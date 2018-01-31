@@ -23,7 +23,7 @@ real_angle = 360.0 / n_windrose_sectors
 
 
 class WorkingGroup(Group):
-    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=1.0, windspeed_sampling_points=15, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves):
+    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=1.0, windspeed_sampling_points=15, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves, windrose_file='Input/weibull_windrose_12identical.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat'):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
@@ -33,6 +33,9 @@ class WorkingGroup(Group):
         self.windspeed_sampling_points = windspeed_sampling_points
         self.direction_sampling_angle = direction_sampling_angle
         self.n_cases = int((360.0 / self.direction_sampling_angle) * (self.windspeed_sampling_points + 1.0))
+        self.windrose_file = windrose_file
+        self.power_curve_file = power_curve_file
+        self.ct_curve_file = ct_curve_file
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
@@ -53,7 +56,7 @@ class WorkingGroup(Group):
         self.add_subsystem('depths', RoughClosestNode(max_n_turbines))
         self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations))
 
-        self.add_subsystem('AeroAEP', AEPFast())
+        self.add_subsystem('AeroAEP', AEPFast(self.direction_sampling_angle, self.windspeed_sampling_points, self.windrose_file, self.power_curve_file, self.ct_curve_file))
 
         self.add_subsystem('electrical', TopologyHybridHeuristic())
 

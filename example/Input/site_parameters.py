@@ -33,7 +33,7 @@ submerged_unit_weight = 10000.0  # [N/m^3] From 'friction angle-report', lighter
 
 # --------  Windrose  ----------------
 wind_directions, weibull_scales, weibull_shapes, direction_probabilities = read_windrose('Input/weibull_windrose_12identical.dat')
-n_windrose_sectors = 12
+n_windrose_sectors = len(wind_directions)
 # wind_directions = [i * 30.0 for i in range(n_windrose_sectors)]
 # weibull_scales = [8.65, 8.86, 8.15, 9.98, 11.35, 10.96, 11.28, 11.50, 11.08, 10.94, 11.27, 10.55]
 # weibull_shapes = [2.11, 2.05, 2.35, 2.55, 2.81, 2.74, 2.63, 2.40, 2.23, 2.28, 2.29, 2.28]
