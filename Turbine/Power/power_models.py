@@ -21,20 +21,7 @@ class PowerPolynomial(AbstractPower):
 class PowerDTU10(AbstractPower):
 
     def power_model(self, u0):
-        table_power = AeroLookup("power_dtu10.dat")
-        if wind_speed < cutin:
-            return 0.0
-        elif wind_speed <= cutout:
-            p = table_power.interpolation(wind_speed)
-            return p * 1000.0
-        else:
-            return 0.0
-
-
-if __name__ == '__main__':
-
-    def power_model(u0):
-        table_power = AeroLookup("power_dtu10.dat")
+        table_power = AeroLookup("Input/power_dtu10.dat")
         if wind_speed < cutin:
             return 0.0
         elif wind_speed <= cutout:
@@ -42,5 +29,4 @@ if __name__ == '__main__':
             return p
         else:
             return 0.0
-
-print power_model(10.5)
+ 

@@ -56,7 +56,7 @@ class PowersToAEP(ExplicitComponent):
         self.add_output('energies', shape=self.windrose_cases)
         self.add_output('AEP', val=0.0)
 
-        #self.declare_partals(of=['AEP', 'energies'], wrt=['powers', 'probabilities'], method='fd')
+        #self.declare_partials(of=['AEP', 'energies'], wrt=['powers', 'probabilities'], method='fd')
 
     def compute(self, inputs, outputs):
         powers = inputs['powers']
@@ -66,5 +66,6 @@ class PowersToAEP(ExplicitComponent):
         #     for n in range(self.windrose_cases):
         #         out.write('{} {} {}\n'.format(powers[n], probs[n], energies[n]))
         outputs['energies'] = energies
+        # print energies
         outputs['AEP'] = sum(energies)
         # print clock(), "Last line compute AEP energies"

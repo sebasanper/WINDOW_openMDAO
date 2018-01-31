@@ -19,6 +19,5 @@ def create_random_layout(n_turbs):
           else:
             xt, yt = borssele_mapping2.transform_to_rectangle(xb, yb)
        return [xb, yb]
-    print n
     layout = np.array([create_random() for _ in range(n_turbs)])
     return layout

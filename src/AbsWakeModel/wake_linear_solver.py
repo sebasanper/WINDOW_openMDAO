@@ -61,7 +61,6 @@ class LinearSolveWake(Group):
         self.connect('turbine{}.power'.format(max_n_turbines - 1), 'turbine{}.prev_turbine_p'.format(max_n_turbines))
         self.connect('turbine{}.ct'.format(max_n_turbines - 1), 'turbine{}.prev_turbine_ct'.format(max_n_turbines))
 
-
         # self.linear_solver = LinearRunOnce()
         # self.nonlinear_solver = NonlinearBlockGS()
         # self.nonlinear_solver.options['maxiter'] = 30
