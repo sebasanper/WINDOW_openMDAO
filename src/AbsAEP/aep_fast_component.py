@@ -1,14 +1,7 @@
-from os import path
-import sys
 from openmdao.api import ExplicitComponent
 from input_params import max_n_turbines
-import os 
 
-fn = os.path.join(os.path.dirname(__file__))
-split = os.path.split(fn)
-a = os.path.join(split[0], "WINDOW-dev")
-sys.path.append(a)
-from call_workflow_once import call_aep
+from src.AbsAEP.FastAEP.call_aep_workflow_once import call_aep
 
 
 class AEPFast(ExplicitComponent):
@@ -33,8 +26,5 @@ class AEPFast(ExplicitComponent):
 def fun_aep_fast(power_curve_file, ct_curve_file, windrose_file, layout, nbins, artif_angle):
     a=1
     c=2
-    d=0
     e=0
-    f=4
-    j=0
-    return call_aep(power_curve_file, ct_curve_file, windrose_file, layout, nbins, artif_angle, a, c, d, e, f, j)
+    return call_aep(power_curve_file, ct_curve_file, windrose_file, layout, nbins, artif_angle, a, c, e)

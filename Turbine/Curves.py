@@ -12,7 +12,7 @@ class Curves(AbsTurbine):
             power = 0.0
         elif u <= cutout:
             p = table.interpolation(u)
-            power = p * 1000.0
+            power = p
         else:
             power = 0.0
 

@@ -17,7 +17,7 @@ from OandM.OandM_models import OM_model1
 from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
 from random import uniform
-from aep_fast_component import AEPFast
+from src.AbsAEP.aep_fast_component import AEPFast
 
 real_angle = 360.0 / n_windrose_sectors
 

@@ -19,7 +19,7 @@ class DetermineIfInWake(ExplicitComponent):
 
         self.add_output('fractions', shape=(self.n_cases, max_n_turbines), val=0)
 
-        #self.declare_partals(of='fractions', wrt=['ordered', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'], method='fd')
+        #self.declare_partials(of='fractions', wrt=['ordered', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'], method='fd')
 
     def compute(self, inputs, outputs):
         # print "4 Determine"
@@ -68,7 +68,7 @@ class WakeDeficit(ExplicitComponent):
         self.add_input('n_turbines', val=1)
         self.add_output('dU', shape=(self.n_cases, max_n_turbines))
 
-        #self.declare_partals(of='dU', wrt=['fractions', 'ct', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'], method='fd')
+        #self.declare_partials(of='dU', wrt=['fractions', 'ct', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'], method='fd')
         
 
     def compute(self, inputs, outputs):
