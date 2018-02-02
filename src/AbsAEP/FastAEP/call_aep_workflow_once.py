@@ -1,6 +1,6 @@
 from aep_workflow import Workflow as aep_workflow
 
-from site_conditions.wind_conditions.windrose import WeibullWindBins
+from site_conditions.wind_conditions.windrose_new import WeibullWindBins
 from farm_energy.wake_model_mean_new.wake_turbulence_models import frandsen2, danish_recommendation, frandsen, \
     larsen_turbulence, Quarton
 from farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen, LarsenEffects as Larsen, Ainslie1DEffects as Ainslie1D, Ainslie2DEffects as Ainslie2D, constantwake

@@ -5,7 +5,7 @@ from Turbine.Curves import Curves
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
-from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, n_windrose_sectors, coll_electrical_efficiency, transm_electrical_efficiency
+from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency
 from WakeModel.WakeMerge.RSS import MergeRSS
 from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP, NumberLayout, MinDistance, WithinBoundaries, RegularLayout, read_layout, read_windrose
 from src.Utils.util_components import create_random_layout
@@ -19,11 +19,28 @@ from Finance.LCOE import LCOE
 from random import uniform
 from src.AbsAEP.aep_fast_component import AEPFast
 
-real_angle = 360.0 / n_windrose_sectors
+
+class XYLayout(ExplicitComponent):
+    def setup(self):
+        self.add_input("xs", shape=max_n_turbines)
+        self.add_input("ys", shape=max_n_turbines)
+        self.add_output("layout", shape=(max_n_turbines, 2))
+    def compute(self, inputs, outputs):
+        outputs["layout"] = [[inputs["xs"][i], inputs["ys"][i]] for i in range(max_n_turbines)]
+
+
+class ObjFun(ExplicitComponent):
+    def setup(self):
+        self.add_input("lcoe", val=0.0)
+        self.add_input("con_dist", val=0.0)
+        self.add_input("con_bound", val=0.0)
+        self.add_output("objfun", val=0.0)
+    def compute(self, inputs, outputs):
+        outputs["objfun"] = inputs["lcoe"] + inputs['con_bound'] + inputs['con_dist']
 
 
 class WorkingGroup(Group):
-    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=1.0, windspeed_sampling_points=15, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves, windrose_file='Input/weibull_windrose_12identical.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat'):
+    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=30.0, windspeed_sampling_points=10, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves, windrose_file='Input/weibull_windrose_12unique.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat'):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model
@@ -41,7 +58,9 @@ class WorkingGroup(Group):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
 
         indep2.add_output("areas", val=areas)
-        indep2.add_output('layout', val=layout)
+        # indep2.add_output('layout', val=layout)
+        indep2.add_output('layout_x', val=[item[0] for item in layout])
+        indep2.add_output('layout_y', val=[item[1] for item in layout])
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=n_turbines)
         indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or one cable type.
@@ -52,6 +71,7 @@ class WorkingGroup(Group):
         indep2.add_output('operational_lifetime', val=operational_lifetime)
         indep2.add_output('interest_rate', val=interest_rate)
 
+        self.add_subsystem("addXY", XYLayout())
         self.add_subsystem('numberlayout', NumberLayout())
         self.add_subsystem('depths', RoughClosestNode(max_n_turbines))
         self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations))
@@ -68,11 +88,14 @@ class WorkingGroup(Group):
         self.add_subsystem('constraint_distance', MinDistance())
         self.add_subsystem('constraint_boundary', WithinBoundaries())
 
-        self.connect("indep2.layout", ["numberlayout.orig_layout", "AeroAEP.layout"])
+        self.add_subsystem("objfun", ObjFun())
 
-        self.connect("indep2.layout", "constraint_distance.orig_layout")
+        self.connect("indep2.layout_x", "addXY.xs")
+        self.connect("indep2.layout_y", "addXY.ys")
+        self.connect("addXY.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
+        # self.connect("indep2.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
+
         self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
-        self.connect("indep2.layout", "constraint_boundary.layout")
         self.connect("indep2.areas", "constraint_boundary.areas")
 
         self.connect('numberlayout.number_layout', 'depths.layout')
@@ -108,3 +131,6 @@ class WorkingGroup(Group):
         self.connect('indep2.transm_electrical_efficiency', 'lcoe.transm_electrical_efficiency')
         self.connect('indep2.operational_lifetime', 'lcoe.operational_lifetime')
         self.connect('indep2.interest_rate', 'lcoe.interest_rate')
+        self.connect('lcoe.LCOE', 'objfun.lcoe')
+        self.connect('constraint_distance.n_constraint_violations', 'objfun.con_dist')
+        self.connect('constraint_boundary.n_constraint_violations', 'objfun.con_bound')
