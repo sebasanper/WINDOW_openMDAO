@@ -81,7 +81,7 @@ class Workflow:
         # thrust_coefficient.reset()
         # # ainslie.reset()
         # # ainslie_full.reset()
-        # determine_if_in_wake.reset()
+        determine_if_in_wake.reset()
         # wake_radius.reset()
         # wake_deficit.reset()
         # frandsen2.reset()

@@ -70,16 +70,16 @@ class WeibullWindBins(object):
 
             windspeeds.append(self.cutin + i * delta)
 
-        return windspeeds
+        return [0.0] + windspeeds + [self.cutout + 1.0], delta
 
     def speed_probabilities(self):
         self.adapt_directions()
         speed_probabilities = []
-        self.windspeeds = self.get_wind_speeds()
+        self.windspeeds, delta = self.get_wind_speeds()
         # print self.windspeeds
         for angle in self.new_direction2:
             place = self.new_direction2.index(angle)
-            prob_cutout = (1.0 - self.cumulative_weibull(self.cutout, self.new_weibull_scale2[place], self.new_weibull_shape2[place]))
+            prob_cutout = (1.0 - self.cumulative_weibull(self.windspeeds[-1], self.new_weibull_scale2[place], self.new_weibull_shape2[place]))
             # print prob_cutout
             length = len(self.windspeeds)
             windspeedprobabilities = [0.0 for _ in range(length)]
@@ -88,15 +88,15 @@ class WeibullWindBins(object):
 
                 if i == 0:
 
-                    windspeedprobabilities[i] = (self.cumulative_weibull(self.windspeeds[i], self.new_weibull_scale2[place], self.new_weibull_shape2[place]))
+                    windspeedprobabilities[i] = (self.cumulative_weibull(self.cutin, self.new_weibull_scale2[place], self.new_weibull_shape2[place]))
 
                 elif i < length - 1:
 
-                    windspeedprobabilities[i] = (self.cumulative_weibull(self.windspeeds[i], self.new_weibull_scale2[place], self.new_weibull_shape2[place]) - sum(windspeedprobabilities[:i]))
+                    windspeedprobabilities[i] = (self.cumulative_weibull(self.windspeeds[i+1], self.new_weibull_scale2[place], self.new_weibull_shape2[place]) - sum(windspeedprobabilities[:i]))
 
                 elif i == length - 1:
 
-                    windspeedprobabilities[i] = (self.cumulative_weibull(self.windspeeds[i], self.new_weibull_scale2[place], self.new_weibull_shape2[place]) - sum(windspeedprobabilities[:i]) + prob_cutout)
+                    windspeedprobabilities[i] = prob_cutout
 
             speed_probabilities.append([item * 100.0 for item in windspeedprobabilities])
         # print [sum(i) for i in speed_probabilities]
