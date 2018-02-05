@@ -58,7 +58,7 @@ class WorkingGroup(Group):
         indep2 = self.add_subsystem('indep2', IndepVarComp())
 
         indep2.add_output("areas", val=areas)
-        # indep2.add_output('layout', val=layout)
+        indep2.add_output('layout', val=layout)
         indep2.add_output('layout_x', val=[item[0] for item in layout])
         indep2.add_output('layout_y', val=[item[1] for item in layout])
         indep2.add_output('turbine_radius', val=turbine_radius)
@@ -92,8 +92,8 @@ class WorkingGroup(Group):
 
         self.connect("indep2.layout_x", "addXY.xs")
         self.connect("indep2.layout_y", "addXY.ys")
-        self.connect("addXY.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
-        # self.connect("indep2.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
+        # self.connect("addXY.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
+        self.connect("indep2.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
 
         self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
         self.connect("indep2.areas", "constraint_boundary.areas")
