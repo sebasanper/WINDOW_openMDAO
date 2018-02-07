@@ -11,7 +11,7 @@ class MinDistance(ExplicitComponent):
         self.add_output("n_constraint_violations", val=0)
         self.add_output("magnitude_violations", val=0)
 
-        #self.declare_partals(of='magnitude_violations', wrt=['turbine_radius', 'orig_layout'], method='fd')
+        #self.declare_partials(of='magnitude_violations', wrt=['turbine_radius', 'orig_layout'], method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs["orig_layout"]
@@ -42,7 +42,7 @@ class WithinBoundaries(ExplicitComponent):
         self.add_output("n_constraint_violations", val=0)
         self.add_output("magnitude_violations", val=0.0)
         
-        #self.declare_partals(of='magnitude_violations', wrt=['areas', 'layout'], method='fd')
+        #self.declare_partials(of='magnitude_violations', wrt=['areas', 'layout'], method='fd')
 
     def compute(self, inputs, outputs):
         layout = inputs["layout"]

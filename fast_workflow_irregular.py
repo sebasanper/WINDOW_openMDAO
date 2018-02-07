@@ -18,6 +18,8 @@ from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
 from random import uniform
 from src.AbsAEP.aep_fast_component import AEPFast
+from example.transform_quadrilateral_iea import AreaMapping
+from input_params import separation_equation_y
 
 
 class XYLayout(ExplicitComponent):
@@ -38,6 +40,28 @@ class ObjFun(ExplicitComponent):
     def compute(self, inputs, outputs):
         outputs["objfun"] = inputs["lcoe"] + inputs['con_bound'] + inputs['con_dist']
 
+
+class TransformLayout(ExplicitComponent):
+    def setup(self):
+        self.add_input("unitary_layout", shape=(74, 2))
+        self.add_input("areas", val=areas)
+        self.add_output("layout", shape=(74, 2))
+    def compute(self, inputs, outputs):
+        squares = []
+        for n in range(n_quadrilaterals):
+            square = [[1.0 / n_quadrilaterals * n, 0.0], [n * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 0.0]]
+            squares.append(square)
+        area = inputs["areas"]
+        unitary = inputs["unitary_layout"]
+        layout = []
+        maps = [AreaMapping(area[n], squares[n]) for n in range(2)]
+        for t in unitary:
+            if t[1] < 1:
+                mapped = maps[0].transform_to_shape(t[0], t[1])
+            else:
+                mapped = maps[1].transform_to_shape(t[0], t[1])
+            layout.append(mapped)
+        outputs["layout"] = layout
 
 class WorkingGroup(Group):
     def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=30.0, windspeed_sampling_points=10, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves, windrose_file='Input/weibull_windrose_12unique.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat'):
@@ -61,6 +85,7 @@ class WorkingGroup(Group):
         indep2.add_output('layout', val=layout)
         indep2.add_output('layout_x', val=[item[0] for item in layout])
         indep2.add_output('layout_y', val=[item[1] for item in layout])
+        indep2.add_output('unitary_layout', shape=(74, 2))
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=n_turbines)
         indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or one cable type.
@@ -72,6 +97,7 @@ class WorkingGroup(Group):
         indep2.add_output('interest_rate', val=interest_rate)
 
         self.add_subsystem("addXY", XYLayout())
+        self.add_subsystem("transform_layout", TransformLayout())
         self.add_subsystem('numberlayout', NumberLayout())
         self.add_subsystem('depths', RoughClosestNode(max_n_turbines))
         self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations))
@@ -92,8 +118,10 @@ class WorkingGroup(Group):
 
         self.connect("indep2.layout_x", "addXY.xs")
         self.connect("indep2.layout_y", "addXY.ys")
+        # self.connect("indep2.unitary_layout", "transform_layout.unitary_layout")
         # self.connect("addXY.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
         self.connect("indep2.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
+        # self.connect("transform_layout.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
 
         self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
         self.connect("indep2.areas", "constraint_boundary.areas")
