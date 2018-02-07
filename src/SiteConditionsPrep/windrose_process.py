@@ -4,6 +4,7 @@ import numpy as np
 from time import clock
 
 
+
 class WindrosePreprocessor(ExplicitComponent):
     def __init__(self, real_angle, artificial_angle, n_windspeedbins):
         super(WindrosePreprocessor, self).__init__()
