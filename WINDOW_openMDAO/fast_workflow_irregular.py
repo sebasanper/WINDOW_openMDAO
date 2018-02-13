@@ -65,7 +65,7 @@ class TransformLayout(ExplicitComponent):
         outputs["layout"] = layout
 
 class WorkingGroup(Group):
-    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=30.0, windspeed_sampling_points=10, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves, windrose_file=os.path.join(os.path.dirname(__file__), "Input/weibull_windrose_12unique.dat"), power_curve_file=os.path.join(os.path.dirname(__file__), "../Input/power_dtu10.dat"), ct_curve_file=os.path.join(os.path.dirname(__file__), "../Input/ct_dtu10.dat")):
+    def __init__(self, fraction_model=JensenWakeFraction, direction_sampling_angle=30.0, windspeed_sampling_points=10, deficit_model=JensenWakeDeficit, merge_model=MergeRSS, turbulence_model=DanishRecommendation, turbine_model=Curves, windrose_file=os.path.join(os.path.dirname(__file__), "Input/weibull_windrose_12unique.dat"), power_curve_file=os.path.join(os.path.dirname(__file__), "Input/power_dtu10.dat"), ct_curve_file=os.path.join(os.path.dirname(__file__), "Input/ct_dtu10.dat")):
         super(WorkingGroup, self).__init__()
         self.fraction_model = fraction_model
         self.deficit_model = deficit_model

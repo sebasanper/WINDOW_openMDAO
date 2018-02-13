@@ -1,4 +1,4 @@
-from WINDOW_OpenMDAO.Input.site_parameters import n_quadrilaterals, areas, separation_equation_y
+from WINDOW_openMDAO.Input.site_parameters import n_quadrilaterals, areas, separation_equation_y
 from transform_quadrilateral_iea import AreaMapping
 from random import uniform
 import numpy as np

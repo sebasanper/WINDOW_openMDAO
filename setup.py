@@ -66,5 +66,6 @@ setup(
       'WINDOW_openMDAO.src.SiteConditionsPrep',
       'WINDOW_openMDAO.src.Utils'
     ],
-    package_data={'WINDOW_openMDAO': ['Input/*.dat', 'Input/*.pkl']}
+    package_data={'WINDOW_openMDAO': ['Input/*.dat', 'Input/*.pkl',
+                                      'WakeModel/*.dat']}
 )
