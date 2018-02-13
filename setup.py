@@ -9,7 +9,7 @@ setup(
     NASA's openMDAO framework. The following publication shows the Extended
     Design Structure Matrix of WINDOW_openMDAO:
 
-    Sebastian Sanchez Perez Moreno and Michiel B. Zaaijer. “How to select MDAO workflows”,
+    Sebastian Sanchez Perez Moreno and Michiel B. Zaaijer. "How to select MDAO workflows",
     2018 AIAA/ASCE/AHS/ASC Structures, Structural Dynamics, and Materials Conference,
     AIAA SciTech Forum, (AIAA 2018-0654) https://doi.org/10.2514/6.2018-0654
     """,
