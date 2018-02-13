@@ -13,4 +13,14 @@ https://doi.org/10.2514/6.2018-0654
 
 ---------------------------------------------------
 
+To install, go to the directory where you have cloned the module and execute
+
+    python2 setup.py install --user
+
+Then its packages will be available under `WINDOW_openMDAO`.
+
+[Python 3 is not yet supported.]
+
+---------------------------------------------------
+
 In order to run from a working directory, you need to implement the WorkingGroup class (in workflow_*.py files) and define an OpenMDAO Problem class. All input must be put in a folder called "Input". See and run an example from the "example" folder provided. Run IEA_borssele_irregular.py.
