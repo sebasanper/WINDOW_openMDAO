@@ -18,11 +18,6 @@ setup(
     url='https://github.com/sebasanper/WINDOW_openMDAO',
     packages=[
         'WINDOW_openMDAO',
-        'WINDOW_openMDAO.fast_workflow_irregular',
-        'WINDOW_openMDAO.input_params',
-        'WINDOW_openMDAO.regular_parameterised',
-        'WINDOW_openMDAO.workflow_irregular',
-        'WINDOW_openMDAO.workflow_regular',
         'WINDOW_openMDAO.src',
         'WINDOW_openMDAO.Costs',
         'WINDOW_openMDAO.ElectricalCollection',
