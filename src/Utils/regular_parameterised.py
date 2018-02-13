@@ -1,17 +1,9 @@
 from random import random
 from transform_quadrilateral import AreaMapping
 from openmdao.api import ExplicitComponent
-from input_params import n_quadrilaterals, max_n_turbines
+from input_params import n_quadrilaterals, max_n_turbines, separation_equation_y
 import numpy as np
 from numpy import sin, cos, deg2rad
-
-from random import random, sample
-from transform_quadrilateral import AreaMapping
-from openmdao.api import ExplicitComponent
-from input_params import n_quadrilaterals, separation_equation_y, max_n_turbines
-import numpy as np
-from numpy import sin, cos, deg2rad
-
 
 class RegularLayout(ExplicitComponent):
     def setup(self):
@@ -22,7 +14,7 @@ class RegularLayout(ExplicitComponent):
         self.add_input("layout_angle", val=0.0)
 
         self.add_output("regular_layout", shape=(max_n_turbines, 2))
-        self.add_output("n_turbines_regular", val=0.0)
+        self.add_output("n_turbines", val=0)
 
     def compute(self, inputs, outputs):
         area = inputs["area"]
@@ -32,16 +24,17 @@ class RegularLayout(ExplicitComponent):
         layout_angle = inputs["layout_angle"]
 
         final, count = regular_layout(downwind_spacing, crosswind_spacing, odd_row_shift_spacing, area, layout_angle)
+        # print count, "number of turbines"
         if count < max_n_turbines:
             to_add = max_n_turbines - count
             final += [[0.0, 0.0] for _ in range(to_add)]
-        # From the entire regular layout a random sample is taken with size max_n_turbines.
-        reduced = [final[i] for i in sorted(sample(range(len(final)), max_n_turbines))]
-        with open("layout_draw.dat", "w") as out:
-            for item in reduced:
-                out.write("{} {}\n".format(item[0], item[1]))
+        # From the entire regular layout the first max_n_turbines are selected.
+        reduced = final[:max_n_turbines]
+        # with open("regular_draw.dat", "w") as outf:
+        #     for t in reduced:
+        #         outf.write("{} {}\n".format(t[0], t[1]))
         outputs["regular_layout"] = reduced
-        outputs["n_turbines_regular"] = len(outputs["regular_layout"])
+        outputs["n_turbines"] = count
 
 
 def centroid(areas):
@@ -117,9 +110,3 @@ def regular_layout(dx, dy, dh, areas, angle):
                 extra = 1
 
     return layout_final, count
-
-
-if __name__ == '__main__':
-    # areas = np.array([[[- 2000.0, - 2000.0], [0.0, - 2000.0], [3000.0, - 1000.0], [- 3000.0, 500.0]], [[- 3000.0, - 4000.0], [2000, - 4000.0], [0.0, - 2000.0], [- 2000.0, - 2000.0]]])
-    areas = np.array([[[- 3000.0, - 4000.0], [2000, - 4000.0], [0.0, - 2000.0], [- 2000.0, - 2000.0]]])
-    regular_layout(482.0, 250.0, 0.0, areas, 0.0)

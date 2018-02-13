@@ -20,6 +20,11 @@ class AEPFast(ExplicitComponent):
         self.add_output("max_TI", shape=max_n_turbines)
 
     def compute(self, inputs, outputs):
+        layout2 = inputs["layout"]
+        layout = []
+        for t in layout2:
+            if t[0] > 0.0 and t[1] > 0.0:
+                layout.append(t)
         outputs['AEP'], outputs['max_TI'] = fun_aep_fast(self.power_curve_file, self.ct_curve_file, self.windrose_file, inputs['layout'], self.nbins, self.artif_angles)
 
 
