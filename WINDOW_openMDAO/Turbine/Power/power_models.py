@@ -2,6 +2,7 @@ from WINDOW_openMDAO.input_params import max_n_turbines
 import numpy as np
 from WINDOW_openMDAO.src.api import AbstractPower
 from aero_models import AeroLookup
+import os
 
 
 class PowerPolynomial(AbstractPower):
@@ -21,7 +22,7 @@ class PowerPolynomial(AbstractPower):
 class PowerDTU10(AbstractPower):
 
     def power_model(self, u0):
-        table_power = AeroLookup("Input/power_dtu10.dat")
+        table_power = AeroLookup(os.path.join(os.path.dirname(__file__), "../../Input/power_dtu10.dat"))
         if wind_speed < cutin:
             return 0.0
         elif wind_speed <= cutout:

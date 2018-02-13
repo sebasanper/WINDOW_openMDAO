@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 def read_windrose(filename):
     direction = []
@@ -32,7 +33,7 @@ friction_angle = 35.0  # [degrees] Depth averaged friction angle from 'friction 
 submerged_unit_weight = 10000.0  # [N/m^3] From 'friction angle-report', lighter layer ignored, because it is at great depth.
 
 # --------  Windrose  ----------------
-wind_directions, weibull_scales, weibull_shapes, direction_probabilities = read_windrose('Input/weibull_windrose_12identical.dat')
+wind_directions, weibull_scales, weibull_shapes, direction_probabilities = read_windrose(os.path.join(os.path.dirname(__file__), "weibull_windrose_12identical.dat"))
 n_windrose_sectors = len(wind_directions)
 # wind_directions = [i * 30.0 for i in range(n_windrose_sectors)]
 # weibull_scales = [8.65, 8.86, 8.15, 9.98, 11.35, 10.96, 11.28, 11.50, 11.08, 10.94, 11.27, 10.55]

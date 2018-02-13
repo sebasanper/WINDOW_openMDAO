@@ -1,5 +1,6 @@
 from WINDOW_openMDAO.src.api import AbstractWaterDepth
 from scipy.interpolate import interp2d
+import os
 import pickle
 import numpy as np
 
@@ -32,7 +33,7 @@ class RoughClosestNode(AbstractWaterDepth):
 
     def depth_model(self, layout):
 
-        pick_file = open("Input/bathymetry.pkl", "rb")
+        pick_file = open(os.path.join(os.path.dirname(__file__), "../Input/bathymetry.pkl"), "rb")
         bathymetry = pickle.load(pick_file)
         pick_file.close()
 

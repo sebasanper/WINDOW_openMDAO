@@ -16,7 +16,7 @@ def print_nice(string, value):
     header += "=" * (22 + len(string))
     print header
 prob = Problem()
-# prob.model = WorkingGroup(direction_sampling_angle=10.0, windspeed_sampling_points=5, windrose_file='Input/weibull_windrose_12identical.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat')
+# prob.model = WorkingGroup(direction_sampling_angle=10.0, windspeed_sampling_points=5, windrose_file=os.path.join(os.path.dirname(__file__), "../Input/weibull_windrose_12identical.dat"), power_curve_file=os.path.join(os.path.dirname(__file__), "../Input/power_dtu10.dat"), ct_curve_file=os.path.join(os.path.dirname(__file__), "../Input/ct_dtu10.dat"))
 prob.model = WorkingGroup(direction_sampling_angle=1.0, windspeed_sampling_points=10)
 prob.setup()
 
