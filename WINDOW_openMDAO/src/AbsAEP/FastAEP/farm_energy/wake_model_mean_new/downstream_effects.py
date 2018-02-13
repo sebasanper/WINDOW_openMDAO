@@ -7,7 +7,7 @@ from ainslie2d import ainslie_full
 # ainslie_full = Memoize(ainslie_full)
 from ainslie_common import crosswind_distance, determine_front
 from time import time
-from input_params import rotor_radius
+from WINDOW_openMDAO.input_params import rotor_radius
 
 
 def constantwake(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity):

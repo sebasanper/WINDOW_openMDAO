@@ -1,7 +1,7 @@
 from openmdao.api import ExplicitComponent
 from numpy import deg2rad, tan, cos, sqrt
 import numpy as np
-from input_params import max_n_turbines
+from WINDOW_openMDAO.input_params import max_n_turbines
 
 
 def distance_to_front(x, y, theta):

@@ -1,6 +1,6 @@
-from input_params import max_n_turbines
+from WINDOW_openMDAO.input_params import max_n_turbines
 import numpy as np
-from src.api import AbstractPower
+from WINDOW_openMDAO.src.api import AbstractPower
 from aero_models import AeroLookup
 
 

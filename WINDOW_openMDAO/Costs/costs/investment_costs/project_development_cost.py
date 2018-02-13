@@ -1,5 +1,5 @@
 # Project development
-from Costs.costs.currency import Cost1
+from WINDOW_openMDAO.Costs.costs.currency import Cost1
 
 
 def project_development_cost(number_turbines, rated_power):

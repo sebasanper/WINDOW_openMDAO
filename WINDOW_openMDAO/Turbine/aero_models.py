@@ -1,5 +1,5 @@
 from numpy import pi
-from input_params import cutout_wind_speed, cutin_wind_speed, rotor_radius, wind_speed_at_max_thrust as rated_wind, turbine_rated_power as rated_power
+from WINDOW_openMDAO.input_params import cutout_wind_speed, cutin_wind_speed, rotor_radius, wind_speed_at_max_thrust as rated_wind, turbine_rated_power as rated_power
 
 def interpolate(minx, miny, maxx, maxy, valx):
     return miny + (maxy - miny) * ((valx - minx) / (maxx - minx))

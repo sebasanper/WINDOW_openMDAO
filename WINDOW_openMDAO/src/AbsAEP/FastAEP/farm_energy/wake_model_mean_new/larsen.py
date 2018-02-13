@@ -1,6 +1,6 @@
 from numpy import pi, sqrt, deg2rad, tan, cos, sin
 from area import AreaReal
-from input_params import rotor_radius as r0, hub_height as H
+from WINDOW_openMDAO.input_params import rotor_radius as r0, hub_height as H
 from memoize import Memoize
 
 D = 2.0 * r0

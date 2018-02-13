@@ -1,6 +1,6 @@
 from math import sqrt
 from memoize import Memoize
-from input_params import rotor_radius
+from WINDOW_openMDAO.input_params import rotor_radius
 #  Change in Fatigue and Extreme Loading when Moving Wind Farms Offshore // Sten Frandsen and Kenneth Thomsen.
 #  Only nearest wake-shedding turbine matters in a wind farm.
 

@@ -1,5 +1,5 @@
 def other_costs(depth_central_platform, n_turbines, infield_length, n_substations):
-    from input_params import turbine_rated_power
+    from WINDOW_openMDAO.input_params import turbine_rated_power
     from investment_costs.project_development_cost import project_development_cost
     from investment_costs.management_cost import management_costs
     from investment_costs.procurement_costs.auxiliary_costs.auxiliary_costs import auxiliary_procurement

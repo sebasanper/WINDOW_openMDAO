@@ -1,8 +1,8 @@
 from openmdao.api import ExplicitComponent, Group
-from input_params import max_n_turbines
+from WINDOW_openMDAO.input_params import max_n_turbines
 from numpy import sqrt
 import numpy as np
-from src.api import AbstractWakeMerge
+from WINDOW_openMDAO.src.api import AbstractWakeMerge
 
 
 class MergeRSS(AbstractWakeMerge):

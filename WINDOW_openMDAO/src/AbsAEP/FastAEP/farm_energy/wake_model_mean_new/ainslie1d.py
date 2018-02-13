@@ -1,6 +1,6 @@
 from numpy import exp
 from ainslie_common import b, E
-from input_params import rotor_radius
+from WINDOW_openMDAO.input_params import rotor_radius
 from memoize import Memoize
 D = rotor_radius * 2.0
 

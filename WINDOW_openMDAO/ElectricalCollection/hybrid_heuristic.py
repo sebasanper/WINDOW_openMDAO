@@ -1,4 +1,4 @@
-from input_params import cable_types, turbine_rated_current
+from WINDOW_openMDAO.input_params import cable_types, turbine_rated_current
 import numpy as np
 
 

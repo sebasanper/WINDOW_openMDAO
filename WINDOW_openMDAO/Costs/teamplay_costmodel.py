@@ -1,5 +1,5 @@
 from openmdao.api import ExplicitComponent
-from input_params import max_n_turbines
+from WINDOW_openMDAO.input_params import max_n_turbines
 from costs.other_costs import other_costs
 
 

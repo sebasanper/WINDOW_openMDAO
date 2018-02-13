@@ -3,7 +3,7 @@ from thomas_algorithm import thomas
 from ainslie_common import b, E
 from time import time
 from memoize import Memoize
-from input_params import rotor_radius
+from WINDOW_openMDAO.input_params import rotor_radius
 # b = Memoize(b)
 # E = Memoize(E)
 rotor_diameter = 2.0 * rotor_radius

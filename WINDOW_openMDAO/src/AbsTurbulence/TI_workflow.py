@@ -1,5 +1,5 @@
 from openmdao.api import Group
-from src.api import DeficitMatrix, CtMatrix
+from WINDOW_openMDAO.src.api import DeficitMatrix, CtMatrix
 
 
 class TIWorkflow(Group):

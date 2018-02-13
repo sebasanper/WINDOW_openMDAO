@@ -1,25 +1,25 @@
 # workflow_regular.py only defines the workflow to be built. Class WorkingGroup needs to be imported from another working directory. As an example we provide a working directory in the example folder. Run IEA_borssele_regular.py from the 'example' folder instead
 
-from WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
-from Turbine.Curves import Curves
+from WINDOW_openMDAO.WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
+from WINDOW_openMDAO.Turbine.Curves import Curves
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
 import numpy as np
 from time import time, clock
-from input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency
-from WakeModel.WakeMerge.RSS import MergeRSS
-from src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP, NumberLayout, MinDistance, WithinBoundaries, RegularLayout, read_layout, read_windrose
-from src.Utils.util_components import create_random_layout
-from WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
-from WaterDepth.water_depth_models import RoughInterpolation, RoughClosestNode
-from ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
-from SupportStructure.teamplay import TeamPlay
-from OandM.OandM_models import OM_model1
-from Costs.teamplay_costmodel import TeamPlayCostModel
-from Finance.LCOE import LCOE
+from WINDOW_openMDAO.input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency
+from WINDOW_openMDAO.WakeModel.WakeMerge.RSS import MergeRSS
+from WINDOW_openMDAO.src.api import AEPWorkflow, TIWorkflow, MaxTI, AEP, NumberLayout, MinDistance, WithinBoundaries, RegularLayout, read_layout, read_windrose
+from WINDOW_openMDAO.src.Utils.util_components import create_random_layout
+from WINDOW_openMDAO.WakeModel.Turbulence.turbulence_wake_models import Frandsen2, DanishRecommendation, Larsen, Frandsen, Quarton
+from WINDOW_openMDAO.WaterDepth.water_depth_models import RoughInterpolation, RoughClosestNode
+from WINDOW_openMDAO.ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
+from WINDOW_openMDAO.SupportStructure.teamplay import TeamPlay
+from WINDOW_openMDAO.OandM.OandM_models import OM_model1
+from WINDOW_openMDAO.Costs.teamplay_costmodel import TeamPlayCostModel
+from WINDOW_openMDAO.Finance.LCOE import LCOE
 from random import uniform
-from src.AbsAEP.aep_fast_component import AEPFast
-from example.transform_quadrilateral_iea import AreaMapping
-from input_params import separation_equation_y
+from WINDOW_openMDAO.src.AbsAEP.aep_fast_component import AEPFast
+from WINDOW_openMDAO.src.Utils.transform_quadrilateral import AreaMapping
+from WINDOW_openMDAO.input_params import separation_equation_y
 
 
 class XYLayout(ExplicitComponent):

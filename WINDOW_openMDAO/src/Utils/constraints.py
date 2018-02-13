@@ -1,5 +1,5 @@
 from openmdao.api import ExplicitComponent
-from input_params import max_n_turbines, n_quadrilaterals, separation_equation_y
+from WINDOW_openMDAO.input_params import max_n_turbines, n_quadrilaterals, separation_equation_y
 from transform_quadrilateral import AreaMapping
 from numpy import sqrt
 

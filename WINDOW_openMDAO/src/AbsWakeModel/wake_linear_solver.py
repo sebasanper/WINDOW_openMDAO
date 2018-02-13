@@ -2,7 +2,7 @@ from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS,
     LinearBlockJac, IndepVarComp
 import numpy as np
 from order_layout import OrderLayout
-from input_params import max_n_turbines
+from WINDOW_openMDAO.input_params import max_n_turbines
 from distance import DistanceComponent
 from windspeed_deficits import SpeedDeficits, CombineOutputs
 

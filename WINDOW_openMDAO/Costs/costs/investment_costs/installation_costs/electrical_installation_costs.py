@@ -1,5 +1,5 @@
-from Costs.costs.currency import Cost1
-from input_params import distance_to_grid
+from WINDOW_openMDAO.Costs.costs.currency import Cost1
+from WINDOW_openMDAO.input_params import distance_to_grid
 
 
 def electrical_installation_costs():

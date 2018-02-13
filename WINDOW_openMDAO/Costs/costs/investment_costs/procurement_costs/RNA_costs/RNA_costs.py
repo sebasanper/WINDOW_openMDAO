@@ -1,4 +1,4 @@
-from input_params import purchase_price, warranty_percentage
+from WINDOW_openMDAO.input_params import purchase_price, warranty_percentage
 
 
 def rna_costs(NT):

@@ -18,7 +18,7 @@ class Workflow:
         from farm_energy.wake_model_mean_new.wake_1angle import energy_one_angle
         from farm_energy.wake_model_mean_new.wake_1angle_turbulence import max_turbulence_one_angle
         from farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen
-        from input_params import cutin_wind_speed, cutout_wind_speed
+        from WINDOW_openMDAO.input_params import cutin_wind_speed, cutout_wind_speed
 
         if self.print_output is True: print ("=== PREPARING WIND CONDITIONS ===")
 

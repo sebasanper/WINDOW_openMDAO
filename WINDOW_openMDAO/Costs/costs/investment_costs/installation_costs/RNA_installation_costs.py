@@ -1,5 +1,5 @@
-from input_params import rotor_radius, hub_height, onshore_transport_distance
-from Costs.costs.currency import Cost1
+from WINDOW_openMDAO.input_params import rotor_radius, hub_height, onshore_transport_distance
+from WINDOW_openMDAO.Costs.costs.currency import Cost1
 
 
 def rna_installation_costs(NT):

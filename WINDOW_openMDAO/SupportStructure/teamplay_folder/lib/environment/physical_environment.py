@@ -1,4 +1,4 @@
-from input_params import ref_height_wind_speed, alpha, hat, lat, storm_surge_pos, storm_surge_neg, Hs_50_year, Hs_1_year, current_depth_averaged_50_year, angle_wave_current_50_year, water_density, d50_soil, d90_soil, friction_angle, submerged_unit_weight
+from WINDOW_openMDAO.input_params import ref_height_wind_speed, alpha, hat, lat, storm_surge_pos, storm_surge_neg, Hs_50_year, Hs_1_year, current_depth_averaged_50_year, angle_wave_current_50_year, water_density, d50_soil, d90_soil, friction_angle, submerged_unit_weight
 
 # TOTAL PHYSICAL ENVIRONMENT **************************************************
 

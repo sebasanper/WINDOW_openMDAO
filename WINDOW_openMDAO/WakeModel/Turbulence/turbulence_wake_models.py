@@ -1,5 +1,5 @@
-from src.api import AbstractWakeAddedTurbulence
-from input_params import max_n_turbines
+from WINDOW_openMDAO.src.api import AbstractWakeAddedTurbulence
+from WINDOW_openMDAO.input_params import max_n_turbines
 import numpy as np
 from numpy import sqrt
 

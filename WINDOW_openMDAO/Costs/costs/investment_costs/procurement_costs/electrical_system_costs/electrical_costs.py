@@ -1,7 +1,7 @@
-from Costs.costs.currency import Cost1
-from input_params import transmission_voltage, grid_coupling_point_voltage, collection_voltage, distance_to_grid, frequency
+from WINDOW_openMDAO.Costs.costs.currency import Cost1
+from WINDOW_openMDAO.input_params import transmission_voltage, grid_coupling_point_voltage, collection_voltage, distance_to_grid, frequency
 from numpy import sqrt, pi, exp, log
-from input_params import generator_voltage, turbine_rated_power as P_rated
+from WINDOW_openMDAO.input_params import generator_voltage, turbine_rated_power as P_rated
 
 rho_copper = 8940  # [kg/m^3]
 rho_xlpe = 940  # [kg/m^3]

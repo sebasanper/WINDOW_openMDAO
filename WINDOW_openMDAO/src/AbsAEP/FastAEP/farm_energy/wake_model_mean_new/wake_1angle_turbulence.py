@@ -1,6 +1,6 @@
 from order_layout import order
 import numpy as np
-from input_params import rotor_radius
+from WINDOW_openMDAO.input_params import rotor_radius
 from memoize import Memoize
 
 

@@ -1,5 +1,5 @@
-from Costs.costs.currency import Cost1
-from input_params import mass, hub_height, management_percentage, distance_to_grid
+from WINDOW_openMDAO.Costs.costs.currency import Cost1
+from WINDOW_openMDAO.input_params import mass, hub_height, management_percentage, distance_to_grid
 
 
 def decommissioning_costs(infield_cable_length, NT):

@@ -1,5 +1,5 @@
-from Costs.costs.currency import Cost1
-from input_params import turbine_rated_power as P_rated
+from WINDOW_openMDAO.Costs.costs.currency import Cost1
+from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
 
 
 def auxiliary_installation_costs(NT):

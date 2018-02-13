@@ -1,4 +1,4 @@
-from src.api import AbstractWaterDepth
+from WINDOW_openMDAO.src.api import AbstractWaterDepth
 from scipy.interpolate import interp2d
 import pickle
 import numpy as np

@@ -1,6 +1,6 @@
-from src.api import AbsTurbine
+from WINDOW_openMDAO.src.api import AbsTurbine
 from aero_models import AeroLookup
-from input_params import cutin_wind_speed as cutin, cutout_wind_speed as cutout
+from WINDOW_openMDAO.input_params import cutin_wind_speed as cutin, cutout_wind_speed as cutout
 
 
 class Curves(AbsTurbine):

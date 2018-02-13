@@ -1,5 +1,5 @@
-from src.api import AbstractSupportStructureDesign
-from SupportStructure.teamplay_folder.teamplay_file import teamplay
+from WINDOW_openMDAO.src.api import AbstractSupportStructureDesign
+from WINDOW_openMDAO.SupportStructure.teamplay_folder.teamplay_file import teamplay
 import numpy as np
 
 

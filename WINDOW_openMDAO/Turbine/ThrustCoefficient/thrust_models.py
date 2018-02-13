@@ -1,6 +1,6 @@
 import numpy as np
-from input_params import max_n_turbines
-from src.api import AbstractThrustCoefficient
+from WINDOW_openMDAO.input_params import max_n_turbines
+from WINDOW_openMDAO.src.api import AbstractThrustCoefficient
 
 
 class ThrustPolynomial(AbstractThrustCoefficient):

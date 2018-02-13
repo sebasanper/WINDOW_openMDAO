@@ -1,5 +1,5 @@
 from openmdao.api import ExplicitComponent
-from input_params import max_n_turbines, max_n_substations, max_n_turbines_p_branch, max_n_branches
+from WINDOW_openMDAO.input_params import max_n_turbines, max_n_substations, max_n_turbines_p_branch, max_n_branches
 import numpy as np
 
 

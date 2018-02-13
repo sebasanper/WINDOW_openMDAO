@@ -1,7 +1,7 @@
 from area import *
 from numpy import deg2rad, tan, sqrt, cos, sin
 
-from input_params import rotor_radius
+from WINDOW_openMDAO.input_params import rotor_radius
 from memoize import Memoize
 jensen_k = 0.04
 

@@ -1,4 +1,4 @@
-from src.api import AbstractOandM
+from WINDOW_openMDAO.src.api import AbstractOandM
 
 
 class OM_model1(AbstractOandM):
