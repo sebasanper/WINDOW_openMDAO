@@ -29,7 +29,6 @@ setup(
       'WINDOW_openMDAO.Costs.costs.investment_costs.procurement_costs.electrical_system_costs',
       'WINDOW_openMDAO.ElectricalCollection',
       'WINDOW_openMDAO.Finance',
-      'WINDOW_openMDAO.Input',
       'WINDOW_openMDAO.OandM',
       'WINDOW_openMDAO.SupportStructure',
       'WINDOW_openMDAO.SupportStructure.teamplay_folder',

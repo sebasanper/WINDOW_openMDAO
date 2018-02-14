@@ -3,6 +3,7 @@ from scipy.interpolate import interp2d
 import os
 import pickle
 import numpy as np
+from WINDOW_openMDAO.input_params import bathymetry_path
 
 
 class RoughInterpolation(AbstractWaterDepth):
@@ -12,7 +13,7 @@ class RoughInterpolation(AbstractWaterDepth):
         bathymetry_grid_y = []
         bathymetry_grid_depths = []
 
-        with open("bathymetry2.dat", "r") as bathymetry_file:
+        with open(bathymetry_path, "r") as bathymetry_file:
             for line in bathymetry_file:
                 cols = line.split()
                 bathymetry_grid_x.append(float(cols[0]))
@@ -32,12 +33,13 @@ class RoughInterpolation(AbstractWaterDepth):
 class RoughClosestNode(AbstractWaterDepth):
 
     def depth_model(self, layout):
+        bathymetry = []
 
-        pick_file = open(os.path.join(os.path.dirname(__file__), "../Input/bathymetry.pkl"), "rb")
-        bathymetry = pickle.load(pick_file)
-        pick_file.close()
-
-
+        with open(bathymetry_path, "r") as bathymetry_file:
+            for line in bathymetry_file:
+                cols = line.split()
+                bathymetry.append([float(cols[0]), float(cols[1]), float(cols[2])])
+        bathymetry = np.array(bathymetry)
         def closest_node(node, nodes):
             nodes = np.asarray(nodes)
             dist_2 = np.sum((nodes - node)**2, axis=1)
