@@ -28,13 +28,16 @@ class RegularLayout(ExplicitComponent):
         if count < max_n_turbines:
             to_add = max_n_turbines - count
             final += [[0.0, 0.0] for _ in range(to_add)]
+            number = count
+        else:
+            number = max_n_turbines
         # From the entire regular layout the first max_n_turbines are selected.
         reduced = final[:max_n_turbines]
         # with open("regular_draw.dat", "w") as outf:
         #     for t in reduced:
         #         outf.write("{} {}\n".format(t[0], t[1]))
         outputs["regular_layout"] = reduced
-        outputs["n_turbines"] = count
+        outputs["n_turbines"] = number
 
 
 def centroid(areas):
