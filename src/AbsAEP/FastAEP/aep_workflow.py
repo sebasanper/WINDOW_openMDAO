@@ -43,7 +43,9 @@ class Workflow:
 
             self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities[i] / 100.0
             self.energies_per_angle.append(self.energy_one_angle_weighted)
-
+            self.array_efficiency = (self.aero_energy_one_angle / (float(len(turbine_coordinates)) * max(self.powers_one_angle) * 8760.0))
+            self.array_efficiencies_weighted = self.array_efficiency * self.direction_probabilities[i] / 100.0
+            self.array_efficiencies.append(self.array_efficiencies_weighted)
             self.turbulences_per_angle.append(self.turbulences)
 
             for j in range(len(turbine_coordinates)):
@@ -52,7 +54,7 @@ class Workflow:
 
         if self.print_output is True: print(str(self.array_efficiency * 100.0) + " %\n")
         if self.print_output is True: print(" --- Farm annual energy without losses---")
-
+        self.array_efficiency = sum(self.array_efficiencies)
         self.farm_annual_energy = sum(self.energies_per_angle)
 
         if self.print_output is True: print( str(self.farm_annual_energy / 1000000.0) + " MWh\n")
@@ -62,7 +64,7 @@ class Workflow:
 
         if self.print_output is True: print (str([self.turbulence[l] * 100.0 for l in range(len(self.turbulence))]) + " %\n")
 
-        return self.farm_annual_energy, self.turbulence
+        return self.farm_annual_energy, self.turbulence, self.array_efficiency
 
     def run(self, layout_coordinates):
 

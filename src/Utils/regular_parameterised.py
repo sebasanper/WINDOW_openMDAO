@@ -111,5 +111,4 @@ def regular_layout(dx, dy, dh, areas, angle):
                 count += 1
             else:
                 extra = 1
-
     return layout_final, count
