@@ -17,7 +17,7 @@ from Costs.teamplay_costmodel import TeamPlayCostModel
 from Finance.LCOE import LCOE
 from random import uniform
 from src.AbsAEP.aep_fast_component import AEPFast
-
+ 
 
 
 class WorkingGroup(Group):
