@@ -139,9 +139,8 @@ class WorkingGroup(Group):
         self.connect('depths.water_depths', 'support.depth')
         self.connect('AeroAEP.max_TI', 'support.max_TI')
 
-        self.connect('AeroAEP.AEP', 'OandM.AEP')
         self.connect('OandM.availability', 'AEP.availability')
-        self.connect('AeroAEP.AEP', 'AEP.aeroAEP')
+        self.connect('AeroAEP.AEP', ['AEP.aeroAEP', 'OandM.AEP'])
         self.connect('indep2.coll_electrical_efficiency', 'AEP.electrical_efficiency')
 
         self.connect('platform_depth.water_depths', 'Costs.depth_central_platform', src_indices=[0])
