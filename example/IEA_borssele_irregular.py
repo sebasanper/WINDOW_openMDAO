@@ -1,14 +1,11 @@
-# This file must be run from the example folder. Otherwise, the absolute path to the WINDOW_openMDAO installation folder needs to be changed below.
 
 from os import path
 import sys
 from openmdao.api import Problem, view_model
 from time import time, clock
 
-sys.path.append(path.abspath('../../WINDOW_openMDAO/'))
-
-# from workflow_irregular import WorkingGroup  # For every function as an openmdao component.
-from fast_workflow_irregular import WorkingGroup  # For a fast and unique AEP openmdao component.
+# from WINDOW_openMDAO.workflow_irregular import WorkingGroup  # For every function as an openmdao component.
+from WINDOW_openMDAO.fast_workflow_irregular import WorkingGroup  # For a fast and unique AEP openmdao component.
 
 def print_nice(string, value):
     header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
@@ -17,7 +14,7 @@ def print_nice(string, value):
     print header
 prob = Problem()
 # prob.model = WorkingGroup(direction_sampling_angle=10.0, windspeed_sampling_points=5, windrose_file='Input/weibull_windrose_12identical.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat')
-prob.model = WorkingGroup(direction_sampling_angle=1.0, windspeed_sampling_points=10)
+prob.model = WorkingGroup(direction_sampling_angle=30.0, windspeed_sampling_points=7)
 prob.setup()
 
 print_nice("Time after setup", clock())

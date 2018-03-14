@@ -1,13 +1,9 @@
-# This file must be run from the example folder. Otherwise, the absolute path to the WINDOW_openMDAO installation folder needs to be given below.
-
 from os import path
 import sys
 from openmdao.api import Problem, view_model
 from time import time, clock
 
-sys.path.append(path.abspath('../../WINDOW_openMDAO/'))
-
-from workflow_regular import WorkingGroup
+from WINDOW_openMDAO.workflow_regular import WorkingGroup
 
 def print_nice(string, value):
     header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
