@@ -22,7 +22,9 @@ def rna_installation_costs(NT):
     inv_installation_turbines_offshore_works = (NT * turbine_installation_per_turbine_coef_a * (hub_height + turbine_installation_per_turbine_coef_b))
 
     total_rna_installation = inv_installation_turbines_offshore_works + inv_installation_turbines_onshore_transport
-
+    # print 'off, on'
+    # print inv_installation_turbines_offshore_works
+    # print inv_installation_turbines_onshore_transport
     return total_rna_installation
 
 if __name__ == '__main__':

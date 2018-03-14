@@ -46,12 +46,12 @@ def electrical_procurement_costs(NT):
     transmission_cable_capacitance = (2.0 * pi * epsilon_0 * epsilon_r / (log(d_insulation / d_conductor_screen)))
     power_shunt_reactor_onshore = 1.0 / (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length)
     power_shunt_reactor_offshore = 1.0 / (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length)
+    # print power_shunt_reactor_offshore, "inductance"
     inv_procurement_electrical_system_transformer = (transformer_coef_A1 * P_rated + transformer_coef_B1) * exp(transformer_coef_C1 * turbine_transformer_winding_ratio) * NT + (transformer_coef_A2 * ((NT * P_rated) ** transformer_coef_B2)) * (exp(transformer_coef_C1 * offshore_transformer_winding_ratio) + exp(transformer_coef_C1 * onshore_transformer_winding_ratio))
     inv_procurement_electrical_system_transmission_cable = manufacturing_price_pm * transmission_cable_length
     inv_procurement_electrical_system_shunt_reactor = shunt_reactor_coef_a * (power_shunt_reactor_onshore ** shunt_reactor_exp_a + power_shunt_reactor_offshore ** shunt_reactor_exp_a)
 
     electrical_total_costs = inv_procurement_electrical_system_transformer + inv_procurement_electrical_system_transmission_cable + inv_procurement_electrical_system_shunt_reactor
-
     return electrical_total_costs
 
 if __name__ == '__main__':
