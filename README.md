@@ -19,6 +19,10 @@ To install, go to the directory where you have cloned the module and execute
 
 Then its packages will be available under `WINDOW_openMDAO`.
 
+To reinstall after changes to your local copy:
+
+    python2 setup.py install --user --force
+
 [Python 3 is not yet supported.]
 
 ---------------------------------------------------
