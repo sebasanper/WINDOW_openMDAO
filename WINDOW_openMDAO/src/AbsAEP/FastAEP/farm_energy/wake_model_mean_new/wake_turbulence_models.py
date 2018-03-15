@@ -4,6 +4,9 @@ from WINDOW_openMDAO.input_params import rotor_radius
 #  Change in Fatigue and Extreme Loading when Moving Wind Farms Offshore // Sten Frandsen and Kenneth Thomsen.
 #  Only nearest wake-shedding turbine matters in a wind farm.
 
+def constantturbulence(ambient_turbulence, Ct, wind_speed, spacing):
+    return 0.15
+
 
 def frandsen2(ambient_turbulence, Ct, wind_speed, spacing):
     return sqrt(1.2 * Ct / spacing ** 2.0 + ambient_turbulence ** 2.0)

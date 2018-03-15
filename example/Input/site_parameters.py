@@ -54,3 +54,6 @@ def separation_equation_y(x):  # values y greater than f(x) use mapping 1, else 
         return m * x + b
     else:
         return - 10000000.0  # Any value so that the entire farm is above this coordinate in the y-axis.
+
+bathymetry_path = "Input/bathymetry_table.dat"
+windrose_path = "Input/weibull_windrose_12unique.dat"

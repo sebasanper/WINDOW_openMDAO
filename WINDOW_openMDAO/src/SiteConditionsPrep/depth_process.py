@@ -4,9 +4,10 @@ import numpy as np
 
 
 class AbstractWaterDepth(ExplicitComponent):
-    def __init__(self, n_turbines):
+    def __init__(self, n_turbines, bathymetry_path):
         super(AbstractWaterDepth, self).__init__()
         self.n_turbines = n_turbines
+        self.bathymetry_path = bathymetry_path
 
     def setup(self):
         self.add_input('layout', shape=(self.n_turbines, 3))
