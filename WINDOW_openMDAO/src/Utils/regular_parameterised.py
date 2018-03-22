@@ -35,8 +35,8 @@ class RegularLayout(ExplicitComponent):
         if count < max_n_turbines:
             to_add = max_n_turbines - count
             final += [[0.0, 0.0] for _ in range(to_add)]
-        # From the entire regular layout a random sample is taken with size max_n_turbines.
-        reduced = [final[i] for i in sorted(sample(range(len(final)), max_n_turbines))]
+        # From the entire regular layout a chunk with size max_n_turbines is taken.
+        reduced = final[:max_n_turbines]
         with open("layout_draw.dat", "w") as out:
             for item in reduced:
                 out.write("{} {}\n".format(item[0], item[1]))

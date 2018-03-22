@@ -30,7 +30,7 @@ class Turbine():
 		self.ct_file = None
 
 
-class Options():
+class WorkflowOptions():
 	def __init__(self):
 		self.samples = Samples()
 		self.models = Models()

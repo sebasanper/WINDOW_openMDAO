@@ -15,4 +15,4 @@ from Utils.constraints import MinDistance, WithinBoundaries
 from Utils.regular_parameterised import RegularLayout
 from Utils.transform_quadrilateral import AreaMapping
 from Utils.read_files import read_layout, read_windrose
-from Utils.workflow_options import Options
+from Utils.workflow_options import WorkflowOptions
