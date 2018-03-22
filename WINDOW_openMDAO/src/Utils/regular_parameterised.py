@@ -32,16 +32,22 @@ class RegularLayout(ExplicitComponent):
         layout_angle = inputs["layout_angle"]
 
         final, count = regular_layout(downwind_spacing, crosswind_spacing, odd_row_shift_spacing, area, layout_angle)
-        if count < max_n_turbines:
-            to_add = max_n_turbines - count
+        if count < 37:
+            to_add = 37 - count
             final += [[0.0, 0.0] for _ in range(to_add)]
+        elif count > 37:
+            count = 37
         # From the entire regular layout a chunk with size max_n_turbines is taken.
-        reduced = final[:max_n_turbines]
+        reduced = final[:37]
+        with open("points.dat", "r") as points:
+            for line in points:
+                cols = line.split()
+                reduced += [[float(cols[0]), float(cols[1])]]
         with open("layout_draw.dat", "w") as out:
             for item in reduced:
                 out.write("{} {}\n".format(item[0], item[1]))
         outputs["regular_layout"] = reduced
-        outputs["n_turbines_regular"] = len(outputs["regular_layout"])
+        outputs["n_turbines_regular"] = count
 
 
 def centroid(areas):
