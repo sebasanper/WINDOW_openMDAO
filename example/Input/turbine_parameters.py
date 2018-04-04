@@ -24,3 +24,5 @@ wind_speed_at_max_thrust = 11.4  # [m/s]
 collection_voltage = 66000.0 # [V]
 turbine_rated_current = turbine_rated_power / (collection_voltage  * sqrt(3.0))  # A = Power / sqrt(3) / Voltage. 3 phase current per line.
 
+power_curve_path = "Input/power_dtu10.dat"
+ct_curve_path = "Input/ct_dtu10.dat"

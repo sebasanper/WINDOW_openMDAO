@@ -26,6 +26,7 @@ class TeamPlayCostModel(ExplicitComponent):
         support_structure_costs = inputs['support_structure_costs']
         depth_central_platform = inputs['depth_central_platform']
         other_investment, outputs['decommissioning_costs'] = other_costs(depth_central_platform, n_turbines, sum(length_p_cable_type), n_substations)
+        # other_investment = 0.0
         infield_cable_investment = sum(cost_p_cable_type)
         # infield_cable_investment = 89356728.7063387
         support_structure_investment = sum(support_structure_costs)

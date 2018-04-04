@@ -2,7 +2,6 @@ from WINDOW_openMDAO.src.api import AbsTurbine
 from aero_models import AeroLookup
 from WINDOW_openMDAO.input_params import cutin_wind_speed as cutin, cutout_wind_speed as cutout
 
-print cutin
 from WINDOW_openMDAO.input_params import power_curve_path, ct_curve_path
 import os
 

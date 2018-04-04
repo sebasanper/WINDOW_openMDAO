@@ -70,7 +70,7 @@ class WeibullWindBins(object):
 
             windspeeds.append(self.cutin + i * delta)
 
-        return [0.0] + windspeeds + [self.cutout + 1.0], delta
+        return [self.cutin - 0.1] + windspeeds + [self.cutout + 1.0], delta
 
     def speed_probabilities(self):
         self.adapt_directions()

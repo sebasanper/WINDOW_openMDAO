@@ -91,6 +91,8 @@ def wake_speed(U0, ct, x, y, ia):
 
 
 def wake_deficit_larsen(U0, ct, x, y, ia):
+    if U0 == 0.0:
+        return 1.0
     return 1.0 - wake_speed(U0, ct, x + x0(ct, ia), y, ia) / U0
 
 

@@ -7,6 +7,7 @@ from time import time, clock
 # from WINDOW_openMDAO.workflow_irregular import WorkingGroup  # For every function as an openmdao component.
 from WINDOW_openMDAO.fast_workflow_irregular import WorkingGroup  # For a fast and unique AEP openmdao component.
 
+
 def print_nice(string, value):
     header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
     header += str(value) + "\n"
@@ -14,7 +15,7 @@ def print_nice(string, value):
     print header
 prob = Problem()
 # prob.model = WorkingGroup(direction_sampling_angle=10.0, windspeed_sampling_points=5, windrose_file='Input/weibull_windrose_12identical.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat')
-prob.model = WorkingGroup(direction_sampling_angle=30.0, windspeed_sampling_points=7)
+prob.model = WorkingGroup(direction_sampling_angle=1.0, windspeed_sampling_points=25)
 prob.setup()
 
 print_nice("Time after setup", clock())
@@ -34,8 +35,8 @@ print_nice("LCOE", prob['lcoe.LCOE'])
 # print_nice("support.cost_support", sum(prob['support.cost_support']))
 # print_nice("electrical.cost_p_cable_type", prob['electrical.cost_p_cable_type'])
 
-# start = time()
-# prob['indep2.interest_rate'] = 0.05 # Changing one parameter for a second run.
-# prob.run_model()
-# print_nice("Execution time second run", time() - start)
+start = time()
+prob['indep2.interest_rate'] = 0.05 # Changing one parameter for a second run.
+prob.run_model()
+print_nice("Execution time second run", time() - start)
 # print_nice("LCOE", prob['lcoe.LCOE'])

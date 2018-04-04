@@ -14,7 +14,12 @@ class Workflow:
         self.power_lookup_file = power_lookup_file
 
     def connect(self, turbine_coordinates):
-        self.number_turbines = len(turbine_coordinates)
+        layout = []
+        for t in turbine_coordinates:
+            if t[0] >= 0.0 and t[1] >= 0.0:
+                layout.append([t[0], t[1]])
+        print len(layout), "AEP"
+        self.number_turbines = len(layout)
         from farm_energy.wake_model_mean_new.wake_1angle import energy_one_angle
         from farm_energy.wake_model_mean_new.wake_1angle_turbulence import max_turbulence_one_angle
         from farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen
@@ -43,7 +48,7 @@ class Workflow:
 
             self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities[i] / 100.0
             self.energies_per_angle.append(self.energy_one_angle_weighted)
-            self.array_efficiency = (self.aero_energy_one_angle / (float(len(turbine_coordinates)) * max(self.powers_one_angle) * 8760.0))
+            self.array_efficiency = self.aero_energy_one_angle / (float(self.number_turbines) * max(self.powers_one_angle) * 8760.0)
             self.array_efficiencies_weighted = self.array_efficiency * self.direction_probabilities[i] / 100.0
             self.array_efficiencies.append(self.array_efficiencies_weighted)
             self.turbulences_per_angle.append(self.turbulences)

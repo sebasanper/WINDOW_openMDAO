@@ -26,44 +26,40 @@ class AbstractElectricDesign(ExplicitComponent):
         substation_coords = [[i[1], i[2]] for i in inputs['substation_coords'][:n_substations]]
 
         cost, topology_dict, cable_lengths = self.topology_design_model(layout, substation_coords, n_turbines_p_cable_type)
+        if type(topology_dict) is dict:
+            topology_list = []
+            for n in range(1, len(topology_dict) + 1):
+                topology_list.append(topology_dict[n])
 
-        topology_list = []
-        for n in range(1, len(topology_dict) + 1):
-            topology_list.append(topology_dict[n])
-        # dif_sub = n_substations - len(topology)
+            from itertools import izip_longest
 
-        from itertools import izip_longest
-
-        def find_shape(seq):
-            try:
-                len_ = len(seq)
-            except TypeError:
-                return ()
-            shapes = [find_shape(subseq) for subseq in seq]
-            return (len_,) + tuple(max(sizes) for sizes in izip_longest(*shapes,
-                                                                        fillvalue=1))
-
-        def fill_array(arr, seq):
-            if arr.ndim == 1:
+            def find_shape(seq):
                 try:
                     len_ = len(seq)
                 except TypeError:
-                    len_ = 0
-                arr[:len_] = seq
-                arr[len_:] = np.nan
-            else:
-                for subarr, subseq in izip_longest(arr, seq, fillvalue=()):
-                    fill_array(subarr, subseq)
-        # for sub in range(n_substations):
-        #     dif_bran = max_n_branches - len(topology[sub])
-        #     for bran in range(max_n_branches):
-        #         for tur in range(max_n_turbines_p_branch):
+                    return ()
+                shapes = [find_shape(subseq) for subseq in seq]
+                return (len_,) + tuple(max(sizes) for sizes in izip_longest(*shapes,
+                                                                            fillvalue=1))
 
-        # topology = np.array(topology_list)
-        topology = np.empty((max_n_substations, max_n_branches, max_n_turbines_p_branch, 2))
-        fill_array(topology, topology_list)
-        # print topology
-        # topology = topology.reshape(1, 3, 3, 2)
+            def fill_array(arr, seq):
+                if arr.ndim == 1:
+                    try:
+                        len_ = len(seq)
+                    except TypeError:
+                        len_ = 0
+                    arr[:len_] = seq
+                    arr[len_:] = np.nan
+                else:
+                    for subarr, subseq in izip_longest(arr, seq, fillvalue=()):
+                        fill_array(subarr, subseq)
+
+            topology = np.empty((max_n_substations, max_n_branches, max_n_turbines_p_branch, 2))
+            fill_array(topology, topology_list)
+
+        else:
+            topology = topology_dict
+
         outputs['cost_p_cable_type'] = cost
         outputs['topology'] = topology
         outputs['length_p_cable_type'] = cable_lengths

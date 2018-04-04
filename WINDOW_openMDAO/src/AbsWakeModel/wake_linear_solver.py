@@ -87,15 +87,13 @@ class TotalWake(Group):
 
     def __init__(self, n_cases, fraction_model, deficit_model, number):
         super(TotalWake, self).__init__()
-        self.fraction_model = fraction_model
-        self.deficit_model = deficit_model
-        self.number = number
-        self.n_cases = n_cases
+        self.fraction_model = fraction_model(number, n_cases)
+        self.deficit_model = deficit_model(n_cases)
 
     def setup(self):
-        self.add_subsystem('fraction', self.fraction_model(self.number, self.n_cases),
+        self.add_subsystem('fraction', self.fraction_model,
                            promotes_inputs=['ordered', 'angle', 'n_turbines', 'downwind_d', 'crosswind_d', 'turbine_radius'])
-        self.add_subsystem('deficit', self.deficit_model(self.n_cases),
+        self.add_subsystem('deficit', self.deficit_model,
                            promotes_inputs=['turbine_radius', 'downwind_d', 'crosswind_d', 'ct', 'n_turbines'],
                            promotes_outputs=['dU'])
 

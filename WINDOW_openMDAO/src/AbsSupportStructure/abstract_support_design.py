@@ -36,7 +36,7 @@ class AbstractSupportStructureDesign(ExplicitComponent):
         costs = self.support_design_model(TI, depth)
         lendif = max_n_turbines - len(costs)
         if lendif > 0:
-            costs = np.concatenate((costs, [0 for _ in range(lendif)]))
+            costs = np.concatenate((costs, [0.0 for _ in range(lendif)]))
         costs = costs.reshape(max_n_turbines)
         outputs['cost_support'] = costs
 
