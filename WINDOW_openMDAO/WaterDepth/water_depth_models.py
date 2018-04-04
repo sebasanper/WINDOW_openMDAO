@@ -46,6 +46,7 @@ class RoughClosestNode(AbstractWaterDepth):
 
         def depth(x, y):
             return bathymetry[closest_node([x, y], bathymetry[:,[0, 1]])][2]
+            # return 20.0
 
         water_depths = []
         if len(layout[0]) == 3:
