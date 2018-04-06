@@ -1,5 +1,5 @@
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
-from WINDOW_openMDAO.input_params import transmission_voltage, grid_coupling_point_voltage, collection_voltage, distance_to_grid, frequency
+from WINDOW_openMDAO.input_params import transmission_voltage, grid_coupling_point_voltage, collection_voltage, distance_to_grid, frequency, number_substations
 from numpy import sqrt, pi, exp, log
 from WINDOW_openMDAO.input_params import generator_voltage, turbine_rated_power as P_rated
 
@@ -9,7 +9,7 @@ epsilon_0 = 8.85e-12  # [F/m]
 epsilon_r = 2.3  # [-] (XLPE)
 
 
-def electrical_procurement_costs(NT):
+def electrical_procurement_costs(NT, n_substations=number_substations):
     # Procurement - Electrical system
     transformer_coef_A1 = Cost1(0.00306, 'Euro', 2012)  # [euro/W]
     transformer_coef_B1 = Cost1(810.0, 'Euro', 2012)  # [euro]
@@ -47,7 +47,9 @@ def electrical_procurement_costs(NT):
     power_shunt_reactor_onshore = 1.0 / (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length)
     power_shunt_reactor_offshore = 1.0 / (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length)
     # print power_shunt_reactor_offshore, "inductance"
-    inv_procurement_electrical_system_transformer = (transformer_coef_A1 * P_rated + transformer_coef_B1) * exp(transformer_coef_C1 * turbine_transformer_winding_ratio) * NT + (transformer_coef_A2 * ((NT * P_rated) ** transformer_coef_B2)) * (exp(transformer_coef_C1 * offshore_transformer_winding_ratio) + exp(transformer_coef_C1 * onshore_transformer_winding_ratio))
+    # inv_procurement_electrical_system_transformer = (transformer_coef_A1 * P_rated + transformer_coef_B1) * exp(transformer_coef_C1 * turbine_transformer_winding_ratio) * NT + (transformer_coef_A2 * ((NT/n_substations * P_rated) ** transformer_coef_B2)) * (exp(transformer_coef_C1 * offshore_transformer_winding_ratio) + exp(transformer_coef_C1 * onshore_transformer_winding_ratio)) * n_substations
+    inv_procurement_electrical_system_transformer = (transformer_coef_A1 * P_rated + transformer_coef_B1) * exp(transformer_coef_C1 * turbine_transformer_winding_ratio) * NT + (transformer_coef_A2 * ((NT * P_rated) ** transformer_coef_B2)) * (exp(transformer_coef_C1 * offshore_transformer_winding_ratio) + exp(transformer_coef_C1 * onshore_transformer_winding_ratio)) * n_substations
+    print "transf", inv_procurement_electrical_system_transformer
     inv_procurement_electrical_system_transmission_cable = manufacturing_price_pm * transmission_cable_length
     inv_procurement_electrical_system_shunt_reactor = shunt_reactor_coef_a * (power_shunt_reactor_onshore ** shunt_reactor_exp_a + power_shunt_reactor_offshore ** shunt_reactor_exp_a)
 

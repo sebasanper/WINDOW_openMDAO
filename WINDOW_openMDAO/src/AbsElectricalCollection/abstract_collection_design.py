@@ -59,7 +59,6 @@ class AbstractElectricDesign(ExplicitComponent):
 
         else:
             topology = topology_dict
-
         outputs['cost_p_cable_type'] = cost
         outputs['topology'] = topology
         outputs['length_p_cable_type'] = cable_lengths

@@ -18,7 +18,6 @@ class Workflow:
         for t in turbine_coordinates:
             if t[0] >= 0.0 and t[1] >= 0.0:
                 layout.append([t[0], t[1]])
-        print len(layout), "AEP"
         self.number_turbines = len(layout)
         from farm_energy.wake_model_mean_new.wake_1angle import energy_one_angle
         from farm_energy.wake_model_mean_new.wake_1angle_turbulence import max_turbulence_one_angle

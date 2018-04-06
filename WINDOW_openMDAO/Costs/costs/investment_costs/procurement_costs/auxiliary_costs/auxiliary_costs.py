@@ -17,16 +17,16 @@ def auxiliary_procurement(depth_central_platform, n_substations, n_turbines):
     topside_mass_coef_b = 0.5e6
 
     # # Investment costs - Procurement - Auxiliary
-    topside_mass = (topside_mass_coef_a * n_turbines * P_rated + topside_mass_coef_b) / n_substations
+    topside_mass = (topside_mass_coef_a * n_turbines * P_rated + topside_mass_coef_b)# / n_substations
+    print "top", topside_mass
     mass_jacket = (jacket_mass_coef_a * depth_central_platform ** jacket_mass_exp_a * topside_mass ** jacket_mass_exp_b)
     inv_procurement_auxiliary_measuring_tower = measuring_tower_costs
     inv_procurement_auxiliary_onshore_premises = onshore_premises_costs
     inv_procurement_auxiliary_offshore_platform = central_platform_modesty_factor * (central_platform_coef_a * mass_jacket ** 2.0 + central_platform_coef_b * mass_jacket + central_platform_coef_c) * n_substations
+    print "inv_platf", inv_procurement_auxiliary_offshore_platform
+    print "inv_platf", inv_procurement_auxiliary_offshore_platform / n_substations
+
 
     total_auxiliary_procurement = inv_procurement_auxiliary_measuring_tower + inv_procurement_auxiliary_offshore_platform + inv_procurement_auxiliary_onshore_premises
 
     return total_auxiliary_procurement
-
-
-if __name__ == '__main__':
-    print auxiliary_procurement(25)
