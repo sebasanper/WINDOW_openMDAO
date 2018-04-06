@@ -1,7 +1,7 @@
 # workflow_regular.py only defines the workflow to be built. Class WorkingGroup needs to be imported from another working directory. As an example we provide a working directory in the example folder. Run IEA_borssele_regular.py from the 'example' folder instead
 
 from openmdao.api import IndepVarComp, Group
-from WINDOW_openMDAO.input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency
+from WINDOW_openMDAO.input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency, number_substations
 from WINDOW_openMDAO.src.api import AEP, NumberLayout, MinDistance, WithinBoundaries
 from WINDOW_openMDAO.WaterDepth.water_depth_models import RoughClosestNode
 from WINDOW_openMDAO.Finance.LCOE import LCOE
@@ -36,8 +36,8 @@ class WorkingGroup(Group):
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=n_turbines)
         indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or one cable type.
-        indep2.add_output('substation_coords', val=central_platform)
-        indep2.add_output('n_substations', val=len(central_platform))
+        indep2.add_output('substation_coords', shape=(number_substations, 3))
+        indep2.add_output('n_substations', val=number_substations)
         indep2.add_output('coll_electrical_efficiency', val=coll_electrical_efficiency)
         indep2.add_output('transm_electrical_efficiency', val=transm_electrical_efficiency)
         indep2.add_output('operational_lifetime', val=operational_lifetime)
