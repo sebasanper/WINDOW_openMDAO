@@ -32,13 +32,13 @@ class RegularLayout(ExplicitComponent):
         layout_angle = inputs["layout_angle"]
 
         final, count = regular_layout(downwind_spacing, crosswind_spacing, odd_row_shift_spacing, area, layout_angle)
-        if count < 37:
-            to_add = 37 - count
-            final += [[0.0, 0.0] for _ in range(to_add)]
-        elif count > 37:
-            count = 37
+        if count < max_n_turbines:
+            to_add = max_n_turbines - count
+            final += [[-100.0, -100.0] for _ in range(to_add)]
+        elif count > max_n_turbines:
+            count = max_n_turbines
         # From the entire regular layout a chunk with size max_n_turbines is taken.
-        reduced = final[:37]
+        reduced = final[:max_n_turbines]
         with open("points.dat", "r") as points:
             for line in points:
                 cols = line.split()
