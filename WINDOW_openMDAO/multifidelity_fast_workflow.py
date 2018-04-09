@@ -79,6 +79,7 @@ class WorkingGroup(Group):
         self.connect('AeroAEP.AEP', ['AEP.aeroAEP', 'OandM.AEP'])
         self.connect('indep2.coll_electrical_efficiency', 'AEP.electrical_efficiency')
 
+        self.connect('indep2.substation_coords', 'platform_depth.layout')
         self.connect('platform_depth.water_depths', 'Costs.depth_central_platform', src_indices=[0])
 
         self.connect('indep2.n_substations', 'Costs.n_substations')
@@ -86,7 +87,6 @@ class WorkingGroup(Group):
         self.connect('electrical.cost_p_cable_type', 'Costs.cost_p_cable_type')
         self.connect('support.cost_support', 'Costs.support_structure_costs')
 
-        self.connect('indep2.substation_coords', 'platform_depth.layout')
 
         self.connect('Costs.investment_costs', 'lcoe.investment_costs')
         self.connect('OandM.annual_cost_O&M', 'lcoe.oandm_costs')

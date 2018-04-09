@@ -410,7 +410,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
                             for z in range(0, len(route) - 1):
                                 Routing_green_temp.append([route[z], route[z + 1]])
                         arc1 = [lines[indexl][0], 0]
-                        new += Crossing_penalty * (
+                        new = Crossing_penalty * (
                             Crossingsi_finder[arc[0], arc[1]] - Crossingsi_finder[arc1[0], arc1[1]])
                         Savingsi, Savingsi_finder = add_task(Savingsi, Savingsi_finder, (arc[0], arc[1]), new)
                         Savingsi, Savingsi_finder, max_saving = pop_task(Savingsi, Savingsi_finder)
