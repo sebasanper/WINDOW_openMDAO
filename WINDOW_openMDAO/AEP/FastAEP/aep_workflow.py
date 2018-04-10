@@ -1,4 +1,4 @@
-from aero_power_ct_models.aero_models import AeroLookup
+from farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import AeroLookup
 
 class Workflow:
     def __init__(self, inflow_model, windrose_file, wake_turbulence_model, thrust_coefficient_model, thrust_lookup_file, wake_mean_model, wake_merging_model, power_model, power_lookup_file):
@@ -63,7 +63,7 @@ class Workflow:
 
         if self.print_output is True: print( "=== CALCULATING ENERGY, TURBULENCE PER WIND DIRECTION ===")
         for i in range(len(self.wind_directions)):
-            self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates, self.wind_speeds[i], self.wind_speeds_probabilities[i], self.wind_directions[i], self.freestream_turbulence, self.wake_mean_model, self.power_model, self.table_power, self.thrust_coefficient_model, self.ctx, self.cty, self.wake_merging_model)
+            self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates, self.wind_speeds[i], self.wind_speeds_probabilities[i], self.wind_directions[i], self.freestream_turbulence, self.wake_mean_model, self.power_model, self.table_power, self.thrust_coefficient_model, self.ct_table, self.wake_merging_model)
             self.turbulences = max_turbulence_one_angle(deficits, turbine_coordinates, self.wind_speeds[i], self.wind_directions[i], self.freestream_turbulence, Jensen, self.thrust_coefficient_model, self.ct_table, self.wake_turbulence_model)
 
             self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities[i] / 100.0

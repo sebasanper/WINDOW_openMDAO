@@ -47,7 +47,7 @@ def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed,
 def max_turbulence_one_angle(deficits, original_layout, windspeeds, wind_angle, turbulences, WakeModel, ThrustModel, ct_table, TurbulenceModel):
     maximo = [0.0 for _ in range(len(original_layout))]
     for i in range(len(windspeeds)):
-        maxturb = turbulence_one_angle(deficits, original_layout, windspeeds[i], wind_angle, turbulences[i], WakeModel, ThrustModel, ctx, cty, TurbulenceModel)
+        maxturb = turbulence_one_angle(deficits, original_layout, windspeeds[i], wind_angle, turbulences[i], WakeModel, ThrustModel, ct_table, TurbulenceModel)
         for j in range(len(original_layout)):
             if maxturb[j] > maximo[j]:
                 maximo[j] = maxturb[j]

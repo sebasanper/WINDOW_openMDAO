@@ -53,6 +53,7 @@ setup(
       'WINDOW_openMDAO.AEP.FastAEP.site_conditions',
       'WINDOW_openMDAO.AEP.FastAEP.site_conditions.wind_conditions',
       'WINDOW_openMDAO.src',
+      'WINDOW_openMDAO.src.AbsAEP',
       'WINDOW_openMDAO.src.AbsCosts',
       'WINDOW_openMDAO.src.AbsElectricalCollection',
       'WINDOW_openMDAO.src.AbsFinance',
