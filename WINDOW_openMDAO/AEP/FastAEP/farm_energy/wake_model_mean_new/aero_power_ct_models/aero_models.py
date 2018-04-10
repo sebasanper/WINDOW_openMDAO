@@ -30,8 +30,7 @@ class AeroLookup:
         return result
 
 # @countcalls
-def power(wind_speed, px, py, cutin=cutin_wind_speed, cutout=cutout_wind_speed, rated=rated_wind, r=rotor_radius):
-    table_power = AeroLookup(px, py)
+def power(wind_speed, table_power, cutin=cutin_wind_speed, cutout=cutout_wind_speed, rated=rated_wind, r=rotor_radius):
 
     if wind_speed < cutin:
         return 0.0
@@ -45,8 +44,7 @@ def power(wind_speed, px, py, cutin=cutin_wind_speed, cutout=cutout_wind_speed, 
 # power = Memoize(power)
 
 # @countcalls
-def thrust_coefficient(wind_speed, ctx, cty):
-    ct_table = AeroLookup(ctx, cty)
+def thrust_coefficient(wind_speed, ct_table):
     ct = ct_table.interpolation(wind_speed)
     if ct > 0.9:
         ct = 0.9
