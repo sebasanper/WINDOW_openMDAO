@@ -1,20 +1,14 @@
 from util import interpolate
 from numpy import pi
-from WINDOW_openMDAO.src.AbsAEP.FastAEP.farm_energy.wake_model_mean_new.memoize import Memoize, countcalls
+from WINDOW_openMDAO.AEP.FastAEP.farm_energy.wake_model_mean_new.memoize import Memoize, countcalls
 from WINDOW_openMDAO.input_params import cutout_wind_speed, cutin_wind_speed, rotor_radius, wind_speed_at_max_thrust as rated_wind, turbine_rated_power
 
 
 class AeroLookup:
 
-    def __init__(self, file_in):
-
-        with open(file_in, "r") as data:
-            self.x = []
-            self.y = []
-            for line in data:
-                col = line.split()
-                self.x.append(float(col[0]))
-                self.y.append(float(col[1]))
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
 
     def interpolation(self, value):
         ii = 0
@@ -36,9 +30,8 @@ class AeroLookup:
         return result
 
 # @countcalls
-def power(wind_speed, power_lookup_file, cutin=cutin_wind_speed, cutout=cutout_wind_speed, rated=rated_wind, r=rotor_radius):
-    table_power = AeroLookup(power_lookup_file)
-    if power_lookup_file == "farm_energy/wake_model_mean_new/aero_power_ct_models/nrel_cp.dat":
+def power(wind_speed, table_power, cutin=cutin_wind_speed, cutout=cutout_wind_speed, rated=rated_wind, r=rotor_radius):
+    if all(cp < 10.0 for cp in table_power.y):
         if wind_speed < cutin:
             return 0.0
         elif wind_speed <= rated:
@@ -48,7 +41,6 @@ def power(wind_speed, power_lookup_file, cutin=cutin_wind_speed, cutout=cutout_w
             return turbine_rated_power
         else:
             return 0.0
-
     if wind_speed < cutin:
         return 0.0
     elif wind_speed <= cutout:
@@ -61,8 +53,7 @@ def power(wind_speed, power_lookup_file, cutin=cutin_wind_speed, cutout=cutout_w
 # power = Memoize(power)
 
 # @countcalls
-def thrust_coefficient(wind_speed, lookup_file):
-    ct_table = AeroLookup(lookup_file)
+def thrust_coefficient(wind_speed, ct_table):
     ct = ct_table.interpolation(wind_speed)
     if ct > 0.9:
         ct = 0.9
