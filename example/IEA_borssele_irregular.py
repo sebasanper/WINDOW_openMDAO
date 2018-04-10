@@ -1,44 +1,71 @@
-# This file must be run from the example folder. Otherwise, the absolute path to the WINDOW_openMDAO installation folder needs to be changed below.
+# This file must be run from the 'example' folder that has the 'Input' folder.
 
-from os import path
-import sys
+# Imports OpenMDAO API
 from openmdao.api import Problem, view_model
-from time import time, clock
 
-sys.path.append(path.abspath('../../WINDOW_openMDAO/'))
+# Imports WINDOW workflow
+from WINDOW_openMDAO.multifidelity_fast_workflow import WorkingGroup
 
-# from workflow_irregular import WorkingGroup  # For every function as an openmdao component.
-from fast_workflow_irregular import WorkingGroup  # For a fast and unique AEP openmdao component.
+# Imports models included in WINDOW 
+# from WINDOW_openMDAO.Turbine.Curves import Curves # Not used in the AEP fast calculator.
+from WINDOW_openMDAO.ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
+from WINDOW_openMDAO.ElectricalCollection.constant_electrical import ConstantElectrical
+from WINDOW_openMDAO.SupportStructure.teamplay import TeamPlay
+from WINDOW_openMDAO.SupportStructure.constant_support import ConstantSupport
+from WINDOW_openMDAO.OandM.OandM_models import OM_model1
+from WINDOW_openMDAO.src.AbsAEP.aep_fast_component import AEPFast
+from WINDOW_openMDAO.Costs.teamplay_costmodel import TeamPlayCostModel
+from WINDOW_openMDAO.src.AbsAEP.FastAEP.farm_energy.wake_model_mean_new.wake_turbulence_models import frandsen2, danish_recommendation, frandsen, larsen_turbulence, Quarton, constantturbulence
+from WINDOW_openMDAO.src.AbsAEP.FastAEP.farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen, LarsenEffects as Larsen, Ainslie1DEffects as Ainslie1D, Ainslie2DEffects as Ainslie2D, constantwake
+from WINDOW_openMDAO.src.AbsAEP.FastAEP.farm_energy.wake_model_mean_new.wake_overlap import root_sum_square, maximum, multiplied, summed
+
+# Imports the Options class to instantiate a workflow.
+from WINDOW_openMDAO.src.api import WorkflowOptions
+
 
 def print_nice(string, value):
     header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
     header += str(value) + "\n"
     header += "=" * (22 + len(string))
     print header
-prob = Problem()
-# prob.model = WorkingGroup(direction_sampling_angle=10.0, windspeed_sampling_points=5, windrose_file='Input/weibull_windrose_12identical.dat', power_curve_file='Input/power_dtu10.dat', ct_curve_file='Input/ct_dtu10.dat')
-prob.model = WorkingGroup(direction_sampling_angle=1.0, windspeed_sampling_points=10)
-prob.setup()
 
-print_nice("Time after setup", clock())
-# view_model(prob) # Uncomment to view N2 chart.
-start = time()
 
-prob.run_model()
-print_nice("Execution time first run", time() - start)
+options = WorkflowOptions()
 
-# print_nice("turbulences", prob['AeroAEP.max_TI'])
-print_nice("AEP", prob['AeroAEP.AEP'])
-print_nice("LCOE", prob['lcoe.LCOE'])
-# print_nice("investment costs", prob['Costs.investment_costs'])
-# print_nice("OandM.annual_cost_O&M", prob['OandM.annual_cost_O&M'])
-# print_nice("Costs.decommissioning_costs", prob['Costs.decommissioning_costs'])
+# Define models to be implemented.
+options.models.aep = AEPFast
+options.models.wake = Jensen  
+options.models.merge = root_sum_square
+options.models.turbine = None
+options.models.turbulence = frandsen
+options.models.electrical = TopologyHybridHeuristic
+options.models.support = TeamPlay
+options.models.opex = OM_model1
+options.models.apex = TeamPlayCostModel
 
-# print_nice("support.cost_support", sum(prob['support.cost_support']))
-# print_nice("electrical.cost_p_cable_type", prob['electrical.cost_p_cable_type'])
+# Define number of windrose sampling points
+options.samples.wind_speeds = 7
+options.samples.wind_sectors_angle = 30.0
 
-# start = time()
-# prob['indep2.interest_rate'] = 0.05 # Changing one parameter for a second run.
-# prob.run_model()
-# print_nice("Execution time second run", time() - start)
-# print_nice("LCOE", prob['lcoe.LCOE'])
+# Define paths to site and turbine defining input files.
+options.input.site.windrose_file = "Input/weibull_windrose_12unique.dat"
+options.input.site.bathymetry_file = "Input/bathymetry_table.dat"
+options.input.turbine.power_file = "Input/power_dtu10.dat"
+options.input.turbine.ct_file = "Input/ct_dtu10.dat"
+
+# Instantiate OpenMDAO problemlem class
+problem = Problem()
+problem.model = WorkingGroup(options)
+
+problem.setup()
+
+
+### Uncomment below to plot N2 diagram in a browser.
+# view_model(problem)
+problem.run_model()
+
+lcoe = problem['lcoe.LCOE'][0]
+aep = problem['AeroAEP.AEP'][0]
+
+print_nice("LCOE", lcoe)
+print_nice("AEP", aep)

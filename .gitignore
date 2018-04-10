@@ -1,4 +1,4 @@
-
+build/*
 *.pyc
 
 n2.html
