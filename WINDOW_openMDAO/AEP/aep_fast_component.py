@@ -1,7 +1,7 @@
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines
 
-from WINDOW_openMDAO.src.AbsAEP.FastAEP.call_aep_workflow_once import call_aep
+from FastAEP.call_aep_workflow_once import call_aep
 
 
 class AEPFast(ExplicitComponent):
