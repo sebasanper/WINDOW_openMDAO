@@ -4,7 +4,7 @@ from WINDOW_openMDAO.input_params import rotor_radius
 from memoize import Memoize
 
 
-def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed, wind_angle, ambient_turbulence, WakeModel, ThrustModel, thrust_file, TurbulenceModel):
+def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed, wind_angle, ambient_turbulence, WakeModel, ThrustModel, ct_table, TurbulenceModel):
     ordered_layout = order(original_layout, wind_angle)
     ct = []
     wind_speeds_array = freestream_wind_speed
@@ -38,16 +38,16 @@ def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed,
         if float("inf") in item:
             wake_added_turbulence.append(ambient_turbulence)
         else:
-            wake_added_turbulence.append(TurbulenceModel(ambient_turbulence, ThrustModel(freestream_wind_speed, thrust_file), freestream_wind_speed, np.linalg.norm(np.array([original_layout[item[0]][1], original_layout[item[0]][2]]) - np.array([original_layout[item[1]][1], original_layout[item[1]][2]])) / (2.0 * rotor_radius)))
+            wake_added_turbulence.append(TurbulenceModel(ambient_turbulence, ThrustModel(freestream_wind_speed, ct_table), freestream_wind_speed, np.linalg.norm(np.array([original_layout[item[0]][1], original_layout[item[0]][2]]) - np.array([original_layout[item[1]][1], original_layout[item[1]][2]])) / (2.0 * rotor_radius)))
 
     return wake_added_turbulence
 # turbulence_one_angle = Memoize(turbulence_one_angle)
 
 
-def max_turbulence_one_angle(deficits, original_layout, windspeeds, wind_angle, turbulences, WakeModel, ThrustModel, thrust_file, TurbulenceModel):
+def max_turbulence_one_angle(deficits, original_layout, windspeeds, wind_angle, turbulences, WakeModel, ThrustModel, ct_table, TurbulenceModel):
     maximo = [0.0 for _ in range(len(original_layout))]
     for i in range(len(windspeeds)):
-        maxturb = turbulence_one_angle(deficits, original_layout, windspeeds[i], wind_angle, turbulences[i], WakeModel, ThrustModel, thrust_file, TurbulenceModel)
+        maxturb = turbulence_one_angle(deficits, original_layout, windspeeds[i], wind_angle, turbulences[i], WakeModel, ThrustModel, ctx, cty, TurbulenceModel)
         for j in range(len(original_layout)):
             if maxturb[j] > maximo[j]:
                 maximo[j] = maxturb[j]
