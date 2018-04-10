@@ -29,4 +29,9 @@ To reinstall after changes to your local copy:
 
 ---------------------------------------------------
 
+First make sure you have OpenMDAO installed.
+
+    pip install openmdao
+
+
 In order to run WINDOW from a working directory, you need to implement the WorkingGroup class (in the multifidelity_fast_workflow.py file) and define an OpenMDAO Problem class. All input must be put in a folder called "Input". An Options class (in WINDOW_openMDAO.src.api) must be instantiated and its attributes filled with the desired inputs that instantiate the MDAO workflow, such as models, numer of windrose sampling points and site and turbine input files. See and run an example from the "example" folder provided. Run IEA_borssele_irregular.py.
