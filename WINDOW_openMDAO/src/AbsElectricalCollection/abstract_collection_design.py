@@ -8,7 +8,7 @@ class AbstractElectricDesign(ExplicitComponent):
     def setup(self):
         self.add_input('layout', shape=(max_n_turbines, 3))
         self.add_input('n_turbines_p_cable_type', shape=3)
-        self.add_input('substation_coords', shape=(max_n_substations, 3))
+        self.add_input('substation_coords', shape=(max_n_substations, 2))
         self.add_input('n_substations', val=0)
         self.add_input('n_turbines', val=0)
 
@@ -23,7 +23,7 @@ class AbstractElectricDesign(ExplicitComponent):
         layout = [[int(coord[0]), coord[1], coord[2]] for coord in inputs['layout'][:n_turbines]]
         n_substations = int(inputs['n_substations'])
         n_turbines_p_cable_type = [int(num) for num in inputs['n_turbines_p_cable_type']]
-        substation_coords = [[i[1], i[2]] for i in inputs['substation_coords'][:n_substations]]
+        substation_coords = inputs['substation_coords'][:n_substations]
 
         cost, topology_dict, cable_lengths = self.topology_design_model(layout, substation_coords, n_turbines_p_cable_type)
         if type(topology_dict) is dict:

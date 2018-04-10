@@ -36,14 +36,15 @@ class WorkingGroup(Group):
         indep2.add_output('turbine_radius', val=turbine_radius)
         indep2.add_output('n_turbines', val=n_turbines)
         indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or one cable type.
-        indep2.add_output('substation_coords', shape=(number_substations, 3))
+        indep2.add_output('substation_coords', val=central_platform)
         indep2.add_output('n_substations', val=number_substations)
         indep2.add_output('coll_electrical_efficiency', val=coll_electrical_efficiency)
         indep2.add_output('transm_electrical_efficiency', val=transm_electrical_efficiency)
         indep2.add_output('operational_lifetime', val=operational_lifetime)
         indep2.add_output('interest_rate', val=interest_rate)
 
-        self.add_subsystem('numberlayout', NumberLayout())
+        self.add_subsystem('numbersubstation', NumberLayout(max_n_substations))
+        self.add_subsystem('numberlayout', NumberLayout(max_n_turbines))
         self.add_subsystem('depths', RoughClosestNode(max_n_turbines, self.bathymetry_file))
         self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations, self.bathymetry_file))
 
@@ -60,6 +61,7 @@ class WorkingGroup(Group):
         self.add_subsystem('constraint_boundary', WithinBoundaries())
 
         self.connect("indep2.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
+        self.connect("indep2.substation_coords", "numbersubstation.orig_layout")
         self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
         self.connect("indep2.areas", "constraint_boundary.areas")
 
@@ -79,7 +81,7 @@ class WorkingGroup(Group):
         self.connect('AeroAEP.AEP', ['AEP.aeroAEP', 'OandM.AEP'])
         self.connect('indep2.coll_electrical_efficiency', 'AEP.electrical_efficiency')
 
-        self.connect('indep2.substation_coords', 'platform_depth.layout')
+        self.connect('numbersubstation.number_layout', 'platform_depth.layout')
         self.connect('platform_depth.water_depths', 'Costs.depth_central_platform', src_indices=[0])
 
         self.connect('indep2.n_substations', 'Costs.n_substations')

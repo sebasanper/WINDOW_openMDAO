@@ -6,9 +6,13 @@ import numpy as np
 
 
 class NumberLayout(ExplicitComponent):
+    def __init__(self, n):
+      super(NumberLayout, self).__init__()
+      self.n = n
+
     def setup(self):
-        self.add_input("orig_layout", shape=(max_n_turbines, 2))
-        self.add_output("number_layout", shape=(max_n_turbines, 3))
+        self.add_input("orig_layout", shape=(self.n, 2))
+        self.add_output("number_layout", shape=(self.n, 3))
 
     def compute(self, inputs, outputs):
         orig_layout = inputs["orig_layout"]

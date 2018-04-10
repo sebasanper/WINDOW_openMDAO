@@ -41,6 +41,9 @@ n_windrose_sectors = len(wind_directions)
 TI_ambient = 0.11
 
 n_quadrilaterals = 2 # Number of quadrilaterals into which the wind farm area is divided.
+# 7D reduced Borssele. Only for perimeter weighted layout.
+# areas = np.array([[[486794.64, 5731868.94], [497472.73, 5735250.56], [495467.19, 5731217.68], [489678.8, 5729085.24]], [[489678.8, 5729085.24], [495467.19, 5731217.68], [501672.52, 5728324.88], [500304.44, 5718829.7]]])
+
 areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 5731880.24], [488951.0, 5.72794e6]], [[488951.0, 5.72794e6], [497318.1, 5731880.24], [503163.37, 5729155.3], [501266.5, 5715990.05]]])
 
 # areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 5731880.24], [491858.00, 5725044.75]], [[491858.00, 5725044.75], [497318.1, 5731880.24], [503163.37, 5729155.3], [501266.5, 5715990.05]]])  # Areas need to be defined in clockwise order starting on the "bottom left" corner, and grouped per quadrilateral considered.
@@ -54,6 +57,3 @@ def separation_equation_y(x):  # values y greater than f(x) use mapping 1, else 
         return m * x + b
     else:
         return - 10000000.0  # Any value so that the entire farm is above this coordinate in the y-axis.
-
-bathymetry_path = "Input/bathymetry_table.dat"
-windrose_path = "Input/weibull_windrose_12unique.dat"
