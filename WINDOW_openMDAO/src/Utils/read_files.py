@@ -26,3 +26,4 @@ def read_windrose(filename):
             weibull_shape.append(float(columns[2]))
             dir_probability.append(float(columns[3]))
     return direction, weibull_scale, weibull_shape, dir_probability
+

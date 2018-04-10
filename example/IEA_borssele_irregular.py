@@ -13,11 +13,11 @@ from WINDOW_openMDAO.ElectricalCollection.constant_electrical import ConstantEle
 from WINDOW_openMDAO.SupportStructure.teamplay import TeamPlay
 from WINDOW_openMDAO.SupportStructure.constant_support import ConstantSupport
 from WINDOW_openMDAO.OandM.OandM_models import OM_model1
-from WINDOW_openMDAO.src.AbsAEP.aep_fast_component import AEPFast
+from WINDOW_openMDAO.AEP.aep_fast_component import AEPFast
 from WINDOW_openMDAO.Costs.teamplay_costmodel import TeamPlayCostModel
-from WINDOW_openMDAO.src.AbsAEP.FastAEP.farm_energy.wake_model_mean_new.wake_turbulence_models import frandsen2, danish_recommendation, frandsen, larsen_turbulence, Quarton, constantturbulence
-from WINDOW_openMDAO.src.AbsAEP.FastAEP.farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen, LarsenEffects as Larsen, Ainslie1DEffects as Ainslie1D, Ainslie2DEffects as Ainslie2D, constantwake
-from WINDOW_openMDAO.src.AbsAEP.FastAEP.farm_energy.wake_model_mean_new.wake_overlap import root_sum_square, maximum, multiplied, summed
+from WINDOW_openMDAO.AEP.FastAEP.farm_energy.wake_model_mean_new.wake_turbulence_models import frandsen2, danish_recommendation, frandsen, larsen_turbulence, Quarton, constantturbulence
+from WINDOW_openMDAO.AEP.FastAEP.farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen, LarsenEffects as Larsen, Ainslie1DEffects as Ainslie1D, Ainslie2DEffects as Ainslie2D, constantwake
+from WINDOW_openMDAO.AEP.FastAEP.farm_energy.wake_model_mean_new.wake_overlap import root_sum_square, maximum, multiplied, summed
 
 # Imports the Options class to instantiate a workflow.
 from WINDOW_openMDAO.src.api import WorkflowOptions
