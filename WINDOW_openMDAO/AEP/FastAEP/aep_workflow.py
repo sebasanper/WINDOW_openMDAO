@@ -12,7 +12,21 @@ class Workflow:
         self.windrose = self.inflow_model(windrose_file)
         self.thrust_lookup_file = thrust_lookup_file
         self.power_lookup_file = power_lookup_file
+        self.ctx = []
+        self.cty = []
+        self.px = []
+        self.py = []
 
+        with open(self.thrust_lookup_file, "r") as data:
+            for line in data:
+                col = line.split()
+                self.ctx.append(float(col[0]))
+                self.cty.append(float(col[1]))
+        with open(self.power_lookup_file, "r") as data:
+            for line in data:
+                col = line.split()
+                self.px.append(float(col[0]))
+                self.py.append(float(col[1]))
     def connect(self, turbine_coordinates):
         layout = []
         for t in turbine_coordinates:
@@ -42,8 +56,8 @@ class Workflow:
 
         if self.print_output is True: print( "=== CALCULATING ENERGY, TURBULENCE PER WIND DIRECTION ===")
         for i in range(len(self.wind_directions)):
-            self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates, self.wind_speeds[i], self.wind_speeds_probabilities[i], self.wind_directions[i], self.freestream_turbulence, self.wake_mean_model, self.power_model, self.power_lookup_file, self.thrust_coefficient_model, self.thrust_lookup_file, self.wake_merging_model)
-            self.turbulences = max_turbulence_one_angle(deficits, turbine_coordinates, self.wind_speeds[i], self.wind_directions[i], self.freestream_turbulence, Jensen, self.thrust_coefficient_model, self.thrust_lookup_file, self.wake_turbulence_model)
+            self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates, self.wind_speeds[i], self.wind_speeds_probabilities[i], self.wind_directions[i], self.freestream_turbulence, self.wake_mean_model, self.power_model, self.px, self.py, self.thrust_coefficient_model, self.ctx, self.cty, self.wake_merging_model)
+            self.turbulences = max_turbulence_one_angle(deficits, turbine_coordinates, self.wind_speeds[i], self.wind_directions[i], self.freestream_turbulence, Jensen, self.thrust_coefficient_model, self.ctx, self.cty, self.wake_turbulence_model)
 
             self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities[i] / 100.0
             self.energies_per_angle.append(self.energy_one_angle_weighted)
