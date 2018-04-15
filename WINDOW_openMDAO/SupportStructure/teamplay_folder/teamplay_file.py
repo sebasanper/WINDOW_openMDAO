@@ -6,7 +6,7 @@ from currency import Cost1
 
 def teamplay(TI, depth):
     dimension_team_support = DimensionTeamSupport()
-    dimension_team_support.fsf = TI + 1.0
+    dimension_team_support.fsf = TI + 1.4 # 1.4 safety factor to account for wave-induced fatigue and the rest is wind-induced.
     # dimension_team_support.fsf = 1.5
     rna = RNA()
     site_data = Site()
