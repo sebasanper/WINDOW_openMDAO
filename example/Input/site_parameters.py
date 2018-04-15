@@ -32,7 +32,7 @@ friction_angle = 35.0  # [degrees] Depth averaged friction angle from 'friction 
 submerged_unit_weight = 10000.0  # [N/m^3] From 'friction angle-report', lighter layer ignored, because it is at great depth.
 
 # --------  Windrose  ----------------
-wind_directions, weibull_scales, weibull_shapes, direction_probabilities = read_windrose('Input/weibull_windrose_12identical.dat')
+wind_directions, weibull_scales, weibull_shapes, direction_probabilities = read_windrose('Input/weibull_windrose_12unique.dat')
 n_windrose_sectors = len(wind_directions)
 # wind_directions = [i * 30.0 for i in range(n_windrose_sectors)]
 # weibull_scales = [8.65, 8.86, 8.15, 9.98, 11.35, 10.96, 11.28, 11.50, 11.08, 10.94, 11.27, 10.55]
@@ -41,7 +41,12 @@ n_windrose_sectors = len(wind_directions)
 TI_ambient = 0.11
 
 n_quadrilaterals = 2 # Number of quadrilaterals into which the wind farm area is divided.
-areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 5731880.24], [491858.00, 5725044.75]], [[491858.00, 5725044.75], [497318.1, 5731880.24], [503163.37, 5729155.3], [501266.5, 5715990.05]]])  # Areas need to be defined in clockwise order starting on the "bottom left" corner, and grouped per quadrilateral considered.
+# 7D reduced Borssele. Only for perimeter weighted layout.
+# areas = np.array([[[486794.64, 5731868.94], [497472.73, 5735250.56], [495467.19, 5731217.68], [489678.8, 5729085.24]], [[489678.8, 5729085.24], [495467.19, 5731217.68], [501672.52, 5728324.88], [500304.44, 5718829.7]]])
+
+areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 5731880.24], [488951.0, 5.72794e6]], [[488951.0, 5.72794e6], [497318.1, 5731880.24], [503163.37, 5729155.3], [501266.5, 5715990.05]]])
+
+# areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 5731880.24], [491858.00, 5725044.75]], [[491858.00, 5725044.75], [497318.1, 5731880.24], [503163.37, 5729155.3], [501266.5, 5715990.05]]])  # Areas need to be defined in clockwise order starting on the "bottom left" corner, and grouped per quadrilateral considered.
 
 def separation_equation_y(x):  # values y greater than f(x) use mapping 1, else mapping 0, in the case of two quadrilaterals.
     if len(areas) > 1:
