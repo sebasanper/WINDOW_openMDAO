@@ -50,7 +50,7 @@ def LarsenEffects(coordinates_upstream, thrust_coefficient, coordinates_downstre
     return partial_deficits
 
 
-def Ainslie1DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=rotor_radius):
+def Ainslie1DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=rotor_radius * 2.0):
     angle3 = angle + 180.0
     partial_deficits = []
     normalised_upstream = [coordinates_upstream[i] / diameter for i in range(1, 3)]
