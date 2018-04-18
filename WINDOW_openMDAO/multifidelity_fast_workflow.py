@@ -7,7 +7,6 @@ from WINDOW_openMDAO.WaterDepth.water_depth_models import RoughClosestNode
 from WINDOW_openMDAO.Finance.LCOE import LCOE
 
 
-
 class WorkingGroup(Group):
     def __init__(self, options):
         super(WorkingGroup, self).__init__()
@@ -22,7 +21,7 @@ class WorkingGroup(Group):
         self.apex_model = options.models.apex
         self.windspeed_sampling_points = options.samples.wind_speeds
         self.direction_sampling_angle = options.samples.wind_sectors_angle
-        self.n_cases = int((360.0 / self.direction_sampling_angle) * (self.windspeed_sampling_points + 1.0))
+        # self.n_cases = int((360.0 / self.direction_sampling_angle) * (self.windspeed_sampling_points + 1.0))
         self.windrose_file = options.input.site.windrose_file
         self.bathymetry_file = options.input.site.bathymetry_file
         self.power_curve_file = options.input.turbine.power_file

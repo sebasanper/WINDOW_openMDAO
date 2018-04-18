@@ -22,30 +22,38 @@ class WeibullWindBins(object):
                 self.weibull_shape.append(float(columns[2]))
                 self.dir_probability.append(float(columns[3]))
 
+        self.real_angle = 360.0 / len(self.direction)
+
     def adapt_directions(self):
         self.new_direction = []
         self.new_direction_probability = []
         self.new_weibull_scale = []
         self.new_weibull_shape = []
 
-        for i in range(len(self.direction)):
-            if self.direction[i] % self.real_angle == 0.0:
-                self.new_direction_probability.append(self.dir_probability[i])
-                self.new_direction.append(self.direction[i])
-                self.new_weibull_scale.append(self.weibull_scale[i])
-                self.new_weibull_shape.append(self.weibull_shape[i])
-            else:
-                self.new_direction_probability[-1] += self.dir_probability[i]
-        # print sum(self.dir_probability)
-        # print self.new_direction
-        # print self.new_direction_probability, sum(self.new_direction_probability)
+        if len(self.direction) > 1:
+            for i in range(len(self.direction)):
+                if self.direction[i] % self.real_angle == 0.0:
+                    self.new_direction_probability.append(self.dir_probability[i])
+                    self.new_direction.append(self.direction[i])
+                    self.new_weibull_scale.append(self.weibull_scale[i])
+                    self.new_weibull_shape.append(self.weibull_shape[i])
+                else:
+                    self.new_direction_probability[-1] += self.dir_probability[i]
 
+        else:
+            self.new_direction_probability.append(100.0)
+            self.new_direction = self.direction
+            self.new_weibull_scale = self.weibull_scale
+            self.new_weibull_shape = self.weibull_shape
         self.new_direction2 = []
         self.new_direction_probability2 = []
         self.new_weibull_shape2 = []
         self.new_weibull_scale2 = []
-        n = int(self.new_direction[1] - self.new_direction[0]) // int(self.artificial_angle)
 
+        if len(self.new_direction) > 1:
+            n = int(self.new_direction[1] - self.new_direction[0]) // int(self.artificial_angle)
+        else:
+            n = 1
         for i in range(len(self.new_direction)):
             for j in range(n):
                 self.new_direction2.append(self.new_direction[i] + self.artificial_angle * j)
@@ -55,12 +63,8 @@ class WeibullWindBins(object):
 
         return self.new_direction2, self.new_direction_probability2
 
-        # print self.new_direction2
-        # print self.new_direction_probability2
-        # print self.dir_probability
 
     def cumulative_weibull(self, wind_speed, weibull_scale_dir, weibull_shape_dir):
-
         return 1.0 - exp(-(wind_speed / weibull_scale_dir) ** weibull_shape_dir)
 
     def get_wind_speeds(self):

@@ -4,12 +4,11 @@ from farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import pow
 
 
 def call_aep(wake_model, turbulence_model, merge_model, power_curve_file, ct_curve_file, windrose_file, layout, nbins, artif_angle):
-    real_angle = 30.0
+
     workflow1 = aep_workflow(WeibullWindBins, windrose_file, turbulence_model, thrust_coefficient, ct_curve_file, wake_model, merge_model, power, power_curve_file)
 
     workflow1.windrose.nbins = nbins
     workflow1.windrose.artificial_angle = artif_angle
-    workflow1.windrose.real_angle = real_angle
     workflow1.print_output = False
     answer = workflow1.run(layout)
     # power2.reset()

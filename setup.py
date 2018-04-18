@@ -39,8 +39,6 @@ setup(
       'WINDOW_openMDAO.SupportStructure.teamplay_folder.lib.environment',
       'WINDOW_openMDAO.SupportStructure.teamplay_folder.lib.system',
       'WINDOW_openMDAO.Turbine',
-      'WINDOW_openMDAO.Turbine.Power',
-      'WINDOW_openMDAO.Turbine.ThrustCoefficient',
       'WINDOW_openMDAO.WakeModel',
       'WINDOW_openMDAO.WakeModel.Turbulence',
       'WINDOW_openMDAO.WakeModel.WakeMerge',
