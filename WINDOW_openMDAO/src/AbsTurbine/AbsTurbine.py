@@ -5,10 +5,12 @@ import numpy as np
 
 class AbsTurbine(ExplicitComponent):
 
-    def __init__(self, number, n_cases):
+    def __init__(self, number, n_cases, power_table, ct_table):
         super(AbsTurbine, self).__init__()
         self.number = number
         self.n_cases = n_cases
+        self.power_table = power_table
+        self.ct_table = ct_table
 
     def setup(self):
         self.add_input('n_turbines', val=0)
@@ -50,7 +52,7 @@ class AbsTurbine(ExplicitComponent):
             #     power = np.append(power, [p])
             for n in range(self.number):
                 if n == self.number - 1:
-                    ct, p = self.turbine_model(inputs['U{}'.format(n)][case])
+                    ct, p = self.turbine_model(inputs['U{}'.format(n)][case], self.power_table, self.ct_table)
                 else:
                     ct = prev_turbine_ct[n]
                     p = prev_turbine_p[n]
