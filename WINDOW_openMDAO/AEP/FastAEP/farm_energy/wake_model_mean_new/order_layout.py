@@ -2,8 +2,8 @@ from numpy import radians, tan, cos, sqrt
 
 
 def distance_to_front(x, y, theta):
-    theta = radians(theta)
-    return abs(x + tan(theta) * y - 10000000000.0 / cos(theta)) / sqrt(1.0 + tan(theta) ** 2.0)
+    theta = radians(- theta + 90.0)
+    return abs(x + tan(theta) * y - 1000000000000000000000.0 / cos(theta)) / sqrt(1.0 + tan(theta) ** 2.0)
 
 
 def order(layout_array, wind_direction):
