@@ -5,6 +5,7 @@ from memoize import Memoize
 
 
 def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed, wind_angle, ambient_turbulence, WakeModel, ThrustModel, ct_table, TurbulenceModel):
+    wind_angle = - wind_angle + 90.0 # To conform to windrose convention. Wake model is written to read 0 as positive X and then angles are measured counterclockwise.
     ordered_layout = order(original_layout, wind_angle)
     ct = []
     wind_speeds_array = freestream_wind_speed
