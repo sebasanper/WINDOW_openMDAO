@@ -66,7 +66,7 @@ class WorkingGroup(Group):
 
         self.connect('numberlayout.number_layout', 'depths.layout')
 
-        self.connect('indep2.n_turbines', ['electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
+        self.connect('indep2.n_turbines', ['AeroAEP.n_turbines', 'electrical.n_turbines', 'support.n_turbines', 'Costs.n_turbines'])
 
         self.connect('numberlayout.number_layout', 'electrical.layout')
         self.connect('indep2.n_turbines_p_cable_type', 'electrical.n_turbines_p_cable_type')

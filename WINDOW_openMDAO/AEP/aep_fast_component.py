@@ -19,16 +19,18 @@ class AEPFast(ExplicitComponent):
 
     def setup(self):
         self.add_input("layout", shape=(max_n_turbines, 2))
+        self.add_input("n_turbines", val=0)
         self.add_output("AEP", val=0.0)
         self.add_output("max_TI", shape=max_n_turbines)
         self.add_output("efficiency", val=0.0)
 
     def compute(self, inputs, outputs):
-        layout2 = inputs["layout"]
-        layout = []
-        for t in layout2:
-            if t[0] >= 0.0 and t[1] >= 0.0:
-                layout.append(t)
+        n_turbines = int(inputs["n_turbines"])
+        layout = inputs["layout"][:n_turbines]
+        # layout = []
+        # for t in layout2:
+        #     if t[0] >= 0.0 and t[1] >= 0.0:
+        #         layout.append(t)
         diff = max_n_turbines - len(layout)
         AEP, max_TI, efficiency = fun_aep_fast(self.wake_model, self.turbulence_model, self.merge_model,
                                                self.power_curve_file, self.ct_curve_file, self.windrose_file, layout,
