@@ -1,6 +1,7 @@
 from math import sqrt
 from memoize import Memoize
-from WINDOW_openMDAO.input_params import rotor_radius
+# from WINDOW_openMDAO.input_params import rotor_radius
+rotor_radius = 63.0
 #  Change in Fatigue and Extreme Loading when Moving Wind Farms Offshore // Sten Frandsen and Kenneth Thomsen.
 #  Only nearest wake-shedding turbine matters in a wind farm.
 
@@ -73,15 +74,15 @@ def frandsen(ambient_turbulence, Ct, speed, spacing, large=False):
     s = spacing
     # 0.8 sometimes 0.3 double check
     # u = 10.0  # wind speed
-    Iw = 1.0 / (1.5 + 0.8 * s / Ct ** 0.5)
+    Iw = speed / (1.5 + 0.8 * s / Ct ** 0.5)
     It = (Iw ** 2.0 + Ia ** 2.0) ** 0.5
 
     if large:
         #  More than 5 turbines between turbine under consideration and edge of park, OR turbines spaces less than 3D
         # in the direction perpendicular to wind. For regular layouts.
 
-        sd = 7.0
-        sc = 7.0
+        sd = spacing
+        sc = spacing
         Iw = 0.36 / (1.0 + 0.2 * (sd * sc / Ct) ** 0.5)
         Ia = 0.5 * (Ia + (Iw ** 2.0 + Ia ** 2.0) ** 0.5)
         It = (Iw ** 2.0 + Ia ** 2.0) ** 0.5
@@ -144,7 +145,7 @@ def Quarton(ambient_turb_percentage, Ct, speed, x, tsr=7.6):
 if __name__ == "__main__":
     # 7d downstream
     ct = 0.6
-    with open('turb_downstream_d.dat', 'w') as out:
+    with open('turb_downstream_d2.dat', 'w') as out:
         for x in range(100):
             d = float(x) * 0.1 + 0.1
             out.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n'.format(d, danish_recommendation(0.11, ct, 8.28, d), larsen_turbulence(0.11, ct, 8.28, d), Quarton(0.11, ct, 8.28, d), frandsen(0.11, ct, 8.28, d), frandsen2(0.11, ct, 8.28, d)))
