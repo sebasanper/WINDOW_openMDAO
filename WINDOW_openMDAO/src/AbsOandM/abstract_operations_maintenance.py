@@ -6,6 +6,7 @@ class AbstractOandM(ExplicitComponent):
 
     def setup(self):
         self.add_input('AEP', val=0.0)
+        self.add_output('array_efficiency', val=0.0)
 
         self.add_output('annual_cost_O&M', val=0.0)
         self.add_output('availability', val=0.0)
@@ -13,4 +14,5 @@ class AbstractOandM(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         AEP = inputs['AEP']
-        outputs['annual_cost_O&M'], outputs['availability'] = self.OandM_model(AEP)
+        eff = inputs['array_efficiency']
+        outputs['annual_cost_O&M'], outputs['availability'] = self.OandM_model(AEP, eff)
