@@ -76,8 +76,9 @@ class WorkingGroup(Group):
         self.connect('depths.water_depths', 'support.depth')
         self.connect('AeroAEP.max_TI', 'support.max_TI')
 
-        self.connect('OandM.availability', 'AEP.availability')
+        self.connect('AeroAEP.efficiency', 'OandM.array_efficiency')
         self.connect('AeroAEP.AEP', ['AEP.aeroAEP', 'OandM.AEP'])
+        self.connect('OandM.availability', 'AEP.availability')
         self.connect('indep2.coll_electrical_efficiency', 'AEP.electrical_efficiency')
 
         self.connect('numbersubstation.number_layout', 'platform_depth.layout')
