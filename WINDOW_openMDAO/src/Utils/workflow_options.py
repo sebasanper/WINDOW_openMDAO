@@ -4,6 +4,11 @@ class Models():
 		self.merge = None
 		self.turbulence = None
 		self.turbine = None
+		self.aep = None
+		self.electrical = None
+		self.support = None
+		self.opex = None
+		self.apex = None
 
 
 class Samples():
