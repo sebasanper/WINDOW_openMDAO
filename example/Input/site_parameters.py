@@ -50,7 +50,8 @@ areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 573
 
 def separation_equation_y(x):  # values y greater than f(x) use mapping 1, else mapping 0, in the case of two quadrilaterals.
     if len(areas) > 1:
-        m = (areas[1][0][1] - areas[1][1][1]) / (areas[1][0][0] - areas[1][1][0])
+        eps = 1e-9
+        m = (areas[1][0][1] - areas[1][1][1]) / (areas[1][0][0] - areas[1][1][0] + eps)
         yy = areas[1][0][1]
         xx = areas[1][0][0]
         b = yy - m * xx

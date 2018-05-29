@@ -41,7 +41,7 @@ def LarsenEffects(coordinates_upstream, thrust_coefficient, coordinates_downstre
         proportion, flag, perpendicular_distance, parallel_distance = larsen.determine_if_in_wake_larsen(coordinates_upstream[1], coordinates_upstream[2], coordinates_downstream[i][1], coordinates_downstream[i][2], thrust_coefficient, angle3, ambient_turbulence_intensity)
         if parallel_distance > 0.0:
             if proportion != 0.0:
-                partial_deficits.append(proportion * larsen.wake_deficit_larsen(wind_speed_upstream, thrust_coefficient, parallel_distance + x0(thrust_coefficient, ambient_turbulence_intensity), perpendicular_distance, ambient_turbulence_intensity))
+                partial_deficits.append(proportion * larsen.wake_deficit_larsen(wind_speed_upstream, thrust_coefficient, parallel_distance + larsen.x0(thrust_coefficient, ambient_turbulence_intensity), perpendicular_distance, ambient_turbulence_intensity))
             else:
                 partial_deficits.append(0.0)
         else:
