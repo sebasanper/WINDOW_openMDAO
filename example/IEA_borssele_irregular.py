@@ -36,7 +36,7 @@ options = WorkflowOptions()
 options.models.aep = AEPFast
 options.models.wake = Jensen  
 options.models.merge = root_sum_square
-options.models.turbine = None
+options.models.turbine = None # Unnecessary for now as long as the power and Ct curves are defined below.
 options.models.turbulence = frandsen
 options.models.electrical = TopologyHybridHeuristic
 options.models.support = TeamPlay
@@ -45,7 +45,7 @@ options.models.apex = TeamPlayCostModel
 
 # Define number of windrose sampling points
 options.samples.wind_speeds = 7
-options.samples.wind_sector_angle = 30.0
+options.samples.wind_sectors_angle = 30.0
 
 # Define paths to site and turbine defining input files.
 options.input.site.windrose_file = "Input/weibull_windrose_12unique.dat"
