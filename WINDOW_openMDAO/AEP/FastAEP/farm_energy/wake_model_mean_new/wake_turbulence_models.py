@@ -1,6 +1,7 @@
 from math import sqrt
-from memoize import Memoize
-from WINDOW_openMDAO.input_params import rotor_radius
+# from memoize import Memoize
+# from WINDOW_openMDAO.input_params import rotor_radius
+rotor_radius = 63.0
 #  Change in Fatigue and Extreme Loading when Moving Wind Farms Offshore // Sten Frandsen and Kenneth Thomsen.
 #  Only nearest wake-shedding turbine matters in a wind farm.
 
@@ -74,14 +75,14 @@ def frandsen(ambient_turbulence, Ct, speed, spacing, large=False):
     # 0.8 sometimes 0.3 double check
     # u = 10.0  # wind speed
     Iw = 1.0 / (1.5 + 0.8 * s / Ct ** 0.5)
-    It = (Iw ** 2.0 + Ia ** 2.0) ** 0.5
+    It = sqrt(Iw ** 2.0 + Ia ** 2.0)
 
     if large:
         #  More than 5 turbines between turbine under consideration and edge of park, OR turbines spaces less than 3D
         # in the direction perpendicular to wind. For regular layouts.
 
-        sd = 7.0
-        sc = 7.0
+        sd = spacing
+        sc = spacing
         Iw = 0.36 / (1.0 + 0.2 * (sd * sc / Ct) ** 0.5)
         Ia = 0.5 * (Ia + (Iw ** 2.0 + Ia ** 2.0) ** 0.5)
         It = (Iw ** 2.0 + Ia ** 2.0) ** 0.5
@@ -92,11 +93,11 @@ def frandsen(ambient_turbulence, Ct, speed, spacing, large=False):
 # frandsen = Memoize(frandsen)
 
 
-def Quarton(ambient_turb_percentage, Ct, speed, x, tsr=7.6):
+def Quarton(ambient_turbulence, Ct, speed, x, tsr=7.6):
     # TODO
     D = rotor_radius * 2.0
-    x *= D
-    Ia = ambient_turb_percentage
+    # x /= D
+    Ia = ambient_turbulence
     K1 = 4.8
     a1 = 0.7
     a2 = 0.68
@@ -104,10 +105,10 @@ def Quarton(ambient_turb_percentage, Ct, speed, x, tsr=7.6):
     m = 1.0 / (1.0 - Ct) ** 0.5
     r0 = D / 2.0 * ((m + 1.0) / 2.0) ** 0.5
 
-    if Ia >= 0.02:
-        da = 2.5 * Ia + 0.05
+    if Ia >= 0.020:
+        da = 0.025 * Ia + 0.050
     else:
-        da = 5.0 * Ia
+        da = 0.050 * Ia
 
     B = 3  # Number of blades
     L = tsr  # Tip speed ratio
@@ -116,10 +117,10 @@ def Quarton(ambient_turb_percentage, Ct, speed, x, tsr=7.6):
 
     xh = r0 * (da + dl + dm) ** (- 0.5)
     xn = xh * (0.212 + 0.145 * m) ** 0.5 * (1.0 - (0.134 + 0.124 * m) ** 0.5) / (1.0 - (0.212 + 0.145 * m) ** 0.5) / (0.134 + 0.124 * m) ** 0.5
-    # print
-    Iw = K1 * (Ct ** a1) * (Ia ** a2) * (x / xn) ** a3
+    # print x/xn
+    Iw = K1 * (Ct ** a1) * (Ia ** a2) * (x/xn*D) ** a3
     # print Iw, x, xn
-    return sqrt(Iw ** 2.0 + Ia ** 2.0)
+    return sqrt(Iw ** 2.0 * 100.0 + Ia ** 2.0)
 
 
 # Quarton = Memoize(Quarton)
@@ -144,10 +145,10 @@ def Quarton(ambient_turb_percentage, Ct, speed, x, tsr=7.6):
 if __name__ == "__main__":
     # 7d downstream
     ct = 0.6
-    with open('turb_downstream_d.dat', 'w') as out:
+    with open('turb_downstream_d3.dat', 'w') as out:
         for x in range(100):
             d = float(x) * 0.1 + 0.1
-            out.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n'.format(d, danish_recommendation(0.11, ct, 8.28, d), larsen_turbulence(0.11, ct, 8.28, d), Quarton(0.11, ct, 8.28, d), frandsen(0.11, ct, 8.28, d), frandsen2(0.11, ct, 8.28, d)))
+            out.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n'.format(d, danish_recommendation(0.11, ct, 8.28, d), larsen_turbulence(0.11, ct, 8.28, d), Quarton(0.11, ct, 8.28, d*rotor_radius*2.0), frandsen(0.11, ct, 8.28, d), frandsen2(0.11, ct, 8.28, d)))
 
     # print danish_recommendation(0.08, 8.5, 7.0)
     # print Larsen_turbulence(0.08, 7.0, 0.79)
