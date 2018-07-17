@@ -10,6 +10,7 @@ from WINDOW_openMDAO.multifidelity_fast_workflow import WorkingGroup
 # from WINDOW_openMDAO.Turbine.Curves import Curves # Not used in the AEP fast calculator.
 from WINDOW_openMDAO.ElectricalCollection.topology_hybrid_optimiser import TopologyHybridHeuristic
 from WINDOW_openMDAO.ElectricalCollection.constant_electrical import ConstantElectrical
+from WINDOW_openMDAO.ElectricalCollection.POS_optimiser import POSHeuristic
 from WINDOW_openMDAO.SupportStructure.teamplay import TeamPlay
 from WINDOW_openMDAO.SupportStructure.constant_support import ConstantSupport
 from WINDOW_openMDAO.OandM.OandM_models import OM_model1

@@ -856,17 +856,3 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
 
     return set_cable_topology(NT, WT_List, central_platform_locations, cable_list)
 
-
-# ------------------------------------Run------------------------------------------------------------------
-
-if __name__ == '__main__':
-
-    WT_List = []
-    with open("layout_cables.dat") as lay:
-        i = 0
-        for line in lay:
-            col = line.split()
-            WT_List.append([i, float(col[0]), float(col[1])])
-            i += 1
-    name = "sebastian"
-    print cable_design(WT_List)
