@@ -50,7 +50,7 @@ class RadialElectrical(AbstractElectricDesign):
         total_length = 0.0
         for sub in ordered:
             total_length += topology(layout, ordered[sub], substation_coords[sub], max(n_turbines_p_cable_type))
-        print max(n_turbines_p_cable_type), ordered
+        # print max(n_turbines_p_cable_type), ordered
         costs = [total_length * cost_per_m, 0, 0]
         lengths = [total_length, 0, 0]
         return costs, np.zeros((max_n_substations, max_n_branches, max_n_turbines_p_branch, 2)), lengths

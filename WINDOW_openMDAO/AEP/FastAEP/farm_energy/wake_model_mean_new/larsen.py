@@ -80,7 +80,7 @@ def determine_if_in_wake_larsen(xt, yt, xw, yw, ct, alpha, ia):  # According to 
         return 0.0, False, distance_to_centre, distance_to_turbine
 
 
-determine_if_in_wake_larsen = Memoize(determine_if_in_wake_larsen)
+# determine_if_in_wake_larsen = Memoize(determine_if_in_wake_larsen)
 
 
 def wake_speed(U0, ct, x, y, ia):

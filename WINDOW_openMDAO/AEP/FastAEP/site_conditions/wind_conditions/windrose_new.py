@@ -68,12 +68,14 @@ class WeibullWindBins(object):
         return 1.0 - exp(-(wind_speed / weibull_scale_dir) ** weibull_shape_dir)
 
     def get_wind_speeds(self):
+        # print self.nbins, "bins"
+
         delta = (self.cutout - self.cutin) / self.nbins
         windspeeds = []
         for i in range(self.nbins + 1):
 
             windspeeds.append(self.cutin + i * delta)
-
+        # print len(windspeeds), "windspeeds"
         return [self.cutin - 0.1] + windspeeds + [self.cutout + 1.0], delta
 
     def speed_probabilities(self):

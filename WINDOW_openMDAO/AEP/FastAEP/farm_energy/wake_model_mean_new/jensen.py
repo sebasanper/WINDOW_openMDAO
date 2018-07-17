@@ -38,7 +38,7 @@ def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, win
         return 0.0, distance_to_turbine
 
 
-determine_if_in_wake = Memoize(determine_if_in_wake)
+# determine_if_in_wake = Memoize(determine_if_in_wake)
 
 
 def wake_deficit(Ct, x, k=jensen_k, r0=rotor_radius):

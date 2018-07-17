@@ -4,6 +4,35 @@ from WINDOW_openMDAO.AEP.FastAEP.farm_energy.wake_model_mean_new.memoize import 
 from WINDOW_openMDAO.input_params import cutout_wind_speed, cutin_wind_speed, rotor_radius, wind_speed_at_max_thrust as rated_wind, turbine_rated_power
 
 
+class countcalls(object):
+    "Decorator that keeps track of the number of times a function is called."
+
+    __instances = {}
+
+    def __init__(self, f):
+        self.__f = f
+        self.__numcalls = 0
+        countcalls.__instances[f] = self
+
+    def __call__(self, *args, **kwargs):
+        self.__numcalls += 1
+        # print self.__numcalls
+        return self.__f(*args, **kwargs)
+
+    def count(self):
+        "Return the number of times the function f was called."
+        return countcalls.__instances[self.__f].__numcalls
+
+    def reset(self):
+        self.__numcalls = 0
+
+    @staticmethod
+    def counts():
+        "Return a dict of {function: # of calls} for all registered functions."
+        return dict([(f.__name__, countcalls.__instances[f].__numcalls) for f in countcalls.__instances])
+
+
+
 class AeroLookup:
 
     def __init__(self, x, y):
@@ -52,7 +81,7 @@ def power(wind_speed, table_power, cutin=cutin_wind_speed, cutout=cutout_wind_sp
 
 # power = Memoize(power)
 
-# @countcalls
+@countcalls
 def thrust_coefficient(wind_speed, ct_table):
     ct = ct_table.interpolation(wind_speed)
     if ct > 0.9:

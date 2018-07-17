@@ -44,7 +44,7 @@ options.models.opex = OM_model1
 options.models.apex = TeamPlayCostModel
 
 # Define number of windrose sampling points
-options.samples.wind_speeds = 7
+options.samples.wind_speeds = 1
 options.samples.wind_sectors_angle = 30.0
 
 # Define paths to site and turbine defining input files.

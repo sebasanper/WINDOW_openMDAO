@@ -13,7 +13,7 @@ def electrical_installation_costs():
     inv_installation_electrical_system_dune_crossing = cable_dune_crossing_costs
 
     electrical_installation_total = inv_installation_electrical_system_dune_crossing + inv_installation_electrical_system_transmission_cable
-
+    # print electrical_installation_total
     return electrical_installation_total
 
 if __name__ == '__main__':
