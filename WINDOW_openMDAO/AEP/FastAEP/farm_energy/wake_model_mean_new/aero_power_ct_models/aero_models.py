@@ -58,7 +58,7 @@ class AeroLookup:
             result = self.y[-1]
         return result
 
-# @countcalls
+@countcalls
 def power(wind_speed, table_power, cutin=cutin_wind_speed, cutout=cutout_wind_speed, rated=rated_wind, r=rotor_radius):
     if all(cp < 10.0 for cp in table_power.y):
         if wind_speed < cutin:
