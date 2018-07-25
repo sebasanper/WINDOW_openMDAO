@@ -10,7 +10,7 @@ from WINDOW_openMDAO.input_params import rotor_radius
 
 
 def constantwake(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity):
-    return [0.0 for _ in range(len(coordinates_downstream))]
+    return [0.2 for _ in range(len(coordinates_downstream))]
 
 
 def JensenEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity):
