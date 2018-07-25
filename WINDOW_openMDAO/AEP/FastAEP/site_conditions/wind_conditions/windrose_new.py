@@ -53,7 +53,7 @@ class WeibullWindBins(object):
         if len(self.new_direction) > 1:
             n = int(self.new_direction[1] - self.new_direction[0]) // int(self.artificial_angle)
         else:
-            n = 1
+            n = 360 // int(self.artificial_angle)
         for i in range(len(self.new_direction)):
             for j in range(n):
                 self.new_direction2.append(self.new_direction[i] + self.artificial_angle * j)
