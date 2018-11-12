@@ -158,7 +158,7 @@ def stageRatioCalc(self, overallRatio,Np,ratio_type,config):
             def constr2(x,overallRatio):
                 return overallRatio-x[0]*x[1]*x[2]
 
-            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7 , iprint = 0)
+            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7)# , iprint = 0)
     
         elif config == 'eep_3':
             #fixes last stage ratio at 3
@@ -183,7 +183,7 @@ def stageRatioCalc(self, overallRatio,Np,ratio_type,config):
             def constr4(x,overallRatio):
                 return 3.0-x[2]
 
-            x=opt.fmin_cobyla(volume, x0,[constr1,constr2,constr3,constr4],consargs=[overallRatio],rhoend=1e-7,iprint=0)
+            x=opt.fmin_cobyla(volume, x0,[constr1,constr2,constr3,constr4],consargs=[overallRatio],rhoend=1e-7)#,iprint=0)
         
         elif config == 'eep_2':
             #fixes final stage ratio at 2
@@ -202,7 +202,7 @@ def stageRatioCalc(self, overallRatio,Np,ratio_type,config):
             def constr2(x,overallRatio):
                 return overallRatio-x[0]*x[1]*x[2]
 
-            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7 , iprint = 0)
+            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7)# , iprint = 0)
         elif config == 'epp':
             #fixes last stage ratio at 3
             x0=[overallRatio**(1.0/3.0),overallRatio**(1.0/3.0),overallRatio**(1.0/3.0)]
@@ -222,7 +222,7 @@ def stageRatioCalc(self, overallRatio,Np,ratio_type,config):
             def constr2(x,overallRatio):
                 return overallRatio-x[0]*x[1]*x[2]
             
-            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7,iprint=0)
+            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7)#,iprint=0)
             
         else:  # what is this subroutine for?  Yi on 04/16/2014
             x0=[overallRatio**(1.0/3.0),overallRatio**(1.0/3.0),overallRatio**(1.0/3.0)]
@@ -237,7 +237,7 @@ def stageRatioCalc(self, overallRatio,Np,ratio_type,config):
             def constr2(x,overallRatio):
                 return overallRatio-x[0]*x[1]*x[2]
 
-            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7 , iprint = 0)
+            x=opt.fmin_cobyla(volume, x0,[constr1,constr2],consargs=[overallRatio],rhoend=1e-7)# , iprint = 0)
     else:
         x='fail'
               
