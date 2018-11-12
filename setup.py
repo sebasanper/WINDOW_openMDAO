@@ -62,7 +62,10 @@ setup(
       'WINDOW_openMDAO.src.AbsWakeModel',
       'WINDOW_openMDAO.src.AbsWakeModel.AbsWakeMerge',
       'WINDOW_openMDAO.src.SiteConditionsPrep',
-      'WINDOW_openMDAO.src.Utils'
+      'WINDOW_openMDAO.src.Utils',
+      'WINDOW_openMDAO.src.AbsRNA.Blade',
+      'WINDOW_openMDAO.src.AbsRNA.Cost',
+      'WINDOW_openMDAO.src.AbsRNA.HubNacelle'
     ],
     package_data={'WINDOW_openMDAO': ['Input/*.dat', 'Input/*.pkl',
                                       'WakeModel/*.dat']}
