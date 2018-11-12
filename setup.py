@@ -63,6 +63,7 @@ setup(
       'WINDOW_openMDAO.src.AbsWakeModel.AbsWakeMerge',
       'WINDOW_openMDAO.src.SiteConditionsPrep',
       'WINDOW_openMDAO.src.Utils',
+      'WINDOW_openMDAO.src.AbsRNA',
       'WINDOW_openMDAO.src.AbsRNA.Blade',
       'WINDOW_openMDAO.src.AbsRNA.Cost',
       'WINDOW_openMDAO.src.AbsRNA.HubNacelle'
