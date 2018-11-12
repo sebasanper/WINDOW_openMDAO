@@ -6,3 +6,7 @@ n2.html
 visualization/
 
 \.idea/
+
+\.project
+
+\.pydevproject
