@@ -218,7 +218,7 @@ def set_cable_topology(NT, WT_List, central_platform_locations, Cable_List):
     if Area:
         print('Crossings = {0}'.format(crossings))
 
-    
+
     plt.tight_layout()
     plt.subplots_adjust(left=0.06, right=0.94, bottom=0.08)
     plt.gca().set_aspect('equal', adjustable='box')
@@ -234,7 +234,7 @@ def set_cable_topology(NT, WT_List, central_platform_locations, Cable_List):
     #plt.show()
     ax.set_autoscale_on(False)
     for j, txt in enumerate(range(1, NT + 1)):
-    	ax.annotate(txt, ([item[1]+10 for item in WT_List][j], [item[2]+10 for item in WT_List][j]))
+        ax.annotate(txt, ([item[1]+10 for item in WT_List][j], [item[2]+10 for item in WT_List][j]))
     plt.savefig("topology_ops.eps", format="eps", dpi=1000)
 
 def POS1_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbinesi, Paths, Routing,
