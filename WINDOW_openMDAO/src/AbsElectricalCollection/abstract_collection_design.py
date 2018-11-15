@@ -32,6 +32,10 @@ class AbstractElectricDesign(ExplicitComponent):
             for n in range(1, len(topology_dict) + 1):
                 topology_list.append(topology_dict[n])
 
+            ### Start Python 2+3 compatibility code
+            from future.standard_library import install_aliases
+            install_aliases()
+            ### End Python 2+3 compatibility code
             from itertools import zip_longest
 
             def find_shape(seq):
