@@ -1,12 +1,13 @@
+from __future__ import absolute_import
 from random import random
-from transform_quadrilateral import AreaMapping
+from .transform_quadrilateral import AreaMapping
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import n_quadrilaterals, max_n_turbines
 import numpy as np
 from numpy import sin, cos, deg2rad
 
 from random import random, sample
-from transform_quadrilateral import AreaMapping
+from .transform_quadrilateral import AreaMapping
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import n_quadrilaterals, separation_equation_y, max_n_turbines
 import numpy as np

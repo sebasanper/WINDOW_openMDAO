@@ -1,10 +1,11 @@
-import jensen
-import larsen
-import ainslie1d
-import ainslie2d
+from __future__ import absolute_import
+from . import jensen
+from . import larsen
+from . import ainslie1d
+from . import ainslie2d
 #from farm_energy.wake_model_mean_new.ainslie2d_cy import ainslie_full
 # ainslie_full = Memoize(ainslie_full)
-from ainslie_common import crosswind_distance, determine_front
+from .ainslie_common import crosswind_distance, determine_front
 from time import time
 from WINDOW_openMDAO.input_params import rotor_radius
 

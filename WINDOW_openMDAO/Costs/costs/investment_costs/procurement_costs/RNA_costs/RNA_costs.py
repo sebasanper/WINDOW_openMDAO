@@ -1,3 +1,4 @@
+from __future__ import print_function
 from WINDOW_openMDAO.input_params import purchase_price, warranty_percentage
 
 
@@ -12,4 +13,4 @@ def rna_costs(NT):
     return total_rna_cost
 
 if __name__ == '__main__':
-    print rna_costs()
+    print(rna_costs())

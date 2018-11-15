@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 from WINDOW_openMDAO.src.api import AbstractElectricDesign
-from hybrid_heuristic import choose_cables
+from .hybrid_heuristic import choose_cables
 import numpy as np
 from WINDOW_openMDAO.input_params import max_n_substations, max_n_turbines_p_branch, max_n_branches
 from copy import deepcopy

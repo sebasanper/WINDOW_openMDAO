@@ -1,3 +1,4 @@
+from __future__ import print_function
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
 
@@ -16,4 +17,4 @@ def auxiliary_installation_costs(NT):
     return total_aux_installation
 
 if __name__ == '__main__':
-    print auxiliary_installation_costs()
+    print(auxiliary_installation_costs())

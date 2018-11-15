@@ -1,3 +1,4 @@
+from __future__ import print_function
 from openmdao.api import ExplicitComponent, Group
 from WINDOW_openMDAO.input_params import max_n_turbines
 from numpy import sqrt
@@ -17,4 +18,4 @@ class MergeRSS(AbstractWakeMerge):
 
 if __name__ == '__main__':
     rss = MergeRSS()
-    print rss.merge_model
+    print(rss.merge_model)

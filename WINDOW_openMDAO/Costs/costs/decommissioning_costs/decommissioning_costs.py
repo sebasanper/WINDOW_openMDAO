@@ -1,3 +1,4 @@
+from __future__ import print_function
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 from WINDOW_openMDAO.input_params import mass, hub_height, management_percentage, distance_to_grid
 
@@ -33,4 +34,4 @@ def decommissioning_costs(infield_cable_length, NT):
     return total_decommissioning_costs
 
 if __name__ == '__main__':
-    print decommissioning_costs(800000)
+    print(decommissioning_costs(800000))

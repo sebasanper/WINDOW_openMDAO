@@ -1,4 +1,5 @@
-from util import interpolate
+from __future__ import absolute_import
+from .util import interpolate
 from numpy import pi
 from WINDOW_openMDAO.AEP.FastAEP.farm_energy.wake_model_mean_new.memoize import Memoize, countcalls
 from WINDOW_openMDAO.input_params import cutout_wind_speed, cutin_wind_speed, rotor_radius, wind_speed_at_max_thrust as rated_wind, turbine_rated_power

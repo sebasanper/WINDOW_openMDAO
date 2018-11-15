@@ -1,3 +1,4 @@
+from __future__ import print_function
 # -----------------------------------------Input Parameters------------------------------------------------------------------
 from math import hypot
 import matplotlib.pyplot as plt
@@ -208,10 +209,10 @@ def set_cable_topology(NT, WT_List, central_platform_locations, Cable_List):
         for route in Routingi[key]:
             if edge_crossings_area([route[0], route[1]], Wind_turbinesi[key], substationi[key], Area)[0]:
                 crossings += edge_crossings_area([route[0], route[1]], Wind_turbinesi[key], substationi[key], Area)[1]
-    print 'Cable length = {0} km'.format(round(cable_length / 1000, 3))
-    print 'Cable cost = {0:,} {1}'.format(round(total_cost / 1000000, 3), MEuro)
+    print('Cable length = {0} km'.format(round(cable_length / 1000, 3)))
+    print('Cable cost = {0:,} {1}'.format(round(total_cost / 1000000, 3), MEuro))
     if Area:
-        print 'Crossings = {0}'.format(crossings)
+        print('Crossings = {0}'.format(crossings))
 
     
     plt.tight_layout()
@@ -987,4 +988,4 @@ def give_coordinates(turbineID, Wind_turbines, central_platform_location):
 t0 = time.time()
 set_cable_topology(NT, WT_List, central_platform_locations, Cable_List)
 t1 = time.time()
-print 'Elapsed time = {0} s'.format(round(t1 - t0, 3))
+print('Elapsed time = {0} s'.format(round(t1 - t0, 3)))

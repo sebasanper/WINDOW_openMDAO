@@ -1,4 +1,6 @@
-from farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import AeroLookup
+from __future__ import print_function
+from __future__ import absolute_import
+from .farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import AeroLookup
 from WINDOW_openMDAO.input_params import TI_ambient
 
 
@@ -42,9 +44,9 @@ class Workflow:
             if t[0] >= 0.0 and t[1] >= 0.0:
                 layout.append([t[0], t[1]])
         self.number_turbines = len(layout)
-        from farm_energy.wake_model_mean_new.wake_1angle import energy_one_angle
-        from farm_energy.wake_model_mean_new.wake_1angle_turbulence import max_turbulence_one_angle
-        from farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen
+        from .farm_energy.wake_model_mean_new.wake_1angle import energy_one_angle
+        from .farm_energy.wake_model_mean_new.wake_1angle_turbulence import max_turbulence_one_angle
+        from .farm_energy.wake_model_mean_new.downstream_effects import JensenEffects as Jensen
         from WINDOW_openMDAO.input_params import cutin_wind_speed, cutout_wind_speed
 
         if self.print_output is True: print("=== PREPARING WIND CONDITIONS ===")
@@ -112,13 +114,13 @@ class Workflow:
 
     def run(self, layout_coordinates):
 
-        from farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import power, thrust_coefficient
-        from farm_energy.wake_model_mean_new.ainslie1d import ainslie
-        from farm_energy.wake_model_mean_new.ainslie2d import ainslie_full
-        from farm_energy.wake_model_mean_new.jensen import determine_if_in_wake, wake_radius, wake_deficit
-        from farm_energy.wake_model_mean_new.larsen import deff, wake_deficit_larsen, wake_radius, x0, rnb, r95, c1, \
+        from .farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import power, thrust_coefficient
+        from .farm_energy.wake_model_mean_new.ainslie1d import ainslie
+        from .farm_energy.wake_model_mean_new.ainslie2d import ainslie_full
+        from .farm_energy.wake_model_mean_new.jensen import determine_if_in_wake, wake_radius, wake_deficit
+        from .farm_energy.wake_model_mean_new.larsen import deff, wake_deficit_larsen, wake_radius, x0, rnb, r95, c1, \
             determine_if_in_wake_larsen, wake_speed
-        from farm_energy.wake_model_mean_new.wake_turbulence_models import frandsen2, Quarton, danish_recommendation, \
+        from .farm_energy.wake_model_mean_new.wake_turbulence_models import frandsen2, Quarton, danish_recommendation, \
             frandsen, larsen_turbulence
 
         self.coordinates = [[i, layout_coordinates[i][0], layout_coordinates[i][1]] for i in

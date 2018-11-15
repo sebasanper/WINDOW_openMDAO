@@ -1,7 +1,8 @@
-from order_layout import order
+from __future__ import absolute_import
+from .order_layout import order
 import numpy as np
 from WINDOW_openMDAO.input_params import rotor_radius
-from memoize import Memoize
+from .memoize import Memoize
 
 
 def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed, wind_angle, ambient_turbulence, WakeModel, ThrustModel, ct_table, TurbulenceModel):

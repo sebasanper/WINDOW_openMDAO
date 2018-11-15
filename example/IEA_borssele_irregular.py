@@ -1,3 +1,4 @@
+from __future__ import print_function
 # This file must be run from the 'example' folder that has the 'Input' folder.
 
 # Imports OpenMDAO API
@@ -28,7 +29,7 @@ def print_nice(string, value):
     header = '=' * 10 + " " + string + " " + '=' * 10 + '\n'
     header += str(value) + "\n"
     header += "=" * (22 + len(string))
-    print header
+    print(header)
 
 
 options = WorkflowOptions()

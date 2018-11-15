@@ -1,8 +1,9 @@
+from __future__ import absolute_import
 from numpy import exp
-from thomas_algorithm import thomas
-from ainslie_common import b, E
+from .thomas_algorithm import thomas
+from .ainslie_common import b, E
 from time import time
-from memoize import Memoize
+from .memoize import Memoize
 from WINDOW_openMDAO.input_params import rotor_radius
 # b = Memoize(b)
 # E = Memoize(E)

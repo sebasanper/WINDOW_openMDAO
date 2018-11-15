@@ -1,10 +1,11 @@
+from __future__ import absolute_import
 from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, \
     LinearBlockJac, IndepVarComp
 import numpy as np
-from order_layout import OrderLayout
+from .order_layout import OrderLayout
 from WINDOW_openMDAO.input_params import max_n_turbines
-from distance import DistanceComponent
-from windspeed_deficits import SpeedDeficits, CombineOutputs
+from .distance import DistanceComponent
+from .windspeed_deficits import SpeedDeficits, CombineOutputs
 
 
 class WakeModel(Group):

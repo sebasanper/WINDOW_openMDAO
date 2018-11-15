@@ -1,4 +1,5 @@
-from memoize import Memoize2
+from __future__ import absolute_import
+from .memoize import Memoize2
 
 
 def thomas(a, b, c, d):
