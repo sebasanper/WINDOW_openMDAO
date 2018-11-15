@@ -2,6 +2,7 @@ from __future__ import print_function
 # This file must be run from the 'example' folder that has the 'Input' folder.
 
 # Imports OpenMDAO API
+from builtins import str
 from openmdao.api import Problem, view_model
 
 # Imports WINDOW workflow

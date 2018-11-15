@@ -1,5 +1,8 @@
 from __future__ import print_function
+from __future__ import division
 # VERTICAL HEIGHTS W.R.T. MSL
+from builtins import range
+from past.utils import old_div
 from math import pi, atan
 
 from scipy.optimize import brentq  # fmin_slsqp  # , fminbound, newton
@@ -85,9 +88,9 @@ class SupportDesigners(Designers):
             print(self.design_variables.tower.length)
         # Initialise list for segment wall thicknesses
         self.properties.nr_segments = int(
-            round((self.design_variables.tower.length / self.max_length_tower_segment) + 0.5, 0))
-        self.properties.segment_length = self.design_variables.tower.length / self.properties.nr_segments
-        self.design_variables.tower.wall_thickness = range(self.properties.nr_segments)
+            round((old_div(self.design_variables.tower.length, self.max_length_tower_segment)) + 0.5, 0))
+        self.properties.segment_length = old_div(self.design_variables.tower.length, self.properties.nr_segments)
+        self.design_variables.tower.wall_thickness = list(range(self.properties.nr_segments))
 
         # Determine monopile diameter (from loads and resistance with fixed D:t relation)
         # self.support_team.domain_top.display.optimising = 'Tower length - Monopile diameter'
@@ -154,8 +157,8 @@ class SupportDesigners(Designers):
         max_pile_penetration = 0.0
         for loadcase in self.loadcases:
             loads_with_safety = self.get_loads(loadcase, - self.support_team.physical_environment.site.water_depth)
-            fx = abs(loads_with_safety[0]) / (self.bearing_resistance_factor * self.fatigue_safety_factor)
-            my = abs(loads_with_safety[4]) / (self.bearing_resistance_factor * self.fatigue_safety_factor)
+            fx = old_div(abs(loads_with_safety[0]), (self.bearing_resistance_factor * self.fatigue_safety_factor))
+            my = old_div(abs(loads_with_safety[4]), (self.bearing_resistance_factor * self.fatigue_safety_factor))
 
             pile_penetration = self.support_team.geophysical_analysts.get_clamping_depth(fx, my)
 
@@ -180,7 +183,7 @@ class SupportDesigners(Designers):
                 fz = abs(loads_with_safety[2])
                 my = abs(loads_with_safety[4])
                 l = self.properties.hub_height + self.support_team.physical_environment.site.water_depth
-                minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(diameter / 2.0, fz, l)
+                minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(old_div(diameter, 2.0), fz, l)
                 result = brentq(self.stress_reserve_tower, minimum_thickness, 0.5 * diameter, args=(diameter, fz, my),
                                 xtol=0.001, full_output=True)
                 wall_thickness = result[0]
@@ -209,7 +212,7 @@ class SupportDesigners(Designers):
             fz = abs(loads_with_safety[2])
             my = self.stress_concentration_tp * abs(loads_with_safety[4])
             l = self.properties.hub_height + self.support_team.physical_environment.site.water_depth
-            minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(diameter / 2.0, fz, l)
+            minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(old_div(diameter, 2.0), fz, l)
             result = brentq(self.stress_reserve_tower, minimum_thickness, 0.5 * diameter, args=(diameter, fz, my),
                             xtol=0.001, full_output=True)
             wall_thickness = result[0]
@@ -231,7 +234,7 @@ class SupportDesigners(Designers):
         # Set transition piece and tower base dimensions
         self.design_variables.transition_piece.diameter = self.design_variables.monopile.diameter + self.d_tp_minus_d_pile
         self.design_variables.tower.base_diameter = self.design_variables.transition_piece.diameter
-        self.design_variables.monopile.wall_thickness = 0.00635 + (self.design_variables.monopile.diameter / 100.0)
+        self.design_variables.monopile.wall_thickness = 0.00635 + (old_div(self.design_variables.monopile.diameter, 100.0))
         # Set transition piece overlap for estimates of gravity loading
         self.design_variables.transition_piece.overlap_monopile = 1.44 * self.design_variables.monopile.diameter
 
@@ -239,9 +242,9 @@ class SupportDesigners(Designers):
         d_base = self.design_variables.tower.base_diameter
         d_top = self.design_variables.tower.top_diameter
         for i in range(self.properties.nr_segments):
-            self.design_variables.tower.wall_thickness[i] = (d_base + i * self.properties.segment_length * (
-                d_top - d_base) / self.design_variables.tower.length) / self.d_over_t_guess_tower
-        self.design_variables.transition_piece.wall_thickness = self.design_variables.transition_piece.diameter / self.d_over_t_guess_tp
+            self.design_variables.tower.wall_thickness[i] = old_div((d_base + i * self.properties.segment_length * (
+                d_top - d_base) / self.design_variables.tower.length), self.d_over_t_guess_tower)
+        self.design_variables.transition_piece.wall_thickness = old_div(self.design_variables.transition_piece.diameter, self.d_over_t_guess_tp)
 
         max_stress_factor = -1.0
         d_outer = self.design_variables.monopile.diameter
@@ -254,7 +257,7 @@ class SupportDesigners(Designers):
                                                                                               loads_with_safety[2],
                                                                                               loads_with_safety[4])
 
-            stress_factor = (stress / (critical_stress / self.partial_safety_material_uls)) - 1.0
+            stress_factor = (old_div(stress, (old_div(critical_stress, self.partial_safety_material_uls)))) - 1.0
             if stress_factor > max_stress_factor:
                 max_stress_factor = stress_factor
 
@@ -262,13 +265,13 @@ class SupportDesigners(Designers):
 
     def stress_reserve_tower(self, d, *args):
         t = d
-        radius = args[0] / 2.0
+        radius = old_div(args[0], 2.0)
         fz = args[1]
         my = args[2]
         l = self.properties.hub_height + self.support_team.physical_environment.site.water_depth
 
         [stress, critical_stress] = self.support_team.mechanical_analysts.get_stress_tower(t, radius, fz, my, l)
-        stress_factor = (stress / (critical_stress / self.partial_safety_material_uls)) - 1.0
+        stress_factor = (old_div(stress, (old_div(critical_stress, self.partial_safety_material_uls)))) - 1.0
 
         return stress_factor
 
@@ -297,7 +300,7 @@ class SupportDesigners(Designers):
         loads_hydro = self.support_team.hydrodynamic_analysts.get_loads(wave_height, wave_number, height)
         loads_gravity = self.support_team.gravity_analysts.get_loads(height)
 
-        loads_safety = range(6)
+        loads_safety = list(range(6))
         for i in range(6):
             loads_safety[i] = self.partial_safety_loads * (loads_rna[i] + loads_aero[i] + loads_hydro[i])
             if i == 4 and loads_gravity[i] < 0.0:
@@ -313,7 +316,7 @@ class SupportDesigners(Designers):
         u_w = self.support_team.physical_environment.site.Uw_50_year
         t_w = self.support_team.physical_environment.site.Tpeak_50_year
         KC = u_w * t_w / self.design_variables.monopile.diameter
-        u_w *= 1.5 + atan(1.0 * (KC - 6.0) - 1.0) / pi
+        u_w *= 1.5 + old_div(atan(1.0 * (KC - 6.0) - 1.0), pi)
         u_c = 1.5 * self.support_team.physical_environment.site.current_depth_averaged_50_year
         wave_current_angle = self.support_team.physical_environment.site.angle_wave_current_50_year_rad
 
@@ -339,7 +342,7 @@ class SupportDesigners(Designers):
         characteristic_friction = self.support_team.rock_analysts.get_characteristic_friction(d50, u_c, u_w, t_w,
                                                                                               wave_current_angle)
 
-        return (critical_friction - characteristic_friction) / critical_friction
+        return old_div((critical_friction - characteristic_friction), critical_friction)
 
     def design_filter_layers(self):
         self.design_variables.scour_protection.filter = []
@@ -349,7 +352,7 @@ class SupportDesigners(Designers):
 
             _filter_needed = True
             while _filter_needed:
-                d85b = d15f / 4.5
+                d85b = old_div(d15f, 4.5)
 
                 if d85b > self.support_team.physical_environment.site.d90_soil:
                     self.design_variables.scour_protection.filter.append(
@@ -365,4 +368,4 @@ class SupportDesigners(Designers):
         for layer in self.design_variables.scour_protection.filter:
             total_thickness += layer[3]
 
-        self.support_team.properties.support_structure.scour_protection_volume = ((1.0 / 4.0) * pi * (self.design_variables.scour_protection.diameter ** 2 * total_thickness + (3.0 * self.design_variables.monopile.diameter) ** 2 * extra_thickness_near_pile - self.design_variables.monopile.diameter ** 2 * (total_thickness + extra_thickness_near_pile)))
+        self.support_team.properties.support_structure.scour_protection_volume = ((old_div(1.0, 4.0)) * pi * (self.design_variables.scour_protection.diameter ** 2 * total_thickness + (3.0 * self.design_variables.monopile.diameter) ** 2 * extra_thickness_near_pile - self.design_variables.monopile.diameter ** 2 * (total_thickness + extra_thickness_near_pile)))

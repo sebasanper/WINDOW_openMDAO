@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from builtins import range
 from openmdao.api import Group, ExplicitComponent, LinearRunOnce, LinearBlockGS, NewtonSolver, NonlinearBlockGS, \
     LinearBlockJac, IndepVarComp
 import numpy as np

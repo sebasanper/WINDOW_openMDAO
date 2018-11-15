@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
 
@@ -6,7 +8,7 @@ def auxiliary_procurement(depth_central_platform, n_substations, n_turbines):
     # Procurement-Auxiliary
     measuring_tower_costs = Cost1(2050000.0, 'Euro', 2003)  # [Euro]
     onshore_premises_costs = Cost1(1500000.0, 'Euro', 2003)  # [Euro]
-    central_platform_modesty_factor = 2.0 / 3.0  # Introduced because the cost model was for a sophisticated platform that didn't match realised platforms
+    central_platform_modesty_factor = old_div(2.0, 3.0)  # Introduced because the cost model was for a sophisticated platform that didn't match realised platforms
     central_platform_coef_a = Cost1(0.4e-3, 'SEK', 2003)  # [SEK/kg^2]
     central_platform_coef_b = Cost1(-50.0, 'SEK', 2003)  # [SEK/kg]
     central_platform_coef_c = Cost1(-80.0e6, 'SEK', 2003)  # [SEK]

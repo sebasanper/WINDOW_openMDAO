@@ -5,13 +5,14 @@ Created on Mon Nov 09 16:16:43 2015
 @author: Αλβέρτος
 """
 
-class Value:
+from builtins import object
+class Value(object):
     def __init__(self):
         
         self.economic = Economic()
         
         
-class Economic:
+class Economic(object):
     def __init__(self):
         
         self.capex = Capex()
@@ -20,7 +21,7 @@ class Economic:
 
 # Capex **************************************************
 
-class Capex:
+class Capex(object):
     total = 0.0 # [Euro]
    
     
@@ -38,7 +39,7 @@ class Capex:
 
 # Procurement **************************************************
 
-class Procurement:
+class Procurement(object):
     total = 0.0 # [Euro]
     
     def __init__(self):
@@ -55,7 +56,7 @@ class Procurement:
 
 # Procure support structures **************************************************
 
-class ProcureSupportStructures:
+class ProcureSupportStructures(object):
     total = 0.0 # [Euro]
     tower = 0.0 # [Euro]
     transition_piece = 0.0 # [Euro]
@@ -76,7 +77,7 @@ class ProcureSupportStructures:
 
 # Installation **************************************************
 
-class Installation:
+class Installation(object):
     total = 0.0 # [Euro]
     foundations = 0.0 # [Euro]
     
@@ -89,7 +90,7 @@ class Installation:
                       
 # Decommissioning **************************************************
 
-class Decommissioning:
+class Decommissioning(object):
     total = 0.0 # [Euro]
         
     def __init__(self):
@@ -103,7 +104,7 @@ class Decommissioning:
                       
 # Removal **************************************************
 
-class Removal:
+class Removal(object):
     total = 0.0 # [Euro]
     
     foundations = 0.0 # [Euro]

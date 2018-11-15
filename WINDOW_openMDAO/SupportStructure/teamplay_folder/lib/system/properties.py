@@ -1,7 +1,8 @@
+from builtins import object
 from WINDOW_openMDAO.input_params import solidity_rotor, cd_rotor_idle_vane, cd_nacelle, front_area_nacelle, max_thrust, yaw_to_hub_height, mass, mass_eccentricity, yaw_diameter, rotor_radius, wind_speed_at_max_thrust#, generator_voltage, warranty_percentage
 
 
-class Properties:
+class Properties(object):
     def __init__(self):
         self.rna = None
 
@@ -11,7 +12,7 @@ class Properties:
 # RNA **************************************************
 
 
-class RNA:
+class RNA(object):
     # DATA FROM USER INPUT **************************************************
     solidity_rotor = solidity_rotor  # [-] 'Generic' value, based on Peter Jamieson's book - Figure 2.5 - P.53
     cd_rotor_idle_vane = cd_rotor_idle_vane  # [-] 'Generic' value, very dependent on angle of attack and therefore the assumed rotor misalignment
@@ -54,7 +55,7 @@ class RNA:
 
 # SUPPORT STRUCTURE **************************************************
 
-class SupportStructure:
+class SupportStructure(object):
     # INTRINSIC PROPERTIES
     hub_height = 0.0  # [m]
     base_tp = 0.0  # [m]

@@ -1,3 +1,4 @@
+from builtins import range
 from WINDOW_openMDAO.src.api import AbstractSupportStructureDesign
 import numpy as np
 

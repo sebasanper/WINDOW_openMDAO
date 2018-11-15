@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from openmdao.api import ExplicitComponent
 from time import clock
 
@@ -27,13 +29,13 @@ class LCOE(ExplicitComponent):
         operational_lifetime = inputs['operational_lifetime']
         interest_rate = inputs['interest_rate']
 
-        annuity = 1.0 / interest_rate * (1.0 - 1.0 / (1.0 + interest_rate) ** operational_lifetime)
+        annuity = 1.0 / interest_rate * (1.0 - old_div(1.0, (1.0 + interest_rate) ** operational_lifetime))
 
-        lcoe_previous = (investment_costs * 100.0) / (annuity * (AEP / 1000.0)) + oandm_costs * 100.0 / (AEP / 1000.0) + decommissioning_costs * 100.0 * (1.0 + interest_rate) ** (- operational_lifetime) / (annuity * (AEP / 1000.0))
+        lcoe_previous = old_div((investment_costs * 100.0), (annuity * (old_div(AEP, 1000.0)))) + oandm_costs * 100.0 / (old_div(AEP, 1000.0)) + decommissioning_costs * 100.0 * (1.0 + interest_rate) ** (- operational_lifetime) / (annuity * (old_div(AEP, 1000.0)))
         # print (investment_costs * 100.0) / (annuity * (AEP / 1000.0))
         # print oandm_costs * 100.0 / (AEP / 1000.0)
         # print decommissioning_costs * 100.0 * (1.0 + interest_rate) ** (- operational_lifetime) / (annuity * (AEP / 1000.0))
-        lcoe = lcoe_previous / transm_electrical_efficiency
+        lcoe = old_div(lcoe_previous, transm_electrical_efficiency)
         # print(lcoe)
         # print(clock())
         outputs['LCOE'] = lcoe

@@ -8,7 +8,8 @@ Created on Wed Nov 04 13:10:18 2015
 # TOTAL SYSTEM **************************************************
 
 
-class DesignVector:
+from builtins import object
+class DesignVector(object):
     def __init__(self):
 #        self.linking_variables = None
          self.support_structure = SupportStructure()
@@ -27,7 +28,7 @@ class DesignVector:
 # SUPPORT STRUCTURE **************************************************
 
 
-class SupportStructure:
+class SupportStructure(object):
     def __init__(self):
         self.monopile = Monopile()
         self.transition_piece = TransitionPiece()
@@ -39,7 +40,7 @@ class SupportStructure:
 #        self.platform_crane = PlatformCrane()
 
 
-class Monopile:
+class Monopile(object):
     diameter = 0.0  # [m]
     wall_thickness = 0.0  # [m]
     length = 0.0  # [m]
@@ -49,7 +50,7 @@ class Monopile:
         pass
 
 
-class TransitionPiece:
+class TransitionPiece(object):
     diameter = 0.0 # [m]
     wall_thickness = 0.0 # [m]
     length = 0.0 # [m]
@@ -59,7 +60,7 @@ class TransitionPiece:
         pass
 
 
-class Tower:
+class Tower(object):
     base_diameter = 0.0  # [m]
     top_diameter = 0.0  # [m]
     length = 0.0  # [m]
@@ -68,7 +69,7 @@ class Tower:
         self.wall_thickness = []  # per segment - index 0 indicates lowest segment [m]
 
 
-class ScourProtection:
+class ScourProtection(object):
     diameter = 0.0  # [m]
 
     def __init__(self):

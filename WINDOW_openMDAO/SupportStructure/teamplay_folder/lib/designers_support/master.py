@@ -1,4 +1,5 @@
-class MasterDesigners:
+from builtins import object
+class MasterDesigners(object):
     def __init__(self, support_team):
         self.support_team = support_team
 #        self.design_variables = self.support_team.design_variables.linking_variables

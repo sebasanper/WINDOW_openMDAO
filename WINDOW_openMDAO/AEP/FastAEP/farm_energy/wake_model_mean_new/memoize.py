@@ -1,4 +1,5 @@
-class Memoize:
+from builtins import object
+class Memoize(object):
     def __init__(self, f):
         self.f = f
         self.memo = {}

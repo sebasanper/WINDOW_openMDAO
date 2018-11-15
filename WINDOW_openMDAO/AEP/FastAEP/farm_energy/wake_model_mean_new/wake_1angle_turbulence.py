@@ -1,4 +1,8 @@
 from __future__ import absolute_import
+from __future__ import division
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from .order_layout import order
 import numpy as np
 from WINDOW_openMDAO.input_params import rotor_radius
@@ -27,7 +31,7 @@ def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed,
         indice_maximo = ordered_layout[indice][0]
         front.append(indice_maximo)
     # print front
-    a = zip([item[0] for item in ordered_layout], front)
+    a = list(zip([item[0] for item in ordered_layout], front))
     # print a
 
     def first(x):
@@ -40,7 +44,7 @@ def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed,
         if float("inf") in item:
             wake_added_turbulence.append(ambient_turbulence)
         else:
-            wake_added_turbulence.append(TurbulenceModel(ambient_turbulence, ThrustModel(freestream_wind_speed, ct_table), freestream_wind_speed, np.linalg.norm(np.array([original_layout[item[0]][1], original_layout[item[0]][2]]) - np.array([original_layout[item[1]][1], original_layout[item[1]][2]])) / (2.0 * rotor_radius)))
+            wake_added_turbulence.append(TurbulenceModel(ambient_turbulence, ThrustModel(freestream_wind_speed, ct_table), freestream_wind_speed, old_div(np.linalg.norm(np.array([original_layout[item[0]][1], original_layout[item[0]][2]]) - np.array([original_layout[item[1]][1], original_layout[item[1]][2]])), (2.0 * rotor_radius))))
 
     return wake_added_turbulence
 # turbulence_one_angle = Memoize(turbulence_one_angle)

@@ -1,4 +1,5 @@
-class Models():
+from builtins import object
+class Models(object):
 	def __init__(self):
 		self.wake = None
 		self.merge = None
@@ -11,31 +12,31 @@ class Models():
 		self.apex = None
 
 
-class Samples():
+class Samples(object):
 	def __init__(self):
 		self.wind_speeds = 7
 		self.wind_sector_angle = 6.0
 
 
-class Input():
+class Input(object):
 	def __init__(self):		
 		self.site = Site()
 		self.turbine = Site()
 
 
-class Site():
+class Site(object):
 	def __init__(self):
 		self.windrose_file = None
 		self.bathymetry_file = None
 
 
-class Turbine():
+class Turbine(object):
 	def __init__(self):
 		self.power_file = None
 		self.ct_file = None
 
 
-class WorkflowOptions():
+class WorkflowOptions(object):
 	def __init__(self):
 		self.samples = Samples()
 		self.models = Models()

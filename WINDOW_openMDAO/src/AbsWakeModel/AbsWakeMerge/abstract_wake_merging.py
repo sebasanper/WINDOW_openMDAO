@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import range
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines
 from numpy import sqrt

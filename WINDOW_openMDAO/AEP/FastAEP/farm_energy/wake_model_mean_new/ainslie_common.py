@@ -1,4 +1,6 @@
 from __future__ import absolute_import
+from __future__ import division
+from past.utils import old_div
 from numpy import radians, cos, sin
 from .memoize import Memoize
 karman = 0.41  # von Karman constant
@@ -20,9 +22,9 @@ def F(x):  # Factor for near and far wake
         return 1.0
     if x < 5.5:
         if x >= 4.5:
-            return 0.65 + ((x - 4.5) / 23.32) ** (1.0 / 3.0)
+            return 0.65 + (old_div((x - 4.5), 23.32)) ** (old_div(1.0, 3.0))
         else:
-            return 0.65 - ((- x + 4.5) / 23.32) ** (1.0 / 3.0)
+            return 0.65 - (old_div((- x + 4.5), 23.32)) ** (old_div(1.0, 3.0))
 # F = Memoize(F)
 
 

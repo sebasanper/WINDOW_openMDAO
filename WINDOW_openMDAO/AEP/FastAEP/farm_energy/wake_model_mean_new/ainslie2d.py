@@ -1,4 +1,7 @@
 from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from numpy import exp
 from .thomas_algorithm import thomas
 from .ainslie_common import b, E
@@ -20,8 +23,8 @@ def ainslie_full(ct, u0, distance_parallel, distance_perpendicular, i0):
     # nj = int(dj * 80)
     ni = 100
     nj = 100
-    k = dj / float(nj)
-    h = di / float(ni)
+    k = old_div(dj, float(nj))
+    h = old_div(di, float(ni))
 
     nj += 1
     ni += 1
@@ -49,10 +52,10 @@ def ainslie_full(ct, u0, distance_parallel, distance_perpendicular, i0):
 
         i = 0
 
-        A.append(- k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct))
-        B.append(2.0 * (h ** 2.0 * old_u[i] + k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct)))
-        C.append(- k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct))
-        R.append(k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct) * (2.0 * old_u[i + 1] - 2.0 * old_u[i]) + 2.0 * h ** 2.0 * old_u[i] ** 2.0)
+        A.append(- k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct))
+        B.append(2.0 * (h ** 2.0 * old_u[i] + k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct)))
+        C.append(- k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct))
+        R.append(k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct) * (2.0 * old_u[i + 1] - 2.0 * old_u[i]) + 2.0 * h ** 2.0 * old_u[i] ** 2.0)
 
         v[0] = 0.0
         # print time() - start, "loop out"
@@ -64,13 +67,13 @@ def ainslie_full(ct, u0, distance_parallel, distance_perpendicular, i0):
             elif j > 1:
                 v[i] = (i * h) / ((i * h) + h) * (old_v[i - 1] - h / k * (old_u[i] - old2_u[i]))
 
-            A.append(k * (h * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct) - (i * h) * h * v[i] - 2.0 * (i * h) * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct)))
-            B.append(4.0 * (i * h) * (h ** 2.0 * old_u[i] + k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct)))
-            C.append(k * ((i * h) * h * v[i] - 2.0 * (i * h) * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct) - h * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct)))
+            A.append(k * (h * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct) - (i * h) * h * v[i] - 2.0 * (i * h) * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct)))
+            B.append(4.0 * (i * h) * (h ** 2.0 * old_u[i] + k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct)))
+            C.append(k * ((i * h) * h * v[i] - 2.0 * (i * h) * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct) - h * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct)))
             if i < ni - 1:
-                R.append(h * k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct) * (old_u[i + 1] - old_u[i - 1]) + 2.0 * k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct) * (i * h) * (old_u[i + 1] - 2.0 * old_u[i] + old_u[i - 1]) - (i * h) * h * k * old_v[i] * (old_u[i + 1] - old_u[i - 1]) + 4.0 * (i * h) * h ** 2.0 * old_u[i] ** 2.0)
+                R.append(h * k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct) * (old_u[i + 1] - old_u[i - 1]) + 2.0 * k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct) * (i * h) * (old_u[i + 1] - 2.0 * old_u[i] + old_u[i - 1]) - (i * h) * h * k * old_v[i] * (old_u[i + 1] - old_u[i - 1]) + 4.0 * (i * h) * h ** 2.0 * old_u[i] ** 2.0)
             elif i == ni - 1:
-                R.append(h * k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct) * (u0 - old_u[i - 1]) + 2.0 * k * E(j * k, old_u[i], (u0 - old_u[i]) / u0, u0, i0, ct) * (i * h) * (u0 - 2.0 * old_u[i] + old_u[i - 1]) - (i * h) * h * k * old_v[i] * (u0 - old_u[i - 1]) + 4.0 * (i * h) * h ** 2.0 * old_u[i] ** 2.0)
+                R.append(h * k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct) * (u0 - old_u[i - 1]) + 2.0 * k * E(j * k, old_u[i], old_div((u0 - old_u[i]), u0), u0, i0, ct) * (i * h) * (u0 - 2.0 * old_u[i] + old_u[i - 1]) - (i * h) * h * k * old_v[i] * (u0 - old_u[i - 1]) + 4.0 * (i * h) * h ** 2.0 * old_u[i] ** 2.0)
         # print time() - start
 
         C[0] += A[0]
@@ -99,7 +102,7 @@ def ainslie_full(ct, u0, distance_parallel, distance_perpendicular, i0):
     # A = pi * 0.5 ** 2.0  ## Unitary diameter in this program.
     # U = U0 - sqrt((1.0 / A) * simpson_integrate2D(G, 0.0, 0.5, 5, 0.0, 2.0 * pi, 10))
     # return 1.0 - old_u[int(round(distance_perpendicular * rotor_diameter, 0))] / u0
-    return 1.0 - old_u[int(distance_perpendicular * ni / di)] / u0
+    return 1.0 - old_div(old_u[int(distance_perpendicular * ni / di)], u0)
 
 
 # ainslie_full = Memoize(ainslie_full)

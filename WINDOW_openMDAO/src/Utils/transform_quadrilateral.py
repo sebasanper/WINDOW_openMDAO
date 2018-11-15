@@ -1,8 +1,12 @@
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from numpy import matmul, cos, sin, pi
 from numpy.linalg import solve, inv
 
 
-class AreaMapping:
+class AreaMapping(object):
     def __init__(self, real_area_coords, desired_rectangle_coords):
         self.real_area_coords = real_area_coords
         self.desired_rectangle_coords = desired_rectangle_coords
@@ -36,11 +40,11 @@ class AreaMapping:
 
     def transform_to_rectangle(self, x, y):
         non_dim = matmul(self.map_to_rectangle, [x, y, 1])
-        return non_dim[0] / non_dim[2], non_dim[1] / non_dim[2]
+        return old_div(non_dim[0], non_dim[2]), old_div(non_dim[1], non_dim[2])
 
     def transform_to_shape(self, u, v):
         non_dim = matmul(self.map_to_shape, [u, v, 1])
-        return non_dim[0] / non_dim[2], non_dim[1] / non_dim[2]
+        return old_div(non_dim[0], non_dim[2]), old_div(non_dim[1], non_dim[2])
 
 
 if __name__ == '__main__':

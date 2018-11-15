@@ -1,10 +1,15 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from .farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import AeroLookup
 from WINDOW_openMDAO.input_params import TI_ambient
 
 
-class Workflow:
+class Workflow(object):
     def __init__(self, inflow_model, windrose_file, wake_turbulence_model, thrust_coefficient_model, thrust_lookup_file,
                  wake_mean_model, wake_merging_model, power_model, power_lookup_file):
 
@@ -86,8 +91,8 @@ class Workflow:
                                                         self.wake_turbulence_model)
             self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities[i] / 100.0
             self.energies_per_angle.append(self.energy_one_angle_weighted)
-            self.array_efficiency = self.aero_energy_one_angle / (
-                float(self.number_turbines) * max(self.powers_one_angle) * 8760.0)
+            self.array_efficiency = old_div(self.aero_energy_one_angle, (
+                float(self.number_turbines) * max(self.powers_one_angle) * 8760.0))
             self.array_efficiencies_weighted = self.array_efficiency * self.direction_probabilities[i] / 100.0
 
             self.array_efficiencies.append(self.array_efficiencies_weighted)
@@ -102,7 +107,7 @@ class Workflow:
         self.array_efficiency = sum(self.array_efficiencies)
         self.farm_annual_energy = sum(self.energies_per_angle)
 
-        if self.print_output is True: print(str(self.farm_annual_energy / 1000000.0) + " MWh\n")
+        if self.print_output is True: print(str(old_div(self.farm_annual_energy, 1000000.0)) + " MWh\n")
         if self.print_output is True: print(" --- Maximum wind turbulence intensity ---")
 
         self.turbulence = self.max_turbulence_per_turbine

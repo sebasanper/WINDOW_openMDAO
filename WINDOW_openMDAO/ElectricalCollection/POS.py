@@ -1,5 +1,9 @@
 from __future__ import print_function
+from __future__ import division
 # -----------------------------------------Input Parameters------------------------------------------------------------------
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from math import hypot
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
@@ -148,17 +152,17 @@ def set_cable_topology(NT, WT_List, central_platform_locations, Cable_List):
         substationi[i] = substation
         i = i + 1
     # splits the Wind_turbines list in the closest substation
-    for j in xrange(NT):
+    for j in range(NT):
         empty = []
-        for key, value in distancefromsubstationi.iteritems():
+        for key, value in distancefromsubstationi.items():
             empty.append(value[j])
         index = empty.index(min(empty, key=lambda x: x[2])) + 1
         Wind_turbinesi[index].append([value[j][1], Wind_turbines[j][1], Wind_turbines[j][2]])
-    for j in xrange(len(Cable_List)):
+    for j in range(len(Cable_List)):
         Capacityi[j + 1] = Cable_List[j][0]
         Cable_Costi[j + 1] = Cable_List[j][1]
     # initialize routes and Saving matrix
-    for key, value in Wind_turbinesi.iteritems():
+    for key, value in Wind_turbinesi.items():
         Pathsi[key], Routingi[key], Routing_redi[key], Routing_greeni[key] = initial_routes(value)
         Cost0i[key], Costij[key] = costi(value, substationi[key])
         Savingsi[key], Savingsi_finder[key], Crossings_finder[key] = savingsi(Cost0i[key], Costij[key], value,
@@ -209,8 +213,8 @@ def set_cable_topology(NT, WT_List, central_platform_locations, Cable_List):
         for route in Routingi[key]:
             if edge_crossings_area([route[0], route[1]], Wind_turbinesi[key], substationi[key], Area)[0]:
                 crossings += edge_crossings_area([route[0], route[1]], Wind_turbinesi[key], substationi[key], Area)[1]
-    print('Cable length = {0} km'.format(round(cable_length / 1000, 3)))
-    print('Cable cost = {0:,} {1}'.format(round(total_cost / 1000000, 3), MEuro))
+    print('Cable length = {0} km'.format(round(old_div(cable_length, 1000), 3)))
+    print('Cable cost = {0:,} {1}'.format(round(old_div(total_cost, 1000000), 3), MEuro))
     if Area:
         print('Crossings = {0}'.format(crossings))
 
@@ -221,9 +225,9 @@ def set_cable_topology(NT, WT_List, central_platform_locations, Cable_List):
     plt.title(' {0} OWF - POS{1}+RouteOpt '.format(name, option), fontsize=fontsize)
     plt.grid()
     scale = 1000
-    ticks1 = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(x / scale))
+    ticks1 = ticker.FuncFormatter(lambda x, pos: '{0:g}'.format(old_div(x, scale)))
     ax.xaxis.set_major_formatter(ticks1)
-    ticks2 = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(y / scale))
+    ticks2 = ticker.FuncFormatter(lambda y, pos: '{0:g}'.format(old_div(y, scale)))
     ax.yaxis.set_major_formatter(ticks2)
     plt.xticks(fontsize=fontsize2)
     plt.yticks(fontsize=fontsize2)
@@ -248,7 +252,7 @@ def POS1_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
         if check_same_path(arc, Paths) is False and any(
                 [True for e in [[arc[0], 0]] if e in Routing]) and one_neighbor(arc[1], Paths) is False:
             condition4 = dict()
-            for key, value in Capacityi.iteritems():
+            for key, value in Capacityi.items():
                 condition4[key] = check_capacity(arc, Paths, Capacityi[key])
             if condition4[1] is False and edge_crossings(arc, Wind_turbinesi, central_platform_location,
                                                          Routing) is False and \
@@ -266,7 +270,7 @@ def POS1_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                 Paths[index1] = []
                 Paths = [path for path in Paths if path != []]
                 for i in Paths:
-                    for j in xrange(len(i) - 1):
+                    for j in range(len(i) - 1):
                         Routing.append([i[j + 1], i[j]])
 
             if len(condition4) > 1 and condition4[1] == True and condition4[2] == False:
@@ -287,18 +291,18 @@ def POS1_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                     Paths_temp[index1] = []
                     for i in Paths_temp:
                         if len(i) >= 2:
-                            for j in xrange(len(i) - 1):
+                            for j in range(len(i) - 1):
                                 Routing_temp.append([i[j + 1], i[j]])
                     overcapacity = len(Paths_temp[index2]) - 1 - Capacityi[1]
                     index3 = overcapacity
-                    for i in xrange(index3):
+                    for i in range(index3):
                         total_update_red_temp.append([Paths_temp[index2][i + 1], Paths_temp[index2][i]])
                     total_update_red_temp = renew_update(total_update_red, total_update_red_temp,
                                                          Paths_temp) + total_update_red_temp
 
                     Routing_red_temp = []
                     for route in total_update_red_temp:
-                        for z in xrange(len(route) - 1):
+                        for z in range(len(route) - 1):
                             Routing_red_temp.append([route[z], route[z + 1]])
                     new = -(cable_cost(central_platform_location, Wind_turbinesi, Routing, Routing_red, Routing_green,
                                        Cable_Costi) - cable_cost(central_platform_location, Wind_turbinesi,
@@ -338,16 +342,16 @@ def POS1_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                     Paths_temp[index1] = []
                     for i in Paths_temp:
                         if len(i) >= 2:
-                            for j in xrange(len(i) - 1):
+                            for j in range(len(i) - 1):
                                 Routing_temp.append([i[j + 1], i[j]])
 
                     overcapacity1 = len(Paths_temp[index2]) - 1 - Capacityi[1]
                     overcapacity2 = len(Paths_temp[index2]) - 1 - Capacityi[2]
                     index3 = overcapacity1
                     index4 = overcapacity2
-                    for i in xrange(index4):
+                    for i in range(index4):
                         total_update_green_temp.append([Paths_temp[index2][i + 1], Paths_temp[index2][i]])
-                    for i in xrange(index4, index3):
+                    for i in range(index4, index3):
                         total_update_red_temp.append([Paths_temp[index2][i + 1], Paths_temp[index2][i]])
                     total_update_red_temp = renew_update(total_update_red, total_update_red_temp,
                                                          Paths_temp) + total_update_red_temp
@@ -355,11 +359,11 @@ def POS1_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                                                            Paths_temp) + total_update_green_temp
                     Routing_red_temp = []
                     for route in total_update_red_temp:
-                        for z in xrange(len(route) - 1):
+                        for z in range(len(route) - 1):
                             Routing_red_temp.append([route[z], route[z + 1]])
                     Routing_green_temp = []
                     for route in total_update_green_temp:
-                        for z in xrange(len(route) - 1):
+                        for z in range(len(route) - 1):
                             Routing_green_temp.append([route[z], route[z + 1]])
                     new = -(cable_cost(central_platform_location, Wind_turbinesi, Routing, Routing_red, Routing_green,
                                        Cable_Costi) - cable_cost(central_platform_location, Wind_turbinesi,
@@ -402,7 +406,7 @@ def POS2_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
         condition3 = one_neighbor(arc[1], Paths)
         if condition1 is False and (condition21 or (condition22 is False)) and condition3 is False:
             condition4 = dict()
-            for key, value in Capacityi.iteritems():
+            for key, value in Capacityi.items():
                 condition4[key] = check_capacity(arc, Paths, Capacityi[key])
             if condition4[1] is False and edge_crossings(arc, Wind_turbinesi, central_platform_location, Routing) is False and edge_crossings_area(arc, Wind_turbinesi, central_platform_location, Transmission)[0] is False:
                 Routing = []
@@ -432,7 +436,7 @@ def POS2_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                 w = Paths[index2][1]
                 Paths = [path for path in Paths if path != []]
                 for i in Paths:
-                    for j in xrange(len(i) - 1):
+                    for j in range(len(i) - 1):
                         Routing.append([i[j + 1], i[j]])
                 for n in Wind_turbinesi:
                     value = -(Costi[w][0] - Costi[u][n[0]]) * Cable_Costi[1]
@@ -465,17 +469,17 @@ def POS2_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                     Paths_temp[index1] = []
                     for i in Paths_temp:
                         if len(i) >= 2:
-                            for j in xrange(len(i) - 1):
+                            for j in range(len(i) - 1):
                                 Routing_temp.append([i[j + 1], i[j]])
                     overcapacity = len(Paths_temp[index2]) - 1 - Capacityi[1]
                     index3 = overcapacity
-                    for i in xrange(0, index3):
+                    for i in range(0, index3):
                         total_update_red_temp.append([Paths_temp[index2][i + 1], Paths_temp[index2][i]])
                     total_update_red_temp = renew_update(total_update_red, total_update_red_temp,
                                                          Paths_temp) + total_update_red_temp
                     Routing_red_temp = []
                     for route in total_update_red_temp:
-                        for z in xrange(0, len(route) - 1):
+                        for z in range(0, len(route) - 1):
                             Routing_red_temp.append([route[z], route[z + 1]])
                     new = -(cable_cost(central_platform_location, Wind_turbinesi, Routing, Routing_red, Routing_green,
                                        Cable_Costi) - cable_cost(central_platform_location, Wind_turbinesi,
@@ -530,15 +534,15 @@ def POS2_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                     Paths_temp[index1] = []
                     for i in Paths_temp:
                         if len(i) >= 2:
-                            for j in xrange(len(i) - 1):
+                            for j in range(len(i) - 1):
                                 Routing_temp.append([i[j + 1], i[j]])
                     overcapacity1 = len(Paths_temp[index2]) - 1 - Capacityi[1]
                     overcapacity2 = len(Paths_temp[index2]) - 1 - Capacityi[2]
                     index3 = overcapacity1
                     index4 = overcapacity2
-                    for i in xrange(0, index4):
+                    for i in range(0, index4):
                         total_update_green_temp.append([Paths_temp[index2][i + 1], Paths_temp[index2][i]])
-                    for i in xrange(index4, index3):
+                    for i in range(index4, index3):
                         total_update_red_temp.append([Paths_temp[index2][i + 1], Paths_temp[index2][i]])
                     total_update_red_temp = renew_update(total_update_red, total_update_red_temp,
                                                          Paths_temp) + total_update_red_temp
@@ -546,11 +550,11 @@ def POS2_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbine
                                                            Paths_temp) + total_update_green_temp
                     Routing_red_temp = []
                     for route in total_update_red_temp:
-                        for z in xrange(0, len(route) - 1):
+                        for z in range(0, len(route) - 1):
                             Routing_red_temp.append([route[z], route[z + 1]])
                     Routing_green_temp = []
                     for route in total_update_green_temp:
-                        for z in xrange(0, len(route) - 1):
+                        for z in range(0, len(route) - 1):
                             Routing_green_temp.append([route[z], route[z + 1]])
                     new = -(cable_cost(central_platform_location, Wind_turbinesi, Routing, Routing_red, Routing_green,
                                        Cable_Costi) - cable_cost(central_platform_location, Wind_turbinesi,
@@ -614,7 +618,7 @@ def RouteOpt(Routing, central_platform_location, Costi, Capacityi, Paths, Wind_t
             path.reverse()
             cond = True
             while cond == True:
-                for l in xrange(1, len(path)):
+                for l in range(1, len(path)):
                     list.append([Costi[path[l - 1]][path[l]] - Costi[path[l]][path[0]], path[0], path[l]])
                 s = max(list, key=lambda x: x[0])
                 if s[0] > 0 and edge_crossings([s[1], s[2]], Wind_turbinesi, central_platform_location,
@@ -638,7 +642,7 @@ def RouteOpt(Routing, central_platform_location, Costi, Capacityi, Paths, Wind_t
             path.reverse()
             cond = True
             while cond == True:
-                for l in xrange(1, len(path)):
+                for l in range(1, len(path)):
                     list.append([Costi[path[l - 1]][path[l]] - Costi[path[l]][path[0]], path[0], path[l]])
                 s = max(list, key=lambda x: x[0])
                 if s[0] > 0 and edge_crossings([s[1], s[2]], Wind_turbinesi, central_platform_location,
@@ -659,15 +663,15 @@ def RouteOpt(Routing, central_platform_location, Costi, Capacityi, Paths, Wind_t
     Routing = []
     for i in Paths:
         i.reverse()
-        for j in xrange(len(i) - 1):
+        for j in range(len(i) - 1):
             Routing.append([i[j + 1], i[j]])
     return Paths, Routing
 
 
 def initial_values(Wind_turbines, central_platform_location):
-    Costi = [[0 for i in xrange(NT + 1)] for j in xrange(NT + 1)]
+    Costi = [[0 for i in range(NT + 1)] for j in range(NT + 1)]
     set_cost_matrix(Costi, Wind_turbines, central_platform_location)
-    distancefromsubstationi = [[0, i + 1, Costi[0][i + 1]] for i in xrange(len(Costi[0]) - 1)]
+    distancefromsubstationi = [[0, i + 1, Costi[0][i + 1]] for i in range(len(Costi[0]) - 1)]
     Wind_turbinesi = []
     return Wind_turbinesi, Costi, distancefromsubstationi
 
@@ -702,7 +706,7 @@ def savingsi(Cost0i, Costij, Wind_turbinesi, Cable_Cost1, central_platform_locat
     for i in zip(*Wind_turbinesi)[0]:
         k = Cost0i[counter]
         step = (len(Wind_turbinesi) - 1) * counter
-        for j in xrange(step, step + len(Wind_turbinesi) - 1):
+        for j in range(step, step + len(Wind_turbinesi) - 1):
             saving = -(k[2] - Costij[j][2]) * Cable_Cost1
             arc1 = [i, 0]
             arc2 = [i, Costij[j][1]]
@@ -803,7 +807,7 @@ def edge_crossings(arc, Wind_turbines, central_platform_location, Routing):
             Area[1] = (x2 - x1) * (y4 - y1) - (x4 - x1) * (y2 - y1)
             Area[2] = (x4 - x3) * (y1 - y3) - (x1 - x3) * (y4 - y3)
             Area[3] = (x4 - x3) * (y2 - y3) - (x2 - x3) * (y4 - y3)
-            for i in xrange(4):
+            for i in range(4):
                 if Area[i] > 0:
                     Position[i] = 0
                 elif Area[i] < 0:
@@ -832,7 +836,7 @@ def edge_crossings_area(arc, Wind_turbines, central_platform_location, Area_cros
         Area[1] = (x2 - x1) * (y4 - y1) - (x4 - x1) * (y2 - y1)
         Area[2] = (x4 - x3) * (y1 - y3) - (x1 - x3) * (y4 - y3)
         Area[3] = (x4 - x3) * (y2 - y3) - (x2 - x3) * (y4 - y3)
-        for i in xrange(4):
+        for i in range(4):
             if Area[i] > 0:
                 Position[i] = 0
             elif Area[i] < 0:
@@ -854,7 +858,7 @@ def plotting(fig, central_platform_location1, Wind_turbines1, Routing, Routing_r
     Routing_blue = [i for i in Routing if i not in Routing_red]
     Routing_blue = [i for i in Routing_blue if i not in Routing_green]
     cable_length1blue = 0
-    index, x, y = zip(*Full_List)
+    index, x, y = list(zip(*Full_List))
     ax = fig.add_subplot(111)
     plt.plot([p[1] for p in Wind_turbines1], [p[2] for p in Wind_turbines1], 'bo', ms=6)
     plt.plot([p[1] for p in central_platform_location1_1], [p[2] for p in central_platform_location1_1], 'ro', ms=10)
@@ -868,9 +872,9 @@ def plotting(fig, central_platform_location1, Wind_turbines1, Routing, Routing_r
                 arcs1.append([j[1], j[2]])
             if j[0] == i[1]:
                 arcs2.append([j[1], j[2]])
-    for i in xrange(len(arcs1)):
+    for i in range(len(arcs1)):
         arcs1.insert(2 * i + 1, arcs2[i])
-    for j in xrange(len(arcs1) - len(Routing_blue)):
+    for j in range(len(arcs1) - len(Routing_blue)):
         plt.plot([arcs1[2 * j][0], arcs1[2 * j + 1][0]], [arcs1[2 * j][1], arcs1[2 * j + 1][1]], color='b')
         cable_length1blue = cable_length1blue + hypot(arcs1[2 * j][0] - arcs1[2 * j + 1][0],
                                                       arcs1[2 * j][1] - arcs1[2 * j + 1][1])
@@ -887,9 +891,9 @@ def plotting(fig, central_platform_location1, Wind_turbines1, Routing, Routing_r
                     arcs1.append([j[1], j[2]])
                 if j[0] == i[1]:
                     arcs2.append([j[1], j[2]])
-        for i in xrange(len(arcs1)):
+        for i in range(len(arcs1)):
             arcs1.insert(2 * i + 1, arcs2[i])
-        for j in xrange(len(arcs1) - len(Routing_red)):
+        for j in range(len(arcs1) - len(Routing_red)):
             plt.plot([arcs1[2 * j][0], arcs1[2 * j + 1][0]], [arcs1[2 * j][1], arcs1[2 * j + 1][1]], color='r')
             cable_length1red = cable_length1red + hypot(arcs1[2 * j][0] - arcs1[2 * j + 1][0],
                                                         arcs1[2 * j][1] - arcs1[2 * j + 1][1])
@@ -907,9 +911,9 @@ def plotting(fig, central_platform_location1, Wind_turbines1, Routing, Routing_r
                     arcs1.append([j[1], j[2]])
                 if j[0] == i[1]:
                     arcs2.append([j[1], j[2]])
-        for i in xrange(len(arcs1)):
+        for i in range(len(arcs1)):
             arcs1.insert(2 * i + 1, arcs2[i])
-        for j in xrange(len(arcs1) - len(Routing_red)):
+        for j in range(len(arcs1) - len(Routing_red)):
             plt.plot([arcs1[2 * j][0], arcs1[2 * j + 1][0]], [arcs1[2 * j][1], arcs1[2 * j + 1][1]], color='r')
             cable_length1red = cable_length1red + hypot(arcs1[2 * j][0] - arcs1[2 * j + 1][0],
                                                         arcs1[2 * j][1] - arcs1[2 * j + 1][1])
@@ -923,9 +927,9 @@ def plotting(fig, central_platform_location1, Wind_turbines1, Routing, Routing_r
                     arcs1.append([j[1], j[2]])
                 if j[0] == i[1]:
                     arcs2.append([j[1], j[2]])
-        for i in xrange(len(arcs1)):
+        for i in range(len(arcs1)):
             arcs1.insert(2 * i + 1, arcs2[i])
-        for j in xrange(len(arcs1) - len(Routing_green)):
+        for j in range(len(arcs1) - len(Routing_green)):
             plt.plot([arcs1[2 * j][0], arcs1[2 * j + 1][0]], [arcs1[2 * j][1], arcs1[2 * j + 1][1]], color='g')
             cable_length1green = cable_length1green + hypot(arcs1[2 * j][0] - arcs1[2 * j + 1][0],
                                                             arcs1[2 * j][1] - arcs1[2 * j + 1][1])

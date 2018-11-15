@@ -1,4 +1,5 @@
-class Designers:
+from builtins import object
+class Designers(object):
     def __init__(self, support_team):
         self.support_team = support_team
         pass

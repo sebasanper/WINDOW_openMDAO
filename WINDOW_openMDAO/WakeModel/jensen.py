@@ -1,5 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from __future__ import division
+from past.utils import old_div
 from .area import AreaReal
 from WINDOW_openMDAO.src.api import DetermineIfInWake, WakeDeficit
 from numpy import deg2rad, sqrt, cos, sin
@@ -24,7 +26,7 @@ class JensenWakeFraction(DetermineIfInWake):
 
 
 def wake_deficit1(x_down, x_cross, Ct, k_jensen, r0):
-    return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k_jensen * x_down) / r0) ** 2.0
+    return old_div((1.0 - sqrt(1.0 - Ct)), (1.0 + old_div((k_jensen * x_down), r0)) ** 2.0)
 
 
 def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, wind_direction, downwind_d, crosswind_d,

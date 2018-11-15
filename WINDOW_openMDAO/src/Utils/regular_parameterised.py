@@ -1,4 +1,7 @@
 from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from random import random
 from .transform_quadrilateral import AreaMapping
 from openmdao.api import ExplicitComponent
@@ -66,11 +69,11 @@ def regular_layout(dx, dy, dh, areas, angle):
     angle = deg2rad(angle)
     with open("area.dat", "w") as areaout:
         for area in areas:
-            for n in range(4) + [0]:
+            for n in list(range(4)) + [0]:
                 areaout.write("{} {}\n".format(area[n][0], area[n][1]))
 
-    n_rows = int((max([rotate(place, angle, centroid_small)[0] for area in areas for place in area]) - min([rotate(place, angle, centroid_small)[0] for area in areas for place in area])) / dx) + 10
-    n_columns = int((max([rotate(place, angle, centroid_small)[1] for area in areas for place in area]) - min([rotate(place, angle, centroid_small)[1] for area in areas for place in area])) / dy) + 10
+    n_rows = int(old_div((max([rotate(place, angle, centroid_small)[0] for area in areas for place in area]) - min([rotate(place, angle, centroid_small)[0] for area in areas for place in area])), dx)) + 10
+    n_columns = int(old_div((max([rotate(place, angle, centroid_small)[1] for area in areas for place in area]) - min([rotate(place, angle, centroid_small)[1] for area in areas for place in area])), dy)) + 10
     layout = [[[0, 0] for _ in range(n_columns)] for _ in range(n_rows)]
     layout_translated = [[[0, 0] for _ in range(n_columns)] for _ in range(n_rows)]
     layout_rotated = [[[0, 0] for _ in range(n_columns)] for _ in range(n_rows)]

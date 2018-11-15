@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from openmdao.api import ExplicitComponent
 from numpy import deg2rad, tan, cos, sqrt
 import numpy as np
@@ -6,7 +9,7 @@ from WINDOW_openMDAO.input_params import max_n_turbines
 
 def distance_to_front(x, y, theta):
     theta = deg2rad(- theta + 90.0)
-    return abs(x + tan(theta) * y - 10000000000000000000.0 / cos(theta)) / sqrt(1.0 + tan(theta) ** 2.0)
+    return old_div(abs(x + tan(theta) * y - old_div(10000000000000000000.0, cos(theta))), sqrt(1.0 + tan(theta) ** 2.0))
 
 
 def order(layout_array, wind_direction):

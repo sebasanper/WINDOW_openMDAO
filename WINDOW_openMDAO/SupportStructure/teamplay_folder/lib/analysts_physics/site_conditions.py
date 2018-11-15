@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import object
+from past.utils import old_div
 from numpy import pi, sqrt, sinh, tanh, exp
 from math import gamma
 
@@ -7,7 +10,7 @@ from scipy.optimize import newton
 # VERTICAL HEIGHTS W.R.T. MSL
 
 
-class SiteConditionsAnalysts:
+class SiteConditionsAnalysts(object):
     g = 9.81
 
     # number_of_sectors = 144  # MUST BE MULTIPLE OF 4 !!! Number of sectors for which farm power is determined
@@ -26,21 +29,21 @@ class SiteConditionsAnalysts:
 
         self.site_conditions.Hmax_50_year = 1.86 * self.site_conditions.Hs_50_year
 
-        self.site_conditions.Tmax_50_year = 11.1 * sqrt(self.site_conditions.Hmax_50_year / self.g)
+        self.site_conditions.Tmax_50_year = 11.1 * sqrt(old_div(self.site_conditions.Hmax_50_year, self.g))
         self.site_conditions.kmax_50_year = self.get_wave_number(self.site_conditions.Tmax_50_year)
         self.site_conditions.Hmax_50_year = min(self.site_conditions.Hmax_50_year,
                                                 self.wave_limit(self.site_conditions.kmax_50_year))
-        self.site_conditions.Tpeak_50_year = 1.4 * 11.1 * sqrt(self.site_conditions.Hs_50_year / self.g)
+        self.site_conditions.Tpeak_50_year = 1.4 * 11.1 * sqrt(old_div(self.site_conditions.Hs_50_year, self.g))
         self.site_conditions.Uw_50_year = (pi * self.site_conditions.Hs_50_year /
                                            (self.site_conditions.Tpeak_50_year * sinh(self.get_wave_number(
                                                self.site_conditions.Tpeak_50_year) * self.site_conditions.water_depth)))
         self.site_conditions.Hred_50_year = 1.32 * self.site_conditions.Hs_50_year
-        self.site_conditions.Tred_50_year = 11.1 * sqrt(self.site_conditions.Hred_50_year / self.g)
+        self.site_conditions.Tred_50_year = 11.1 * sqrt(old_div(self.site_conditions.Hred_50_year, self.g))
         self.site_conditions.kred_50_year = self.get_wave_number(self.site_conditions.Tred_50_year)
         self.site_conditions.Hred_50_year = min(self.site_conditions.Hred_50_year,
                                                 self.wave_limit(self.site_conditions.kred_50_year))
         self.site_conditions.Hmax_1_year = 1.86 * self.site_conditions.Hs_1_year
-        self.site_conditions.Tmax_1_year = 11.1 * sqrt(self.site_conditions.Hmax_1_year / self.g)
+        self.site_conditions.Tmax_1_year = 11.1 * sqrt(old_div(self.site_conditions.Hmax_1_year, self.g))
         self.site_conditions.kmax_1_year = self.get_wave_number(self.site_conditions.Tmax_1_year)
         self.site_conditions.Hmax_1_year = min(self.site_conditions.Hmax_1_year,
                                                self.wave_limit(self.site_conditions.kmax_1_year))
@@ -48,7 +51,7 @@ class SiteConditionsAnalysts:
         self.site_conditions.min_crest = self.site_conditions.lat + self.site_conditions.storm_surge_pos - 0.45 * self.site_conditions.Hmax_50_year
         self.site_conditions.Vreference = self.site_conditions.Vaverage * 5
         self.site_conditions.Vmax_50_year = 1.2 * self.site_conditions.Vreference
-        self.site_conditions.Vred_50_year = (1.2 / 1.1) * self.site_conditions.Vreference
+        self.site_conditions.Vred_50_year = (old_div(1.2, 1.1)) * self.site_conditions.Vreference
         # print self.site_conditions.water_depth
 
     # def set_Vaverage(self):
@@ -128,7 +131,7 @@ class SiteConditionsAnalysts:
     def get_wave_number(self, period):
         omega = 2 * pi / period
 
-        start_k = omega ** 2.0 / self.g
+        start_k = old_div(omega ** 2.0, self.g)
         return newton(self.dispersion, start_k, args=(omega,), tol=0.001)
 
     def dispersion(self, d, *args):
@@ -143,7 +146,7 @@ class SiteConditionsAnalysts:
         return min(shallow_water_limit, deep_water_limit)
 
     def get_wind_speed_at_height(self, wind_speed_ref, height):
-        return wind_speed_ref * (height / self.site_conditions.ref_height_wind_speed) ** self.site_conditions.alpha
+        return wind_speed_ref * (old_div(height, self.site_conditions.ref_height_wind_speed)) ** self.site_conditions.alpha
 
     def get_Vmax_50_year(self, height):
         return self.get_wind_speed_at_height(self.site_conditions.Vmax_50_year, height)

@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from builtins import object
 from copy import deepcopy
 
 from ..system.design_vector import DesignVector
@@ -24,7 +25,7 @@ from ..analysts_physics.rocks import RockAnalysts
 from ..analysts_humanities.cost_support_structure import CostAnalysts
 
 
-class DimensionTeamSupport:
+class DimensionTeamSupport(object):
     def __init__(self):
         #        self.domain_top = domain_top
         #        self.previous_score = 0.0

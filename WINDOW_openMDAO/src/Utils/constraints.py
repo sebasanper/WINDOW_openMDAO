@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from builtins import range
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines, n_quadrilaterals, separation_equation_y
 from .transform_quadrilateral import AreaMapping

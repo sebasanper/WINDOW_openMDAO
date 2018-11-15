@@ -1,3 +1,4 @@
+from builtins import range
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines, max_n_substations, max_n_turbines_p_branch, max_n_branches
 import numpy as np
@@ -31,7 +32,7 @@ class AbstractElectricDesign(ExplicitComponent):
             for n in range(1, len(topology_dict) + 1):
                 topology_list.append(topology_dict[n])
 
-            from itertools import izip_longest
+            from itertools import zip_longest
 
             def find_shape(seq):
                 try:
@@ -39,7 +40,7 @@ class AbstractElectricDesign(ExplicitComponent):
                 except TypeError:
                     return ()
                 shapes = [find_shape(subseq) for subseq in seq]
-                return (len_,) + tuple(max(sizes) for sizes in izip_longest(*shapes,
+                return (len_,) + tuple(max(sizes) for sizes in zip_longest(*shapes,
                                                                             fillvalue=1))
 
             def fill_array(arr, seq):
@@ -51,7 +52,7 @@ class AbstractElectricDesign(ExplicitComponent):
                     arr[:len_] = seq
                     arr[len_:] = np.nan
                 else:
-                    for subarr, subseq in izip_longest(arr, seq, fillvalue=()):
+                    for subarr, subseq in zip_longest(arr, seq, fillvalue=()):
                         fill_array(subarr, subseq)
 
             topology = np.empty((max_n_substations, max_n_branches, max_n_turbines_p_branch, 2))

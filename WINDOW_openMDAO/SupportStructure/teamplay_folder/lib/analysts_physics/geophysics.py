@@ -4,13 +4,16 @@ Created on Wed Nov 11 17:53:24 2015
 
 @author: Αλβέρτος
 """
+from __future__ import division
 
+from builtins import object
+from past.utils import old_div
 from math import pi, sin
 
 from scipy.optimize import brentq  # newton
 
 
-class GeophysicalAnalysts:
+class GeophysicalAnalysts(object):
     multiplier_blum = 1.1
     
     def __init__(self, support_team):
@@ -20,8 +23,8 @@ class GeophysicalAnalysts:
         phi = self.support_team.physical_environment.site.friction_angle
         gamma = self.support_team.physical_environment.site.submerged_unit_weight
         phi_rad = phi * pi / 180.0
-        kp = (1.0 + sin(phi_rad) / (1.0 - sin(phi_rad)))
-        ka = (1.0 - sin(phi_rad) / (1.0 + sin(phi_rad)))
+        kp = (1.0 + old_div(sin(phi_rad), (1.0 - sin(phi_rad))))
+        ka = (1.0 - old_div(sin(phi_rad), (1.0 + sin(phi_rad))))
         
         self.factor = (kp - ka) * gamma * self.support_team.design_variables.support_structure.monopile.diameter / 6.0
 
@@ -34,4 +37,4 @@ class GeophysicalAnalysts:
         fx = args[0]
         my = args[1]
 
-        return self.factor * l_pile ** 2.0 - (fx + my) / l_pile
+        return self.factor * l_pile ** 2.0 - old_div((fx + my), l_pile)

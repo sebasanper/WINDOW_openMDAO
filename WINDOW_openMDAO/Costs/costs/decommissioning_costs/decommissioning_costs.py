@@ -1,4 +1,6 @@
 from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 from WINDOW_openMDAO.input_params import mass, hub_height, management_percentage, distance_to_grid
 
@@ -29,7 +31,7 @@ def decommissioning_costs(infield_cable_length, NT):
 
     decommissioning_costs = decommissioning_removal_turbines + decommissioning_removal_site_clearance + decommissioning_removal_substation_and_metmast + decommissioning_removal_transmission_cable + decommissioning_removal_infield_cable + decommissioning_disposal_turbines
 
-    total_decommissioning_costs = decommissioning_costs * (management_percentage / 100.0 + 1.0)
+    total_decommissioning_costs = decommissioning_costs * (old_div(management_percentage, 100.0) + 1.0)
 
     return total_decommissioning_costs
 
