@@ -107,7 +107,7 @@ class Workflow(object):
         self.array_efficiency = sum(self.array_efficiencies)
         self.farm_annual_energy = sum(self.energies_per_angle)
 
-        if self.print_output is True: print(str(old_div(self.farm_annual_energy, 1000000.0)) + " MWh\n")
+        if self.print_output is True: print(str(self.farm_annual_energy / 1000000.0) + " MWh\n")
         if self.print_output is True: print(" --- Maximum wind turbulence intensity ---")
 
         self.turbulence = self.max_turbulence_per_turbine

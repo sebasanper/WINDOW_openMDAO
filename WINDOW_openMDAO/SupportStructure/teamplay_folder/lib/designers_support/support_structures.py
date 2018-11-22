@@ -183,7 +183,7 @@ class SupportDesigners(Designers):
                 fz = abs(loads_with_safety[2])
                 my = abs(loads_with_safety[4])
                 l = self.properties.hub_height + self.support_team.physical_environment.site.water_depth
-                minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(old_div(diameter, 2.0), fz, l)
+                minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(diameter / 2.0, fz, l)
                 result = brentq(self.stress_reserve_tower, minimum_thickness, 0.5 * diameter, args=(diameter, fz, my),
                                 xtol=0.001, full_output=True)
                 wall_thickness = result[0]
@@ -212,7 +212,7 @@ class SupportDesigners(Designers):
             fz = abs(loads_with_safety[2])
             my = self.stress_concentration_tp * abs(loads_with_safety[4])
             l = self.properties.hub_height + self.support_team.physical_environment.site.water_depth
-            minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(old_div(diameter, 2.0), fz, l)
+            minimum_thickness = self.support_team.mechanical_analysts.get_min_thickness_euler(diameter / 2.0, fz, l)
             result = brentq(self.stress_reserve_tower, minimum_thickness, 0.5 * diameter, args=(diameter, fz, my),
                             xtol=0.001, full_output=True)
             wall_thickness = result[0]
@@ -234,7 +234,7 @@ class SupportDesigners(Designers):
         # Set transition piece and tower base dimensions
         self.design_variables.transition_piece.diameter = self.design_variables.monopile.diameter + self.d_tp_minus_d_pile
         self.design_variables.tower.base_diameter = self.design_variables.transition_piece.diameter
-        self.design_variables.monopile.wall_thickness = 0.00635 + (old_div(self.design_variables.monopile.diameter, 100.0))
+        self.design_variables.monopile.wall_thickness = 0.00635 + (self.design_variables.monopile.diameter / 100.0)
         # Set transition piece overlap for estimates of gravity loading
         self.design_variables.transition_piece.overlap_monopile = 1.44 * self.design_variables.monopile.diameter
 
@@ -265,7 +265,7 @@ class SupportDesigners(Designers):
 
     def stress_reserve_tower(self, d, *args):
         t = d
-        radius = old_div(args[0], 2.0)
+        radius = args[0] / 2.0
         fz = args[1]
         my = args[2]
         l = self.properties.hub_height + self.support_team.physical_environment.site.water_depth
@@ -352,7 +352,7 @@ class SupportDesigners(Designers):
 
             _filter_needed = True
             while _filter_needed:
-                d85b = old_div(d15f, 4.5)
+                d85b = d15f / 4.5
 
                 if d85b > self.support_team.physical_environment.site.d90_soil:
                     self.design_variables.scour_protection.filter.append(
@@ -368,4 +368,4 @@ class SupportDesigners(Designers):
         for layer in self.design_variables.scour_protection.filter:
             total_thickness += layer[3]
 
-        self.support_team.properties.support_structure.scour_protection_volume = ((old_div(1.0, 4.0)) * pi * (self.design_variables.scour_protection.diameter ** 2 * total_thickness + (3.0 * self.design_variables.monopile.diameter) ** 2 * extra_thickness_near_pile - self.design_variables.monopile.diameter ** 2 * (total_thickness + extra_thickness_near_pile)))
+        self.support_team.properties.support_structure.scour_protection_volume = ((1.0 / 4.0) * pi * (self.design_variables.scour_protection.diameter ** 2 * total_thickness + (3.0 * self.design_variables.monopile.diameter) ** 2 * extra_thickness_near_pile - self.design_variables.monopile.diameter ** 2 * (total_thickness + extra_thickness_near_pile)))

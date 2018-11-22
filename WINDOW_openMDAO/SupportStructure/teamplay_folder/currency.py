@@ -1,5 +1,5 @@
 from __future__ import division
-from past.utils import old_div
+
 def Cost1(value, currency, year):
     value_year = 2016
     # Inflation and exchange rate {'Currency Code': [Average inflation rate, Exchange rate to Euro]}
@@ -13,4 +13,4 @@ def Cost1(value, currency, year):
     inflation_rate = conversion[currency][0]
     exchange_rate = conversion[currency][1]
 
-    return value * ((1.0 + (old_div(inflation_rate, 100.0))) ** (value_year - year)) * exchange_rate
+    return value * ((1.0 + (inflation_rate / 100.0)) ** (value_year - year)) * exchange_rate

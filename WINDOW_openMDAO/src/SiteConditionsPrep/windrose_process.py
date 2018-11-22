@@ -15,9 +15,9 @@ class WindrosePreprocessor(ExplicitComponent):
     def __init__(self, real_angle, artificial_angle, n_windspeedbins):
         super(WindrosePreprocessor, self).__init__()
         self.real_angle = real_angle
-        self.n_directions = int(old_div(360.0, real_angle))
+        self.n_directions = int(360.0 / real_angle)
         self.artificial_angle = artificial_angle
-        self.n_artificials = int(old_div(360.0, self.artificial_angle))
+        self.n_artificials = int(360.0 / self.artificial_angle)
         self.n_windspeedbins = n_windspeedbins
         self.n_cases = int(self.n_artificials * (self.n_windspeedbins + 1))
 

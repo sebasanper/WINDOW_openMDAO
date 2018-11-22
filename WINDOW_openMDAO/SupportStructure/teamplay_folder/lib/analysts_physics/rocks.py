@@ -42,7 +42,7 @@ class RockAnalysts(object):
 
     def get_critical_friction(self, d50):
         s = old_div(self.rho_stone, self.support_team.physical_environment.site.water_density)
-        d_star = (old_div((self.g * (s - 1.0)), self.nu_water**2))**(old_div(1.0,3.0)) * d50
+        d_star = (old_div((self.g * (s - 1.0)), self.nu_water**2))**(1.0 / 3.0) * d50
         critical_shields_factor = (old_div(0.30, (1.0 + 1.2 * d_star))) + (0.055 * (1.0 - exp(-0.020 * d_star)))
         return critical_shields_factor * self.g * (self.rho_stone - self.support_team.physical_environment.site.water_density) * d50
     
@@ -73,7 +73,7 @@ class RockAnalysts(object):
         r_w = args[0]
         r = args[1]
         
-        lefthand_side = old_div(0.32, f_w) 
+        lefthand_side = 0.32 / f_w
         righthand_side = ((log(6.36 * r * sqrt(f_w)) -
                            log(1.0 - exp(- 0.0262 * r_w * sqrt(f_w) / r)) +
                            4.71 * r / (r_w * sqrt(f_w))) ** 2.0 + 1.64)

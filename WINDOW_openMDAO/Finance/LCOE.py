@@ -31,7 +31,7 @@ class LCOE(ExplicitComponent):
 
         annuity = 1.0 / interest_rate * (1.0 - old_div(1.0, (1.0 + interest_rate) ** operational_lifetime))
 
-        lcoe_previous = old_div((investment_costs * 100.0), (annuity * (old_div(AEP, 1000.0)))) + oandm_costs * 100.0 / (old_div(AEP, 1000.0)) + decommissioning_costs * 100.0 * (1.0 + interest_rate) ** (- operational_lifetime) / (annuity * (old_div(AEP, 1000.0)))
+        lcoe_previous = old_div((investment_costs * 100.0), (annuity * (AEP / 1000.0))) + oandm_costs * 100.0 / (AEP / 1000.0) + decommissioning_costs * 100.0 * (1.0 + interest_rate) ** (- operational_lifetime) / (annuity * (AEP / 1000.0))
         # print (investment_costs * 100.0) / (annuity * (AEP / 1000.0))
         # print oandm_costs * 100.0 / (AEP / 1000.0)
         # print decommissioning_costs * 100.0 * (1.0 + interest_rate) ** (- operational_lifetime) / (annuity * (AEP / 1000.0))

@@ -51,7 +51,7 @@ class HydrodynamicAnalysts(object):
         return self.cm * (self.support_team.physical_environment.site.water_density * pi * diameter ** 2.0 / 4.0) * zeta * self.g * (old_div(tanh(k * d), sinh(k * d))) * (sinh(k * (b + d))-sinh(k * (a + d)))
 
     def get_integrated_drag_force(self, wave_height, wave_number, base, top, diameter):
-        zeta = old_div(wave_height, 2.0)
+        zeta = wave_height / 2.0
         k = wave_number
         a = base
         b = top
@@ -60,7 +60,7 @@ class HydrodynamicAnalysts(object):
         return self.cd * 0.5 * self.support_team.physical_environment.site.water_density * diameter * zeta ** 2.0 * self.g * (old_div(2.0, sinh(2.0 * k * d))) * ((old_div(sinh(2.0 * k * (b + d)), 4.0) + k * (b + d) / 2.0) - (old_div(sinh(2.0 * k * (a + d)), 4.0) + k * (a + d) / 2.0))
 
     def get_integrated_inertia_moment(self, wave_height, wave_number, base, top, diameter):
-        zeta = old_div(wave_height, 2.0)
+        zeta = wave_height / 2.0
         k = wave_number
         a = base
         b = top
@@ -69,7 +69,7 @@ class HydrodynamicAnalysts(object):
         return self.cm * (self.support_team.physical_environment.site.water_density * pi * diameter ** 2.0 / 4.0) * zeta * self.g * (old_div(tanh(k * d), sinh(k * d))) * ((b * sinh(k * (b + d)) - old_div(cosh(k * (b + d)),k)) - (a * sinh(k * (a + d)) - old_div(cosh(k * (a + d)),k)))
 
     def get_integrated_drag_moment(self, wave_height, wave_number, base, top, diameter):
-        zeta = old_div(wave_height, 2.0)
+        zeta = wave_height / 2.0
         k = wave_number
         a = base
         b = top

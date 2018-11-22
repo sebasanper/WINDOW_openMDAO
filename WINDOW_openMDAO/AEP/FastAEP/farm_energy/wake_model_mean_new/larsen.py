@@ -23,7 +23,7 @@ def r95(ia):
 
 
 def wake_radius(ct, x, ia):
-    return ((35.0 / 2.0 / pi) ** (old_div(1.0, 5.0))) * ((3.0 * c1(ct, ia) ** 2.0) ** (old_div(1.0, 5.0))) * ((ct * rotor_area * x) ** (old_div(1.0, 3.0)))
+    return ((35.0 / 2.0 / pi) ** (1.0 / 5.0)) * ((3.0 * c1(ct, ia) ** 2.0) ** (1.0 / 5.0)) * ((ct * rotor_area * x) ** (1.0 / 3.0))
 # wake_radius = Memoize(wake_radius)
 
 
@@ -42,7 +42,7 @@ def x0(Ct, ia):
 
 def c1(Ct, ia):
     # print (x0(Ct, ia)) ** (- 5.0 / 6.0)
-    return (old_div(deff(Ct), 2.0)) ** (old_div(5.0, 2.0)) * (105.0 / 2.0 / pi) ** (old_div(- 1.0, 2.0)) * (Ct * rotor_area * x0(Ct, ia)) ** (old_div(- 5.0, 6.0))  # Prandtl mixing length
+    return (old_div(deff(Ct), 2.0)) ** (5.0 / 2.0) * (105.0 / 2.0 / pi) ** (- 1.0 / 2.0) * (Ct * rotor_area * x0(Ct, ia)) ** (- 5.0 / 6.0)  # Prandtl mixing length
 # c1 = Memoize(c1)
 
 
@@ -87,7 +87,7 @@ def determine_if_in_wake_larsen(xt, yt, xw, yw, ct, alpha, ia):  # According to 
 
 
 def wake_speed(U0, ct, x, y, ia):
-    return U0 * (1.0 - ((ct * rotor_area * x ** (- 2.0)) ** (old_div(1.0, 3.0))) / 9.0 * (y ** (old_div(3.0, 2.0)) * (3.0 * c1(ct, ia) ** 2.0 * ct * rotor_area * x) ** (old_div(- 1.0, 2.0)) - (35.0 / 2.0 / pi) ** (old_div(3.0, 10.0)) * (3.0 * c1(ct, ia) ** 2.0) ** (old_div(- 1.0, 5.0))) ** 2.0)
+    return U0 * (1.0 - ((ct * rotor_area * x ** (- 2.0)) ** (1.0 / 3.0)) / 9.0 * (y ** (3.0 / 2.0) * (3.0 * c1(ct, ia) ** 2.0 * ct * rotor_area * x) ** (- 1.0 / 2.0) - (35.0 / 2.0 / pi) ** (3.0 / 10.0) * (3.0 * c1(ct, ia) ** 2.0) ** (- 1.0 / 5.0)) ** 2.0)
 
 
 # wake_speed = Memoize(wake_speed)

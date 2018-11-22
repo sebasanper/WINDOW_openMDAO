@@ -145,10 +145,10 @@ class GravityAnalysts(object):
         d_diameter = top_diameter - base_diameter
         
         if d_diameter == 0.0:
-            return (old_div(1.0, 4.0)) * pi * (base_diameter**2 - (base_diameter - 2.0 * t)**2) * (b - a)
+            return (1.0 / 4.0) * pi * (base_diameter**2 - (base_diameter - 2.0 * t)**2) * (b - a)
         
         else:
-            return ((old_div(1.0, 4.0)) * pi * (old_div(l, (3.0 * d_diameter))) *
+            return ((1.0 / 4.0) * pi * (old_div(l, (3.0 * d_diameter))) *
                     (((base_diameter + (b - base) * d_diameter / l) ** 3.0 - (base_diameter - 2.0 * t + (b - base) * d_diameter / l) ** 3) -
                      ((base_diameter + (a - base) * d_diameter / l) ** 3.0 - (base_diameter - 2.0 * t + (a - base) * d_diameter / l) ** 3.0)
                      ))

@@ -62,7 +62,7 @@ def larsen_turbulence(ambient_turbulence, Ct, speed, spacing):
     # By Matthew Huaiquan Zhangaiquan Zhang
     # for spacings larger than 2D
     s = spacing
-    Iw = 0.29 * s ** (old_div(- 1.0, 3.0)) * (1.0 - (1.0 - Ct) ** 0.5) ** 0.5
+    Iw = 0.29 * s ** (- 1.0 / 3.0) * (1.0 - (1.0 - Ct) ** 0.5) ** 0.5
     Ia = ambient_turbulence
     Id = sqrt(Ia ** 2.0 + Iw ** 2.0)
     return Id

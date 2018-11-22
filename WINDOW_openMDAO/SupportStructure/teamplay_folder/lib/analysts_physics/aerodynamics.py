@@ -41,7 +41,7 @@ class AerodynamicAnalysts(object):
         l = top - base
         d_diameter = top_diameter - base_diameter
         
-        return (0.5 * self.rho_air * self.cd_cylinder * wind_speed ** 2 * (old_div(1.0, wind_speed_height)) ** (2 * alpha) *
+        return (0.5 * self.rho_air * self.cd_cylinder * wind_speed ** 2 * (1.0 / wind_speed_height) ** (2 * alpha) *
                 (((base_diameter - base * d_diameter / l) * (old_div(1.0, (2.0 * alpha + 1.0))) * b ** (2.0 * alpha + 1.0) + ((old_div(d_diameter, l)) * (old_div(1.0, (2.0 * alpha + 2.0))) * b ** (2.0 * alpha + 2.0))) -
                  ((base_diameter - base * d_diameter / l) * (old_div(1.0, (2.0 * alpha + 1.0))) * a ** (2.0 * alpha + 1.0) + ((old_div(d_diameter, l)) * (old_div(1.0, (2.0 * alpha + 2.0))) * a ** (2.0 * alpha + 2.0)))) 
                 )
@@ -52,7 +52,7 @@ class AerodynamicAnalysts(object):
         l = top - base
         d_diameter = top_diameter - base_diameter
         
-        return (0.5 * self.rho_air * self.cd_cylinder * wind_speed ** 2 * (old_div(1.0, wind_speed_height)) ** (2 * alpha) *
+        return (0.5 * self.rho_air * self.cd_cylinder * wind_speed ** 2 * (1.0 / wind_speed_height) ** (2 * alpha) *
                 (((base_diameter - base * d_diameter / l) * (old_div(1.0, (2.0 * alpha + 2.0))) * b ** (2.0 * alpha + 2.0) + ((old_div(d_diameter, l)) * (old_div(1.0, (2.0 * alpha + 3.0))) * b ** (2.0 * alpha + 3.0))) -
                  ((base_diameter - base * d_diameter / l) * (old_div(1.0, (2.0 * alpha + 2.0))) * a ** (2.0 * alpha + 2.0) + ((old_div(d_diameter, l)) * (old_div(1.0, (2.0 * alpha + 3.0))) * a ** (2.0 * alpha + 3.0)))) 
                 )

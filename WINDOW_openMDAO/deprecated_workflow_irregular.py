@@ -1,8 +1,8 @@
-from __future__ import division
 # workflow_regular.py only defines the workflow to be built. Class WorkingGroup needs to be imported from another working directory. As an example we provide a working directory in the example folder. Run IEA_borssele_regular.py from the 'example' folder instead
 
+from __future__ import division
 from builtins import range
-from past.utils import old_div
+
 from WINDOW_openMDAO.WakeModel.jensen import JensenWakeFraction, JensenWakeDeficit
 from WINDOW_openMDAO.Turbine.Curves import Curves
 from openmdao.api import IndepVarComp, Problem, Group, view_model, SqliteRecorder, ExplicitComponent
@@ -22,7 +22,7 @@ from WINDOW_openMDAO.Finance.LCOE import LCOE
 from WINDOW_openMDAO.Turbine.aero_models import AeroLookup
 from random import uniform
 
-real_angle = old_div(360.0, n_windrose_sectors)
+real_angle = 360.0 / n_windrose_sectors
 
 
 class WorkingGroup(Group):
@@ -35,7 +35,7 @@ class WorkingGroup(Group):
         self.turbulence_model = turbulence_model
         self.windspeed_sampling_points = windspeed_sampling_points
         self.direction_sampling_angle = direction_sampling_angle
-        self.n_cases = int((old_div(360.0, self.direction_sampling_angle)) * (self.windspeed_sampling_points + 1.0))
+        self.n_cases = int(360.0 / self.direction_sampling_angle * (self.windspeed_sampling_points + 1.0))
 
     def setup(self):
         indep2 = self.add_subsystem('indep2', IndepVarComp())

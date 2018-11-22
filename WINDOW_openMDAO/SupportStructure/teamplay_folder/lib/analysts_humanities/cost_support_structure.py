@@ -26,7 +26,7 @@ class cost1(object):
         self.ref_value = value
         self.currency = currency
         self.ref_year = year
-        self.value = value * ((1.0 + (old_div(inflation_rate, 100.0))) ** (value_year - year)) * exchange_rate
+        self.value = value * ((1.0 + (inflation_rate / 100.0)) ** (value_year - year)) * exchange_rate
 
 
 class CostAnalysts(object):

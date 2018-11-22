@@ -1,5 +1,5 @@
 from __future__ import division
-from past.utils import old_div
+
 from openmdao.api import Group, ExplicitComponent
 from WINDOW_openMDAO.src.AbsWakeModel.wake_linear_solver import WakeModel
 from WINDOW_openMDAO.src.AbsAEP.abstract_power import FarmAeroPower
@@ -14,7 +14,7 @@ class AEPWorkflow(Group):
         self.real_angle = real_angle
         self.artificial_angle = artificial_angle
         self.n_windspeedbins = n_windspeedbins
-        self.n_angles = old_div(360.0, self.artificial_angle)
+        self.n_angles = 360.0 / self.artificial_angle
         self.n_windspeeds = n_windspeedbins + 1
         self.n_cases = int(self.n_angles * self.n_windspeeds)
         self.fraction_model = fraction_model
@@ -49,7 +49,7 @@ class AEPWorkflow(Group):
 class PowersToAEP(ExplicitComponent):
     def __init__(self, artificial_angle, n_windspeedbins):
         super(PowersToAEP, self).__init__()
-        self.n_angles = old_div(360.0, artificial_angle)
+        self.n_angles = 360.0 / artificial_angle
         self.n_windspeeds = n_windspeedbins + 1
         self.windrose_cases = int(self.n_angles * self.n_windspeeds)
 

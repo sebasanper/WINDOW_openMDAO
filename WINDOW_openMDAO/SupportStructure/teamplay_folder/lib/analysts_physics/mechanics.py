@@ -13,7 +13,7 @@ class MechanicalAnalysts(object):
         self.support_team = support_team
 
     def get_stress_pile(self, d_outer, d_inner, fz, my):
-        cross_sectional_area = (old_div(pi, 4.0)) * (d_outer**2 - d_inner**2) 
+        cross_sectional_area = (pi / 4.0) * (d_outer**2 - d_inner**2)
         moment_of_inertia = pi * (d_outer**4 - d_inner**4) / 64.0
         stress = (old_div(abs(fz), cross_sectional_area)) + old_div((abs(my) * d_outer), (2.0 * moment_of_inertia))
         return [stress, self.yield_stress_steel]
@@ -42,7 +42,7 @@ class MechanicalAnalysts(object):
         
         n_el = (pi**2 * self.e_modulus_steel * pi * radius**3 * t / (4.0 * l**2))
         lambda_r = sqrt(old_div(sigma_cr, (old_div(n_el, (2.0 * pi * radius * t)))))
-        k = old_div(radius, 2.0)
+        k = radius / 2.0
         e = max(0.34 * (lambda_r - 0.2) * k, 0.0)
         if e > (2.0 * l / 1000.0):
             e = 2.0 * e - (2.0 * l / 1000.0)
