@@ -17,15 +17,15 @@ https://doi.org/10.2514/6.2018-0654
 
 To install, go to the directory where you have cloned the module and execute
 
-    python2 setup.py install --user
+    python setup.py install --user
 
 Then its packages will be available under `from WINDOW_openMDAO import <...>`.
 
 To reinstall after changes to your local copy:
 
-    python2 setup.py install --user --force
+    python setup.py install --user --force
 
-[Python 3 is not yet supported.]
+[Both Python 2 and Python 3 are now supported.]
 
 ---------------------------------------------------
 
