@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Project development
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 
@@ -14,4 +15,4 @@ def project_development_cost(number_turbines, rated_power):
 if __name__ == '__main__':
     number = 3
     rating = 6.0
-    print project_development_cost(number, rating)
+    print(project_development_cost(number, rating))

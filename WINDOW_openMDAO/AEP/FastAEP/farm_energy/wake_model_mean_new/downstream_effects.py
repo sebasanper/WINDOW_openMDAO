@@ -1,10 +1,14 @@
-import jensen
-import larsen
-import ainslie1d
-import ainslie2d
+from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+from past.utils import old_div
+from . import jensen
+from . import larsen
+from . import ainslie1d
+from . import ainslie2d
 #from farm_energy.wake_model_mean_new.ainslie2d_cy import ainslie_full
 # ainslie_full = Memoize(ainslie_full)
-from ainslie_common import crosswind_distance, determine_front
+from .ainslie_common import crosswind_distance, determine_front
 from time import time
 from WINDOW_openMDAO.input_params import rotor_radius
 
@@ -52,8 +56,8 @@ def LarsenEffects(coordinates_upstream, thrust_coefficient, coordinates_downstre
 def Ainslie1DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=rotor_radius * 2.0):
     angle3 = angle + 180.0
     partial_deficits = []
-    normalised_upstream = [coordinates_upstream[i] / diameter for i in range(1, 3)]
-    normalised_downstream = [[coordinates_downstream[j][i] / diameter for i in range(1, 3)] for j in range(len(coordinates_downstream))]
+    normalised_upstream = [old_div(coordinates_upstream[i], diameter) for i in range(1, 3)]
+    normalised_downstream = [[old_div(coordinates_downstream[j][i], diameter) for i in range(1, 3)] for j in range(len(coordinates_downstream))]
 
     for i in range(len(normalised_downstream)):
 
@@ -71,8 +75,8 @@ def Ainslie1DEffects(coordinates_upstream, thrust_coefficient, coordinates_downs
 def Ainslie2DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=rotor_radius * 2.0):
     angle3 = angle + 180.0
     partial_deficits = []
-    normalised_upstream = [coordinates_upstream[i] / diameter for i in range(1, 3)]
-    normalised_downstream = [[coordinates_downstream[j][i] / diameter for i in range(1, 3)] for j in range(len(coordinates_downstream))]
+    normalised_upstream = [old_div(coordinates_upstream[i], diameter) for i in range(1, 3)]
+    normalised_downstream = [[old_div(coordinates_downstream[j][i], diameter) for i in range(1, 3)] for j in range(len(coordinates_downstream))]
     # start = time()
     for i in range(len(normalised_downstream)):
         parallel_distance = determine_front(angle3, normalised_upstream[0], normalised_upstream[1], normalised_downstream[i][0], normalised_downstream[i][1])

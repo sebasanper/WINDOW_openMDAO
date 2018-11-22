@@ -1,3 +1,4 @@
+from builtins import range
 from openmdao.api import ExplicitComponent
 
 class DetermineIfInWakeJensen(ExplicitComponent):

@@ -1,6 +1,7 @@
-from aep_workflow import Workflow as aep_workflow
-from site_conditions.wind_conditions.windrose_new import WeibullWindBins
-from farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import power, thrust_coefficient
+from __future__ import absolute_import
+from .aep_workflow import Workflow as aep_workflow
+from .site_conditions.wind_conditions.windrose_new import WeibullWindBins
+from .farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import power, thrust_coefficient
 
 
 def call_aep(wake_model, turbulence_model, merge_model, power_curve_file, ct_curve_file, windrose_file, layout, nbins, artif_angle):

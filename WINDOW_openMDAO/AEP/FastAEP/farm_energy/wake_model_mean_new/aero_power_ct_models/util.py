@@ -1,5 +1,7 @@
+from __future__ import division
+from past.utils import old_div
 def interpolate(minx, miny, maxx, maxy, valx):
-    return miny + (maxy - miny) * ((valx - minx) / (maxx - minx))
+    return miny + (maxy - miny) * (old_div((valx - minx), (maxx - minx)))
 
 
 #-----------parse FAST output file and generate statistics with GNUplot

@@ -1,7 +1,8 @@
-from lib.designers_support.dimension_team_support import DimensionTeamSupport
-from lib.system.properties import RNA
-from lib.environment.physical_environment import Site
-from currency import Cost1
+from __future__ import absolute_import
+from .lib.designers_support.dimension_team_support import DimensionTeamSupport
+from .lib.system.properties import RNA
+from .lib.environment.physical_environment import Site
+from .currency import Cost1
 
 
 def teamplay(TI, depth):

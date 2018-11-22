@@ -1,4 +1,8 @@
-from memoize import Memoize2
+from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+from past.utils import old_div
+from .memoize import Memoize2
 
 
 def thomas(a, b, c, d):
@@ -37,14 +41,14 @@ def thomas(a, b, c, d):
     # Calculate p and q
     p = []
     q = []
-    p.append(c[0] / b[0])
-    q.append(d[0] / b[0])
+    p.append(old_div(c[0], b[0]))
+    q.append(old_div(d[0], b[0]))
     for j in range(1, n):
         # print 'thomas algorithm'
         # print j, b[j], c[j], p[j - 1]
         # print
-        pj = c[j] / (b[j] - a[j - 1] * p[j - 1])
-        qj = (d[j] - a[j - 1] * q[j - 1]) / (b[j] - a[j - 1] * p[j - 1])
+        pj = old_div(c[j], (b[j] - a[j - 1] * p[j - 1]))
+        qj = old_div((d[j] - a[j - 1] * q[j - 1]), (b[j] - a[j - 1] * p[j - 1]))
         p.append(pj)
         q.append(qj)
     # print p,q # Used for debugging the code!

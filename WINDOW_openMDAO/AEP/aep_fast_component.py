@@ -1,3 +1,4 @@
+from builtins import range
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines
 

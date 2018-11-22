@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 from WINDOW_openMDAO.input_params import transmission_voltage, grid_coupling_point_voltage, collection_voltage, distance_to_grid, frequency, number_substations
 from numpy import sqrt, pi, exp, log
@@ -25,11 +28,11 @@ def electrical_procurement_costs(NT, n_substations=number_substations):
 
     # Investment costs - Procurement -Electrical system
     voltage_at_turbine = generator_voltage
-    onshore_transformer_winding_ratio = transmission_voltage / grid_coupling_point_voltage
-    offshore_transformer_winding_ratio = collection_voltage / transmission_voltage
-    turbine_transformer_winding_ratio = voltage_at_turbine / collection_voltage
+    onshore_transformer_winding_ratio = old_div(transmission_voltage, grid_coupling_point_voltage)
+    offshore_transformer_winding_ratio = old_div(collection_voltage, transmission_voltage)
+    turbine_transformer_winding_ratio = old_div(voltage_at_turbine, collection_voltage)
     transmission_cable_voltage = onshore_transformer_winding_ratio * grid_coupling_point_voltage
-    max_current_at_rated = (NT * P_rated) / (sqrt(3.0) * transmission_cable_voltage)
+    max_current_at_rated = old_div((NT * P_rated), (sqrt(3.0) * transmission_cable_voltage))
     d_conductor = 33.0e-9 * max_current_at_rated ** 2 + 8.9e-6 * max_current_at_rated + 5.7e-3
     a_conductor = 0.25 * pi * d_conductor ** 2
     t_conductor_screen = 1.1 * a_conductor
@@ -45,9 +48,9 @@ def electrical_procurement_costs(NT, n_substations=number_substations):
     xlpe_price_pm = xlpe_mass_pm * xlpe_insulation_price
     # print cable_costs_offset ,cable_manufacturing_surcharge, copper_price_pm ,xlpe_price_pm
     manufacturing_price_pm = cable_costs_offset + cable_manufacturing_surcharge * (copper_price_pm + xlpe_price_pm)
-    transmission_cable_capacitance = (2.0 * pi * epsilon_0 * epsilon_r / (log(d_insulation / d_conductor_screen)))
-    power_shunt_reactor_onshore = 1.0 / (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length)
-    power_shunt_reactor_offshore = 1.0 / (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length)
+    transmission_cable_capacitance = (2.0 * pi * epsilon_0 * epsilon_r / (log(old_div(d_insulation, d_conductor_screen))))
+    power_shunt_reactor_onshore = old_div(1.0, (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length))
+    power_shunt_reactor_offshore = old_div(1.0, (2.0 * pi ** 2 * frequency ** 2 * transmission_cable_capacitance * transmission_cable_length))
     # print power_shunt_reactor_offshore, "inductance"
     inv_procurement_electrical_system_transformer = (transformer_coef_A1 * P_rated + transformer_coef_B1) * exp(transformer_coef_C1 * turbine_transformer_winding_ratio) * NT + (transformer_coef_A2 * ((NT/n_substations * P_rated) ** transformer_coef_B2)) * (exp(transformer_coef_C1 * offshore_transformer_winding_ratio) + exp(transformer_coef_C1 * onshore_transformer_winding_ratio)) * n_substations
     # inv_procurement_electrical_system_transformer = (transformer_coef_A1 * P_rated + transformer_coef_B1) * exp(transformer_coef_C1 * turbine_transformer_winding_ratio) * NT + (transformer_coef_A2 * ((NT * P_rated) ** transformer_coef_B2)) * (exp(transformer_coef_C1 * offshore_transformer_winding_ratio) + exp(transformer_coef_C1 * onshore_transformer_winding_ratio)) * n_substations
@@ -61,4 +64,4 @@ def electrical_procurement_costs(NT, n_substations=number_substations):
     return electrical_total_costs
 
 if __name__ == '__main__':
-    print electrical_procurement_costs()
+    print(electrical_procurement_costs())

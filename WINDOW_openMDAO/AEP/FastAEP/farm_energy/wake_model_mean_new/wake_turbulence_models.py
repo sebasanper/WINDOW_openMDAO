@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from math import sqrt
 # from memoize import Memoize
 # from WINDOW_openMDAO.input_params import rotor_radius
@@ -74,7 +77,7 @@ def frandsen(ambient_turbulence, Ct, speed, spacing, large=False):
     s = spacing
     # 0.8 sometimes 0.3 double check
     # u = 10.0  # wind speed
-    Iw = 1.0 / (1.5 + 0.8 * s / Ct ** 0.5)
+    Iw = old_div(1.0, (1.5 + 0.8 * s / Ct ** 0.5))
     It = sqrt(Iw ** 2.0 + Ia ** 2.0)
 
     if large:
@@ -83,7 +86,7 @@ def frandsen(ambient_turbulence, Ct, speed, spacing, large=False):
 
         sd = spacing
         sc = spacing
-        Iw = 0.36 / (1.0 + 0.2 * (sd * sc / Ct) ** 0.5)
+        Iw = old_div(0.36, (1.0 + 0.2 * (sd * sc / Ct) ** 0.5))
         Ia = 0.5 * (Ia + (Iw ** 2.0 + Ia ** 2.0) ** 0.5)
         It = (Iw ** 2.0 + Ia ** 2.0) ** 0.5
 
@@ -102,8 +105,8 @@ def Quarton(ambient_turbulence, Ct, speed, x, tsr=7.6):
     a1 = 0.7
     a2 = 0.68
     a3 = - 0.57
-    m = 1.0 / (1.0 - Ct) ** 0.5
-    r0 = D / 2.0 * ((m + 1.0) / 2.0) ** 0.5
+    m = old_div(1.0, (1.0 - Ct) ** 0.5)
+    r0 = D / 2.0 * (old_div((m + 1.0), 2.0)) ** 0.5
 
     if Ia >= 0.020:
         da = 0.025 * Ia + 0.050

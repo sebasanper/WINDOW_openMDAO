@@ -1,3 +1,5 @@
+from builtins import zip
+from builtins import range
 from WINDOW_openMDAO.input_params import cable_types, turbine_rated_current
 import numpy as np
 
@@ -25,7 +27,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
     Transmission = []
 
     'Remove and return the lowest priority task. Raise KeyError if empty.'
-    REMOVED = '<removed-task>'  # placeholder for a removed task
+    REMOVED = np.inf # '<removed-task>'  # placeholder for a removed task
 
     # ---------------------------------------Main----------------------------------------------
     def set_cable_topology(NT, WT_List, central_platform_locations, cable_list):

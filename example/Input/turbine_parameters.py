@@ -1,3 +1,5 @@
+from __future__ import division
+from past.utils import old_div
 from numpy import sqrt
 
 turbine_rated_power = 10000000.0  # [W]
@@ -22,4 +24,4 @@ yaw_diameter = 5.5  # [m]
 wind_speed_at_max_thrust = 11.4  # [m/s]
 
 collection_voltage = 66000.0 # [V]
-turbine_rated_current = turbine_rated_power / (collection_voltage  * sqrt(3.0))  # A = Power / sqrt(3) / Voltage. 3 phase current per line.
+turbine_rated_current = old_div(turbine_rated_power, (collection_voltage  * sqrt(3.0)))  # A = Power / sqrt(3) / Voltage. 3 phase current per line.

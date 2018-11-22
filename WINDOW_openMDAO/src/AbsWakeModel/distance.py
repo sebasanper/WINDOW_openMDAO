@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines
 import numpy as np
@@ -51,13 +54,13 @@ class DistanceComponent(ExplicitComponent):
 
 def distance(t1, t2, angle):
     wind_direction = deg2rad(- angle + 90.0)
-    distance_to_centre = abs(- tan(wind_direction) * t2[1] + t2[2] + tan(wind_direction) * t1[1] - t1[2]) / \
-                         sqrt(1.0 + tan(wind_direction) ** 2.0)
+    distance_to_centre = old_div(abs(- tan(wind_direction) * t2[1] + t2[2] + tan(wind_direction) * t1[1] - t1[2]), \
+                         sqrt(1.0 + tan(wind_direction) ** 2.0))
     # Coordinates of the intersection between closest path from turbine in wake to centreline.
-    x_int = (t2[1] + tan(wind_direction) * t2[2] + tan(wind_direction) * (tan(wind_direction) * t1[1] - t1[2])) / \
-            (tan(wind_direction) ** 2.0 + 1.0)
-    y_int = (- tan(wind_direction) * (- t2[1] - tan(wind_direction) * t2[2]) - tan(
-        wind_direction) * t1[1] + t1[2]) / (tan(wind_direction) ** 2.0 + 1.0)
+    x_int = old_div((t2[1] + tan(wind_direction) * t2[2] + tan(wind_direction) * (tan(wind_direction) * t1[1] - t1[2])), \
+            (tan(wind_direction) ** 2.0 + 1.0))
+    y_int = old_div((- tan(wind_direction) * (- t2[1] - tan(wind_direction) * t2[2]) - tan(
+        wind_direction) * t1[1] + t1[2]), (tan(wind_direction) ** 2.0 + 1.0))
     # Distance from intersection point to turbine
     distance_to_turbine = sqrt((x_int - t1[1]) ** 2.0 + (y_int - t1[2]) ** 2.0)
     return np.array(distance_to_turbine), np.array(distance_to_centre)

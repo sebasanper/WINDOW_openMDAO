@@ -1,3 +1,5 @@
+from __future__ import division
+
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
 

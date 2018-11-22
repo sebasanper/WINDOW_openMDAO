@@ -1,9 +1,13 @@
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from numpy import pi, arccos, sin, sqrt
 
 __author__ = 'Sebastian Sanchez Perez Moreno' \
              's.sanchezperezmoreno@tudelft.nl'
 
-class AreaReal:
+class AreaReal(object):
     def __init__(self, r, R, d):
         self.r = r
         self.R = R
@@ -16,7 +20,7 @@ class AreaReal:
         if d <= abs(r - R):
             return 1.0
         elif abs(r - R) < d < abs(r + R):
-            return (r ** 2 * arccos((d ** 2 + r ** 2 - R ** 2) / (2.0 * d * r)) + R ** 2 * arccos((d ** 2 + R ** 2 - r ** 2) / (2.0 * d * R)) - 0.5 * sqrt((- d + r + R) * (d + r - R) * (d - r + R) * (d + r + R))) / (pi * r ** 2)
+            return old_div((r ** 2 * arccos(old_div((d ** 2 + r ** 2 - R ** 2), (2.0 * d * r))) + R ** 2 * arccos(old_div((d ** 2 + R ** 2 - r ** 2), (2.0 * d * R))) - 0.5 * sqrt((- d + r + R) * (d + r - R) * (d - r + R) * (d + r + R))), (pi * r ** 2))
         else:
             return 0.0
 

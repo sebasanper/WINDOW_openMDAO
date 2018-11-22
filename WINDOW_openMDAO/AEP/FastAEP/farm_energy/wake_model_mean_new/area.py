@@ -1,10 +1,14 @@
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from math import pi, acos, sin, sqrt
 
 __author__ = 'Sebastian Sanchez Perez Moreno' \
              's.sanchezperezmoreno@tudelft.nl'
 
 
-class AreaWan:
+class AreaWan(object):
     def __init__(self, r1, r2, d):
         self.r1 = r1
         self.r2 = r2
@@ -17,14 +21,14 @@ class AreaWan:
         if d <= abs(r2 - r1):
             return 1.0
         elif abs(r2 - r1) < d < abs(r1 + r2):
-            a1 = 2.0 * acos((r1 ** 2 + d**2 - r2 ** 2) / (2.0 * r1 * d))
-            a2 = 2.0 * acos((r2 ** 2 + d**2 - r1 ** 2) / (2.0 * r2 * d))
-            return (0.5 * r1 ** 2. * (a1 - sin(a1)) + 0.5 * r2 ** 2 * (a2 - sin(a2))) / (pi * r1 ** 2)
+            a1 = 2.0 * acos(old_div((r1 ** 2 + d**2 - r2 ** 2), (2.0 * r1 * d)))
+            a2 = 2.0 * acos(old_div((r2 ** 2 + d**2 - r1 ** 2), (2.0 * r2 * d)))
+            return old_div((0.5 * r1 ** 2. * (a1 - sin(a1)) + 0.5 * r2 ** 2 * (a2 - sin(a2))), (pi * r1 ** 2))
         else:
             return 0.0
 
 
-class AreaReal:
+class AreaReal(object):
     def __init__(self, r, R, d):
         self.r = r
         self.R = R
@@ -37,7 +41,7 @@ class AreaReal:
         if d <= abs(r - R):
             return 1.0
         elif abs(r - R) < d and d < abs(r + R):
-            return (r ** 2 * acos((d ** 2 + r ** 2 - R ** 2) / (2.0 * d * r)) + R ** 2 * acos((d ** 2 + R ** 2 - r ** 2) / (2.0 * d * R)) - 0.5 * sqrt((- d + r + R) * (d + r - R) * (d - r + R) * (d + r + R))) / (pi * r ** 2)
+            return old_div((r ** 2 * acos(old_div((d ** 2 + r ** 2 - R ** 2), (2.0 * d * r))) + R ** 2 * acos(old_div((d ** 2 + R ** 2 - r ** 2), (2.0 * d * R))) - 0.5 * sqrt((- d + r + R) * (d + r - R) * (d - r + R) * (d + r + R))), (pi * r ** 2))
         else:
             return 0.0
 

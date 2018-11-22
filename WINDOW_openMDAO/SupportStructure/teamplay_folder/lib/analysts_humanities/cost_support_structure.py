@@ -4,9 +4,12 @@ Created on Mon Nov 09 14:58:16 2015
 
 @author: Αλβέρτος
 """
+from __future__ import division
 
 
-class cost1:
+from builtins import object
+from past.utils import old_div
+class cost1(object):
     def __init__(self, value, currency, year):
         value_year = 2016
         # Inflation and exchange rate {'Currency Code': [Average inflation rate, Exchange rate to Euro]}
@@ -26,7 +29,7 @@ class cost1:
         self.value = value * ((1.0 + (inflation_rate / 100.0)) ** (value_year - year)) * exchange_rate
 
 
-class CostAnalysts:
+class CostAnalysts(object):
 
     def __init__(self, support_team):
         self.support_team = support_team

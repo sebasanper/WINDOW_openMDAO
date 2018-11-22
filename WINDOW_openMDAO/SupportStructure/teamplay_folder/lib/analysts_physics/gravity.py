@@ -4,11 +4,15 @@ Created on Wed Nov 11 15:35:19 2015
 
 @author: Αλβέρτος
 """
+from __future__ import division
 
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from math import pi
 
 
-class GravityAnalysts:
+class GravityAnalysts(object):
     g = 9.81
     rho_steel = 7850.0  # [kg/m^3]
     rho_grout = 2600.0  # [kg/m^3]
@@ -60,7 +64,7 @@ class GravityAnalysts:
             if z_from < height:
                 z_from = height
             z_to = top
-            t = (base_diameter - self.support_team.design_variables.support_structure.monopile.diameter) / 2.0
+            t = old_div((base_diameter - self.support_team.design_variables.support_structure.monopile.diameter), 2.0)
             fz -= self.g * self.rho_grout * self.get_integrated_volume(base, top, base_diameter, top_diameter, z_from,
                                                                        z_to, t)
 
@@ -119,7 +123,7 @@ class GravityAnalysts:
             top = pile_top
             z_from = base
             z_to = top
-            t = (base_diameter - self.support_team.design_variables.support_structure.monopile.diameter) / 2.0
+            t = old_div((base_diameter - self.support_team.design_variables.support_structure.monopile.diameter), 2.0)
             mass = self.rho_grout * self.get_integrated_volume(base, top, base_diameter, top_diameter, z_from, z_to, t)
 
         if component == 'monopile':
@@ -144,7 +148,7 @@ class GravityAnalysts:
             return (1.0 / 4.0) * pi * (base_diameter**2 - (base_diameter - 2.0 * t)**2) * (b - a)
         
         else:
-            return ((1.0 / 4.0) * pi * (l / (3.0 * d_diameter)) *
+            return ((1.0 / 4.0) * pi * (old_div(l, (3.0 * d_diameter))) *
                     (((base_diameter + (b - base) * d_diameter / l) ** 3.0 - (base_diameter - 2.0 * t + (b - base) * d_diameter / l) ** 3) -
                      ((base_diameter + (a - base) * d_diameter / l) ** 3.0 - (base_diameter - 2.0 * t + (a - base) * d_diameter / l) ** 3.0)
                      ))

@@ -1,3 +1,8 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
+from past.utils import old_div
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines
 import numpy as np
@@ -40,14 +45,14 @@ class AbstractWakeAddedTurbulence(ExplicitComponent):
                     ct_case_closest = 0
                 else:
                     ct_case_closest = rowct[max_index]
-                spacing = self.distance(ordered[n][1], ordered[n][2], ordered[max_index][1], ordered[max_index][2]) / diameter
+                spacing = old_div(self.distance(ordered[n][1], ordered[n][2], ordered[max_index][1], ordered[max_index][2]), diameter)
                 # print n, row, max_index, rowct, ct_case_closest, n, max_index, spacing, ordered[n][1], ordered[n][2], ordered[max_index][1], ordered[max_index][2]
                 if ct_case_closest == 0:
                     ans = TI_amb_case
                 else:
                     ans = self.TI_model(TI_amb_case, ct_case_closest, freestream_case, spacing)
                 TI_case = np.append(TI_case, ans)
-            TI_case = zip(*sorted(zip(ordered[:, 0], TI_case)))[1]
+            TI_case = list(zip(*sorted(zip(ordered[:, 0], TI_case))))[1]
             lendif = max_n_turbines - len(TI_case)
             if lendif > 0:
                 TI_case = np.concatenate((TI_case, [0 for _ in range(lendif)]))
@@ -124,7 +129,7 @@ if __name__ == '__main__':
             u_inf = inputs['u_inf']
             d = inputs['d']
 
-            outputs['TI_eff'] = TI_amb * ct + u_inf / d
+            outputs['TI_eff'] = TI_amb * ct + old_div(u_inf, d)
 
     model = Group()
     ivc = IndepVarComp()

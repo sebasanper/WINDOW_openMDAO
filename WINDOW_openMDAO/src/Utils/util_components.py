@@ -1,6 +1,9 @@
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines, n_quadrilaterals, areas, separation_equation_y
-from transform_quadrilateral import AreaMapping
+from .transform_quadrilateral import AreaMapping
 from random import uniform
 import numpy as np
 
@@ -35,6 +38,6 @@ def create_random_layout(n_turbs):
           else:
             xt, yt = borssele_mapping2.transform_to_rectangle(xb, yb)
        return [xb, yb]
-    print n
+    print(n)
     layout = np.array([create_random() for _ in range(n_turbs)])
     return layout

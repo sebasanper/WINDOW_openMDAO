@@ -1,4 +1,8 @@
+from __future__ import print_function
+from __future__ import division
 # VERTICAL HEIGHTS W.R.T. MSL
+from builtins import range
+from past.utils import old_div
 from math import pi, atan
 
 from scipy.optimize import brentq  # fmin_slsqp  # , fminbound, newton
@@ -44,17 +48,17 @@ class SupportDesigners(Designers):
         # self._base_tp_below_splashzone = max(1.0, 0.2 * self.support_team.physical_environment.site.Hmax_50_year)
         # self.properties.base_tp = self.support_team.physical_environment.site.min_crest - self._base_tp_below_splashzone
         if self.verbose is True:
-            print "water depth"
+            print("water depth")
         if self.verbose is True:
-            print self.support_team.physical_environment.site.water_depth
+            print(self.support_team.physical_environment.site.water_depth)
         self.properties.base_tp = min(
             self.tp_base_above_seabed - self.support_team.physical_environment.site.water_depth,
             self.support_team.physical_environment.site.min_crest)
         self.properties.platform_height = self.support_team.physical_environment.site.max_crest + self._splash_platform_clearance
         if self.verbose is True:
-            print "platform height"
+            print("platform height")
         if self.verbose is True:
-            print self.properties.platform_height
+            print(self.properties.platform_height)
         self.lowest_hub_height = max(self.properties.platform_height + self.platform_bladetip_clearance + self.support_team.properties.rna.rotor_radius, self.support_team.physical_environment.site.hat + self.water_bladetip_clearance + self.support_team.properties.rna.rotor_radius)
         self.shortest_tower = self.lowest_hub_height - self.properties.platform_height - self.support_team.properties.rna.yaw_to_hub_height
 
@@ -62,14 +66,14 @@ class SupportDesigners(Designers):
         # Set not-iterated design variables
         self.design_variables.tower.top_diameter = self.support_team.properties.rna.yaw_diameter
         if self.verbose is True:
-            print "tower top diameter"
+            print("tower top diameter")
         if self.verbose is True:
-            print self.design_variables.tower.top_diameter
+            print(self.design_variables.tower.top_diameter)
         self.design_variables.transition_piece.length = self.properties.platform_height - self.properties.base_tp
         if self.verbose is True:
-            print "transition piece length"
+            print("transition piece length")
         if self.verbose is True:
-            print self.design_variables.transition_piece.length
+            print(self.design_variables.transition_piece.length)
         # Set initial guesses of other design variables and update properties
         self.design_variables.tower.length = self.lowest_hub_height - self.support_team.properties.rna.yaw_to_hub_height - self.properties.platform_height
 
@@ -79,14 +83,14 @@ class SupportDesigners(Designers):
         self.properties.hub_height = (
             self.properties.platform_height + self.design_variables.tower.length + self.support_team.properties.rna.yaw_to_hub_height)
         if self.verbose is True:
-            print "tower length"
+            print("tower length")
         if self.verbose is True:
-            print self.design_variables.tower.length
+            print(self.design_variables.tower.length)
         # Initialise list for segment wall thicknesses
         self.properties.nr_segments = int(
-            round((self.design_variables.tower.length / self.max_length_tower_segment) + 0.5, 0))
-        self.properties.segment_length = self.design_variables.tower.length / self.properties.nr_segments
-        self.design_variables.tower.wall_thickness = range(self.properties.nr_segments)
+            round((old_div(self.design_variables.tower.length, self.max_length_tower_segment)) + 0.5, 0))
+        self.properties.segment_length = old_div(self.design_variables.tower.length, self.properties.nr_segments)
+        self.design_variables.tower.wall_thickness = list(range(self.properties.nr_segments))
 
         # Determine monopile diameter (from loads and resistance with fixed D:t relation)
         # self.support_team.domain_top.display.optimising = 'Tower length - Monopile diameter'
@@ -97,9 +101,9 @@ class SupportDesigners(Designers):
         # Determine monopile length (from penetration, water depth, base_tp and overlap)
         self.design_variables.monopile.length = self.design_variables.monopile.penetration_depth + self.support_team.physical_environment.site.water_depth + self.properties.base_tp + self.design_variables.transition_piece.overlap_monopile
         if self.verbose is True:
-            print "monopile length"
+            print("monopile length")
         if self.verbose is True:
-            print self.design_variables.monopile.length
+            print(self.design_variables.monopile.length)
         # Determine tower wall thickness (from loads and resistance)
         # self.support_team.domain_top.display.optimising = 'Tower length - Tower wall thicknesses'
         self.design_tower_wall_thicknesses()
@@ -129,21 +133,21 @@ class SupportDesigners(Designers):
 
     def design_monopile_diameter(self):
         if self.verbose is True:
-            print "monopile diameter"
+            print("monopile diameter")
         # print self.support_team.physical_environment.site.water_depth, self.fatigue_safety_factor
         monop_diam = brentq(self.stress_reserve_pile, 0.01, 100.0, xtol=0.01, full_output=True)[0]
         if self.verbose is True:
-            print monop_diam
+            print(monop_diam)
 
         if self.verbose is True:
-            print "monopile wall thickness"
+            print("monopile wall thickness")
         if self.verbose is True:
-            print self.design_variables.monopile.wall_thickness
+            print(self.design_variables.monopile.wall_thickness)
 
         if self.verbose is True:
-            print "transition piece overlap length"
+            print("transition piece overlap length")
         if self.verbose is True:
-            print self.design_variables.transition_piece.overlap_monopile
+            print(self.design_variables.transition_piece.overlap_monopile)
     #        if result[1].converged != True:
     #            self.optimisation_succeeded = False
 
@@ -153,8 +157,8 @@ class SupportDesigners(Designers):
         max_pile_penetration = 0.0
         for loadcase in self.loadcases:
             loads_with_safety = self.get_loads(loadcase, - self.support_team.physical_environment.site.water_depth)
-            fx = abs(loads_with_safety[0]) / (self.bearing_resistance_factor * self.fatigue_safety_factor)
-            my = abs(loads_with_safety[4]) / (self.bearing_resistance_factor * self.fatigue_safety_factor)
+            fx = old_div(abs(loads_with_safety[0]), (self.bearing_resistance_factor * self.fatigue_safety_factor))
+            my = old_div(abs(loads_with_safety[4]), (self.bearing_resistance_factor * self.fatigue_safety_factor))
 
             pile_penetration = self.support_team.geophysical_analysts.get_clamping_depth(fx, my)
 
@@ -163,9 +167,9 @@ class SupportDesigners(Designers):
 
         self.design_variables.monopile.penetration_depth = max_pile_penetration
         if self.verbose is True:
-            print "monopile penetration depth"
+            print("monopile penetration depth")
         if self.verbose is True:
-            print self.design_variables.monopile.penetration_depth
+            print(self.design_variables.monopile.penetration_depth)
 
     def design_tower_wall_thicknesses(self):
         for i in range(self.properties.nr_segments):
@@ -191,15 +195,15 @@ class SupportDesigners(Designers):
 
             self.design_variables.tower.wall_thickness[i] = max_wall_thickness
         if self.verbose is True:
-            print "tower wall thicknesses"
+            print("tower wall thicknesses")
         if self.verbose is True:
-            print self.design_variables.tower.wall_thickness[0], self.design_variables.tower.wall_thickness[-1]
+            print(self.design_variables.tower.wall_thickness[0], self.design_variables.tower.wall_thickness[-1])
 
     def design_tp_wall_thickness(self):
         if self.verbose is True:
-            print "transition piece diameter"
+            print("transition piece diameter")
         if self.verbose is True:
-            print self.design_variables.transition_piece.diameter
+            print(self.design_variables.transition_piece.diameter)
         diameter = self.design_variables.transition_piece.diameter
         height = self.properties.base_tp + self.design_variables.transition_piece.overlap_monopile
         max_wall_thickness = 0.0
@@ -221,9 +225,9 @@ class SupportDesigners(Designers):
             self.design_variables.transition_piece.wall_thickness = max_wall_thickness
         pass
         if self.verbose is True:
-            print "transition piece wall thickness"
+            print("transition piece wall thickness")
         if self.verbose is True:
-            print self.design_variables.transition_piece.wall_thickness
+            print(self.design_variables.transition_piece.wall_thickness)
 
     def stress_reserve_pile(self, d):
         self.design_variables.monopile.diameter = d
@@ -238,9 +242,9 @@ class SupportDesigners(Designers):
         d_base = self.design_variables.tower.base_diameter
         d_top = self.design_variables.tower.top_diameter
         for i in range(self.properties.nr_segments):
-            self.design_variables.tower.wall_thickness[i] = (d_base + i * self.properties.segment_length * (
-                d_top - d_base) / self.design_variables.tower.length) / self.d_over_t_guess_tower
-        self.design_variables.transition_piece.wall_thickness = self.design_variables.transition_piece.diameter / self.d_over_t_guess_tp
+            self.design_variables.tower.wall_thickness[i] = old_div((d_base + i * self.properties.segment_length * (
+                d_top - d_base) / self.design_variables.tower.length), self.d_over_t_guess_tower)
+        self.design_variables.transition_piece.wall_thickness = old_div(self.design_variables.transition_piece.diameter, self.d_over_t_guess_tp)
 
         max_stress_factor = -1.0
         d_outer = self.design_variables.monopile.diameter
@@ -253,7 +257,7 @@ class SupportDesigners(Designers):
                                                                                               loads_with_safety[2],
                                                                                               loads_with_safety[4])
 
-            stress_factor = (stress / (critical_stress / self.partial_safety_material_uls)) - 1.0
+            stress_factor = (old_div(stress, (old_div(critical_stress, self.partial_safety_material_uls)))) - 1.0
             if stress_factor > max_stress_factor:
                 max_stress_factor = stress_factor
 
@@ -267,7 +271,7 @@ class SupportDesigners(Designers):
         l = self.properties.hub_height + self.support_team.physical_environment.site.water_depth
 
         [stress, critical_stress] = self.support_team.mechanical_analysts.get_stress_tower(t, radius, fz, my, l)
-        stress_factor = (stress / (critical_stress / self.partial_safety_material_uls)) - 1.0
+        stress_factor = (old_div(stress, (old_div(critical_stress, self.partial_safety_material_uls)))) - 1.0
 
         return stress_factor
 
@@ -296,7 +300,7 @@ class SupportDesigners(Designers):
         loads_hydro = self.support_team.hydrodynamic_analysts.get_loads(wave_height, wave_number, height)
         loads_gravity = self.support_team.gravity_analysts.get_loads(height)
 
-        loads_safety = range(6)
+        loads_safety = list(range(6))
         for i in range(6):
             loads_safety[i] = self.partial_safety_loads * (loads_rna[i] + loads_aero[i] + loads_hydro[i])
             if i == 4 and loads_gravity[i] < 0.0:
@@ -312,7 +316,7 @@ class SupportDesigners(Designers):
         u_w = self.support_team.physical_environment.site.Uw_50_year
         t_w = self.support_team.physical_environment.site.Tpeak_50_year
         KC = u_w * t_w / self.design_variables.monopile.diameter
-        u_w *= 1.5 + atan(1.0 * (KC - 6.0) - 1.0) / pi
+        u_w *= 1.5 + old_div(atan(1.0 * (KC - 6.0) - 1.0), pi)
         u_c = 1.5 * self.support_team.physical_environment.site.current_depth_averaged_50_year
         wave_current_angle = self.support_team.physical_environment.site.angle_wave_current_50_year_rad
 
@@ -338,7 +342,7 @@ class SupportDesigners(Designers):
         characteristic_friction = self.support_team.rock_analysts.get_characteristic_friction(d50, u_c, u_w, t_w,
                                                                                               wave_current_angle)
 
-        return (critical_friction - characteristic_friction) / critical_friction
+        return old_div((critical_friction - characteristic_friction), critical_friction)
 
     def design_filter_layers(self):
         self.design_variables.scour_protection.filter = []

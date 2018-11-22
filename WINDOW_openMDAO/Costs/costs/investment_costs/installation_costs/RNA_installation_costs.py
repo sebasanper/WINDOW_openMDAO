@@ -1,3 +1,4 @@
+from __future__ import print_function
 from WINDOW_openMDAO.input_params import rotor_radius, hub_height, onshore_transport_distance
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 
@@ -28,4 +29,4 @@ def rna_installation_costs(NT):
     return total_rna_installation
 
 if __name__ == '__main__':
-    print rna_installation_costs()
+    print(rna_installation_costs())

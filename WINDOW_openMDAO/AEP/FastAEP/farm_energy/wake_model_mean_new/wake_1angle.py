@@ -1,4 +1,7 @@
-from order_layout import order
+from __future__ import absolute_import
+from builtins import zip
+from builtins import range
+from .order_layout import order
 
 
 def energy_one_angle(original_layout, freestream_wind_speeds, probabilities_speed, wind_angle, ambient_turbulences, WakeModel, PowerModel, table_power, ThrustModel, ct_table, MergingModel):

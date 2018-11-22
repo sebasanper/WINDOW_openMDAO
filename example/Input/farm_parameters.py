@@ -1,3 +1,4 @@
+from builtins import range
 central_platform = [[498000.0, 5731000.0], [497000.0, 5731000.0]]
 number_turbines_per_cable = [2, 4, 7]
 Crossing_penalty = 0

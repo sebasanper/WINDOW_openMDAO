@@ -1,3 +1,4 @@
+from builtins import range
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines, turbine_rated_power
 import numpy as np
@@ -71,7 +72,7 @@ class AbsTurbine(ExplicitComponent):
         outputs['power'] = power_ans
 
     def turbine_model(self, u):
-    	if u < 4.0:
+        if u < 4.0:
             ct = 0.1
         elif u <= 25.0:
             ct = 7.3139922126945e-7 * u ** 6.0 - 6.68905596915255e-5 * u ** 5.0 + 2.3937885e-3 * u ** 4.0 - 0.0420283143 * u ** 3.0 + 0.3716111285 * u ** 2.0 - 1.5686969749 * u + 3.2991094727

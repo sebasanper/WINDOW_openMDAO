@@ -1,3 +1,6 @@
+from __future__ import print_function
+from __future__ import division
+from past.utils import old_div
 from WINDOW_openMDAO.src.api import AbstractWakeAddedTurbulence
 from WINDOW_openMDAO.input_params import max_n_turbines
 import numpy as np
@@ -72,7 +75,7 @@ class Frandsen(AbstractWakeAddedTurbulence):
         s = spacing
         # 0.8 sometimes 0.3 double check
         # u = 10.0  # wind speed
-        Iw = 1.0 / (1.5 + 0.8 * s / ct ** 0.5)
+        Iw = old_div(1.0, (1.5 + 0.8 * s / ct ** 0.5))
         It = (Iw ** 2.0 + Ia ** 2.0) ** 0.5
 
         if large:
@@ -81,7 +84,7 @@ class Frandsen(AbstractWakeAddedTurbulence):
 
             sd = 7.0
             sc = 7.0
-            Iw = 0.36 / (1.0 + 0.2 * (sd * sc / ct) ** 0.5)
+            Iw = old_div(0.36, (1.0 + 0.2 * (sd * sc / ct) ** 0.5))
             Ia = 0.5 * (Ia + (Iw ** 2.0 + Ia ** 2.0) ** 0.5)
             It = (Iw ** 2.0 + Ia ** 2.0) ** 0.5
 
@@ -99,8 +102,8 @@ class Quarton(AbstractWakeAddedTurbulence):
         a1 = 0.7
         a2 = 0.68
         a3 = - 0.96#- 0.57
-        m = sqrt(1.0 / (1.0 - ct))
-        r0 = D / 2.0 * sqrt((m + 1.0) / 2.0)
+        m = sqrt(old_div(1.0, (1.0 - ct)))
+        r0 = D / 2.0 * sqrt(old_div((m + 1.0), 2.0))
 
         if Ia >= 0.02:
             da = 2.5 * Ia + 0.05
@@ -114,7 +117,7 @@ class Quarton(AbstractWakeAddedTurbulence):
 
         xh = r0 * (da + dl + dm) ** (- 0.5)
         xn = xh * sqrt(0.212 + 0.145 * m) * (1.0 - sqrt(0.134 + 0.124 * m)) / (1.0 - sqrt(0.212 + 0.145 * m)) / sqrt(0.134 + 0.124 * m)
-        Iw = K1 * (ct ** a1) * (Ia ** a2) * (x / xn) ** a3
+        Iw = K1 * (ct ** a1) * (Ia ** a2) * (old_div(x, xn)) ** a3
         return sqrt(Iw ** 2.0 + Ia ** 2.0)
 
 
@@ -129,7 +132,7 @@ if __name__ == '__main__':
             u_inf = inputs['u_inf']
             d = inputs['d']
 
-            outputs['TI_eff'] = TI_amb * ct + u_inf / d
+            outputs['TI_eff'] = TI_amb * ct + old_div(u_inf, d)
 
     model = Group()
     ivc = IndepVarComp()

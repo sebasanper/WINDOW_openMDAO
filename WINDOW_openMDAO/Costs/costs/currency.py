@@ -1,3 +1,6 @@
+from __future__ import division
+
+
 def Cost1(value, currency, year):
     value_year = 2016
     # Inflation and exchange rate {'Currency Code': [Average inflation rate, Exchange rate to Euro]}

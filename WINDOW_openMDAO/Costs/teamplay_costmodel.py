@@ -1,6 +1,7 @@
+from __future__ import absolute_import
 from openmdao.api import ExplicitComponent
 from WINDOW_openMDAO.input_params import max_n_turbines
-from costs.other_costs import other_costs
+from .costs.other_costs import other_costs
 
 
 class TeamPlayCostModel(ExplicitComponent):

@@ -4,11 +4,14 @@ Created on Wed Nov 11 15:10:53 2015
 
 @author: Αλβέρτος
 """
+from __future__ import division
 
+from past.utils import old_div
+from builtins import object
 from math import pi
 
 
-class RNAAnalysts:
+class RNAAnalysts(object):
     rho_air = 1.225  # [kg/m^3]
 
     def __init__(self, support_team):
@@ -86,8 +89,8 @@ class InterpolatedArray(object):
     def _interpolate(self, x, lower_point, upper_point):
         """Interpolate a Y value for x given lower & upper
         bounding points."""
-        slope = (float(upper_point[1] - lower_point[1]) /
-                 (upper_point[0] - lower_point[0]))
+        slope = (old_div(float(upper_point[1] - lower_point[1]),
+                 (upper_point[0] - lower_point[0])))
         return lower_point[1] + (slope * (x - lower_point[0]))
 
 
@@ -115,8 +118,8 @@ class InterpolatedArrayOriginal(object):
     def _Interpolate(self, x, lower_point, upper_point):
         """Interpolate a Y value for x given lower & upper
         bounding points."""
-        slope = (float(upper_point[1] - lower_point[1]) /
-                 (upper_point[0] - lower_point[0]))
+        slope = (old_div(float(upper_point[1] - lower_point[1]),
+                 (upper_point[0] - lower_point[0])))
         return lower_point[1] + (slope * (x - lower_point[0]))
 
 

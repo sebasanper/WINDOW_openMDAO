@@ -1,8 +1,11 @@
-from area import *
+from __future__ import absolute_import
+from __future__ import division
+from past.utils import old_div
+from .area import *
 from numpy import deg2rad, tan, sqrt, cos, sin
 
 from WINDOW_openMDAO.input_params import rotor_radius
-from memoize import Memoize
+from .memoize import Memoize
 jensen_k = 0.04
 
 
@@ -10,11 +13,11 @@ def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, win
     # Eq. of centreline is Y = tan (d) (X - Xt) + Yt
     # Distance from point to line
     wind_direction = deg2rad(wind_direction + 180.0)
-    distance_to_centre = abs(- tan(wind_direction) * x_downstream + y_downstream + tan(wind_direction) * x_upstream - y_upstream) / sqrt(1.0 + tan(wind_direction) ** 2.0)
+    distance_to_centre = old_div(abs(- tan(wind_direction) * x_downstream + y_downstream + tan(wind_direction) * x_upstream - y_upstream), sqrt(1.0 + tan(wind_direction) ** 2.0))
     # print distance_to_centre
     # Coordinates of the intersection between closest path from turbine in wake to centreline.
-    X_int = (x_downstream + tan(wind_direction) * y_downstream + tan(wind_direction) * (tan(wind_direction) * x_upstream - y_upstream)) / (tan(wind_direction) ** 2.0 + 1.0)
-    Y_int = (- tan(wind_direction) * (- x_downstream - tan(wind_direction) * y_downstream) - tan(wind_direction) * x_upstream + y_upstream) / (tan(wind_direction) ** 2.0 + 1.0)
+    X_int = old_div((x_downstream + tan(wind_direction) * y_downstream + tan(wind_direction) * (tan(wind_direction) * x_upstream - y_upstream)), (tan(wind_direction) ** 2.0 + 1.0))
+    Y_int = old_div((- tan(wind_direction) * (- x_downstream - tan(wind_direction) * y_downstream) - tan(wind_direction) * x_upstream + y_upstream), (tan(wind_direction) ** 2.0 + 1.0))
     # Distance from intersection point to turbine
     distance_to_turbine = sqrt((X_int - x_upstream) ** 2.0 + (Y_int - y_upstream) ** 2.0)
     # # Radius of wake at that distance
@@ -42,7 +45,7 @@ def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, win
 
 
 def wake_deficit(Ct, x, k=jensen_k, r0=rotor_radius):
-    return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x) / r0) ** 2.0
+    return old_div((1.0 - sqrt(1.0 - Ct)), (1.0 + old_div((k * x), r0)) ** 2.0)
 
 
 # wake_deficit = Memoize(wake_deficit)

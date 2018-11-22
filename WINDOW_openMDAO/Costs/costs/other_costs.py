@@ -1,14 +1,16 @@
+from __future__ import print_function
+from __future__ import absolute_import
 def other_costs(depth_central_platform, n_turbines, infield_length, n_substations):
     from WINDOW_openMDAO.input_params import turbine_rated_power
-    from investment_costs.project_development_cost import project_development_cost
-    from investment_costs.management_cost import management_costs
-    from investment_costs.procurement_costs.auxiliary_costs.auxiliary_costs import auxiliary_procurement
-    from investment_costs.procurement_costs.electrical_system_costs.electrical_costs import electrical_procurement_costs
-    from investment_costs.procurement_costs.RNA_costs.RNA_costs import rna_costs
-    from investment_costs.installation_costs.auxiliary_installation_costs import auxiliary_installation_costs
-    from investment_costs.installation_costs.electrical_installation_costs import electrical_installation_costs
-    from investment_costs.installation_costs.RNA_installation_costs import rna_installation_costs
-    from decommissioning_costs.decommissioning_costs import decommissioning_costs
+    from .investment_costs.project_development_cost import project_development_cost
+    from .investment_costs.management_cost import management_costs
+    from .investment_costs.procurement_costs.auxiliary_costs.auxiliary_costs import auxiliary_procurement
+    from .investment_costs.procurement_costs.electrical_system_costs.electrical_costs import electrical_procurement_costs
+    from .investment_costs.procurement_costs.RNA_costs.RNA_costs import rna_costs
+    from .investment_costs.installation_costs.auxiliary_installation_costs import auxiliary_installation_costs
+    from .investment_costs.installation_costs.electrical_installation_costs import electrical_installation_costs
+    from .investment_costs.installation_costs.RNA_installation_costs import rna_installation_costs
+    from .decommissioning_costs.decommissioning_costs import decommissioning_costs
 
     project_development = project_development_cost(n_turbines, turbine_rated_power)
 
@@ -58,4 +60,4 @@ def other_costs(depth_central_platform, n_turbines, infield_length, n_substation
 
 
 if __name__ == '__main__':
-    print total_costs(20.0, 5, 230000)
+    print(total_costs(20.0, 5, 230000))

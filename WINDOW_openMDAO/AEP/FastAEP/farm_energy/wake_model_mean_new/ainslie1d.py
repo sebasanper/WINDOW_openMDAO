@@ -1,7 +1,11 @@
+from __future__ import absolute_import
+from __future__ import division
+from builtins import range
+from past.utils import old_div
 from numpy import exp
-from ainslie_common import b, E
+from .ainslie_common import b, E
 from WINDOW_openMDAO.input_params import rotor_radius
-from memoize import Memoize
+from .memoize import Memoize
 D = rotor_radius * 2.0
 
 
@@ -10,7 +14,7 @@ def ainslie(Ct, u0, distance_parallel, distance_perpendicular, I0):
     # velocity = open('velocity.dat', 'w')
     h = 0.007
     L = distance_parallel
-    n = int(L / h) + 1
+    n = int(old_div(L, h)) + 1
     Uc1 = [0.0 for _ in range(n)]
     d1 = [0.0 for _ in range(n)]
     U0 = u0
@@ -29,10 +33,10 @@ def ainslie(Ct, u0, distance_parallel, distance_perpendicular, I0):
 
     for i in range(1, n):  # For all positions in the wake centreline direction. Recursive. Whole grid
         Uc1[i] = Uc1[i - 1] + (h * 16.0 * E(i * h, Uc1[i - 1], d1[i - 1], U0, I0, Ct) * (Uc1[i - 1] ** 3.0 - U0 * Uc1[i - 1] ** 2.0 - Uc1[i - 1] * U0 ** 2.0 + U0 ** 3.0) / (Uc1[i - 1] * Ct * U0 ** 2.0))
-        d1[i] = 1.0 - Uc1[i] / U0
+        d1[i] = 1.0 - old_div(Uc1[i], U0)
 
     # Code to calculate wake deficit at a specific point instead of the whole grid. Namely, the rotor's centrepoint.
-    answer = d1[-1] * exp(- 3.56 * (Y / b(d1[-1], ct)) ** 2.0)  # * (1.0 + 7.12 * (0.07 * distance_perpendicular b(d1[-1], ct))) ** (- 0.5)
+    answer = d1[-1] * exp(- 3.56 * (old_div(Y, b(d1[-1], ct))) ** 2.0)  # * (1.0 + 7.12 * (0.07 * distance_perpendicular b(d1[-1], ct))) ** (- 0.5)
 
     return answer
 

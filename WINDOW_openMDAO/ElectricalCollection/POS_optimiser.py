@@ -1,5 +1,6 @@
+from __future__ import absolute_import
 from WINDOW_openMDAO.src.api import AbstractElectricDesign
-from POS_electrical import cable_design, choose_cables
+from .POS_electrical import cable_design, choose_cables
 
 
 class POSHeuristic(AbstractElectricDesign):

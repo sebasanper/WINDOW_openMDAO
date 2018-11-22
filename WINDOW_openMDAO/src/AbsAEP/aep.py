@@ -13,6 +13,6 @@ class AEP(ExplicitComponent):
         #self.declare_partials(of='AEP', wrt=['aeroAEP', 'availability', 'electrical_efficiency'], method='fd')
 
     def compute(self, inputs, outputs):
-    	# aeroaep = 2723354011950
-    	aeroaep = inputs['aeroAEP']
+        # aeroaep = 2723354011950
+        aeroaep = inputs['aeroAEP']
         outputs['AEP'] = aeroaep * inputs['availability'] * inputs['electrical_efficiency']

@@ -1,3 +1,5 @@
+from __future__ import division
+
 from openmdao.api import Group, ExplicitComponent
 from WINDOW_openMDAO.src.AbsWakeModel.wake_linear_solver import WakeModel
 from WINDOW_openMDAO.src.AbsAEP.abstract_power import FarmAeroPower

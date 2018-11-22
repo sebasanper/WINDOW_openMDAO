@@ -1,11 +1,12 @@
+from __future__ import absolute_import
 from WINDOW_openMDAO.src.api import AbstractElectricDesign
-from hybrid_heuristic import choose_cables
+from .hybrid_heuristic import choose_cables
 import numpy as np
 from WINDOW_openMDAO.input_params import max_n_substations, max_n_turbines_p_branch, max_n_branches
 from copy import deepcopy
 
 def distance(turb, sub):
-	return np.sqrt((turb[0] - sub[0]) ** 2.0 + (turb[1] - sub[1]) ** 2.0)
+    return np.sqrt((turb[0] - sub[0]) ** 2.0 + (turb[1] - sub[1]) ** 2.0)
 
 class RadialElectrical(AbstractElectricDesign):
 

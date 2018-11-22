@@ -1,3 +1,7 @@
+from __future__ import division
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from numpy import exp
 from WINDOW_openMDAO.input_params import cutin_wind_speed, cutout_wind_speed
 
@@ -22,7 +26,7 @@ class WeibullWindBins(object):
                 self.weibull_shape.append(float(columns[2]))
                 self.dir_probability.append(float(columns[3]))
 
-        self.real_angle = 360.0 / len(self.direction)
+        self.real_angle = old_div(360.0, len(self.direction))
 
     def adapt_directions(self):
         self.new_direction = []
@@ -57,7 +61,7 @@ class WeibullWindBins(object):
         for i in range(len(self.new_direction)):
             for j in range(n):
                 self.new_direction2.append(self.new_direction[i] + self.artificial_angle * j)
-                self.new_direction_probability2.append(self.new_direction_probability[i] / n)
+                self.new_direction_probability2.append(old_div(self.new_direction_probability[i], n))
                 self.new_weibull_scale2.append(self.new_weibull_scale[i])
                 self.new_weibull_shape2.append(self.new_weibull_shape[i])
 
@@ -65,12 +69,12 @@ class WeibullWindBins(object):
 
 
     def cumulative_weibull(self, wind_speed, weibull_scale_dir, weibull_shape_dir):
-        return 1.0 - exp(-(wind_speed / weibull_scale_dir) ** weibull_shape_dir)
+        return 1.0 - exp(-(old_div(wind_speed, weibull_scale_dir)) ** weibull_shape_dir)
 
     def get_wind_speeds(self):
         # print self.nbins, "bins"
 
-        delta = (self.cutout - self.cutin) / self.nbins
+        delta = old_div((self.cutout - self.cutin), self.nbins)
         windspeeds = []
         for i in range(self.nbins + 1):
 

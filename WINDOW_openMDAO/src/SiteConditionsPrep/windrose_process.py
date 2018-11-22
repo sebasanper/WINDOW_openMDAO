@@ -1,3 +1,9 @@
+from __future__ import print_function
+from __future__ import division
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 from openmdao.api import ExplicitComponent
 from numpy import exp
 import numpy as np
@@ -106,13 +112,13 @@ class WeibullWindBins(object):
             self.new_weibull_shape.append(0)
 
         if len(self.new_direction) > 1:
-            n = int(self.new_direction[1] - self.new_direction[0]) / int(self.artificial_angle)
+            n = old_div(int(self.new_direction[1] - self.new_direction[0]), int(self.artificial_angle))
         else:
             n = 1
         for i in range(len(self.new_direction)):
             for j in range(n):
                 self.new_direction2.append(self.new_direction[i] + self.artificial_angle * j)
-                self.new_direction_probability2.append(self.new_direction_probability[i] / n)
+                self.new_direction_probability2.append(old_div(self.new_direction_probability[i], n))
                 self.new_weibull_scale2.append(self.new_weibull_scale[i])
                 self.new_weibull_shape2.append(self.new_weibull_shape[i])
 
@@ -124,11 +130,11 @@ class WeibullWindBins(object):
 
     def cumulative_weibull(self, wind_speed, weibull_scale_dir, weibull_shape_dir):
 
-        return 1.0 - exp(-(wind_speed / weibull_scale_dir) ** weibull_shape_dir)
+        return 1.0 - exp(-(old_div(wind_speed, weibull_scale_dir)) ** weibull_shape_dir)
 
     def get_wind_speeds(self):
         if self.nbins > 0:
-            delta = (self.cutout - self.cutin) / self.nbins
+            delta = old_div((self.cutout - self.cutin), self.nbins)
         else:
             delta = 0
         windspeeds = []
@@ -197,6 +203,6 @@ if __name__ == '__main__':
 
     cases = np.array(cases)
 
-    print cases
-    print probs
+    print(cases)
+    print(probs)
 

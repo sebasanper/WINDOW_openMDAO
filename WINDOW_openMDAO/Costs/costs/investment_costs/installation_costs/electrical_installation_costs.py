@@ -1,3 +1,4 @@
+from __future__ import print_function
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 from WINDOW_openMDAO.input_params import distance_to_grid
 
@@ -17,4 +18,4 @@ def electrical_installation_costs():
     return electrical_installation_total
 
 if __name__ == '__main__':
-    print electrical_installation_costs()
+    print(electrical_installation_costs())
