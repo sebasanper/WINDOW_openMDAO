@@ -1,10 +1,11 @@
 from order_layout import order
 import numpy as np
-from WINDOW_openMDAO.input_params import rotor_radius
+#from WINDOW_openMDAO.input_params import rotor_radius
 from memoize import Memoize
 
 
-def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed, wind_angle, ambient_turbulence, WakeModel, ThrustModel, ct_table, TurbulenceModel):
+def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed, wind_angle, ambient_turbulence, WakeModel, ThrustModel, ct_table, TurbulenceModel, rotor_radius):
+    deficit_matrix = np.array(deficit_matrix)
     wind_angle = - wind_angle + 90.0 # To conform to windrose convention. Wake model is written to read 0 as positive X and then angles are measured counterclockwise.
     ordered_layout = order(original_layout, wind_angle)
     ct = []
@@ -45,10 +46,10 @@ def turbulence_one_angle(deficit_matrix, original_layout, freestream_wind_speed,
 # turbulence_one_angle = Memoize(turbulence_one_angle)
 
 
-def max_turbulence_one_angle(deficits, original_layout, windspeeds, wind_angle, turbulences, WakeModel, ThrustModel, ct_table, TurbulenceModel):
+def max_turbulence_one_angle(deficits, original_layout, windspeeds, wind_angle, turbulences, WakeModel, ThrustModel, ct_table, TurbulenceModel, rotor_radius):
     maximo = [0.0 for _ in range(len(original_layout))]
     for i in range(len(windspeeds)):
-        maxturb = turbulence_one_angle(deficits, original_layout, windspeeds[i], wind_angle, turbulences[i], WakeModel, ThrustModel, ct_table, TurbulenceModel)
+        maxturb = turbulence_one_angle(deficits, original_layout, windspeeds[i], wind_angle, turbulences[i], WakeModel, ThrustModel, ct_table, TurbulenceModel, rotor_radius)
         for j in range(len(original_layout)):
             if maxturb[j] > maximo[j]:
                 maximo[j] = maxturb[j]

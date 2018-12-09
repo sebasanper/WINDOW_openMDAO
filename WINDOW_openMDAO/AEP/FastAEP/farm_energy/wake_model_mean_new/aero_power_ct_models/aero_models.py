@@ -1,7 +1,7 @@
 from util import interpolate
 from numpy import pi
 from WINDOW_openMDAO.AEP.FastAEP.farm_energy.wake_model_mean_new.memoize import Memoize, countcalls
-from WINDOW_openMDAO.input_params import cutout_wind_speed, cutin_wind_speed, rotor_radius, wind_speed_at_max_thrust as rated_wind, turbine_rated_power
+#from WINDOW_openMDAO.input_params import cutout_wind_speed, cutin_wind_speed, rotor_radius, wind_speed_at_max_thrust as rated_wind, turbine_rated_power
 
 
 class countcalls(object):
@@ -59,7 +59,7 @@ class AeroLookup:
         return result
 
 @countcalls
-def power(wind_speed, table_power, cutin=cutin_wind_speed, cutout=cutout_wind_speed, rated=rated_wind, r=rotor_radius):
+def power(wind_speed, table_power, cutin, cutout, rated, r, turbine_rated_power):
     if all(cp < 10.0 for cp in table_power.y):
         if wind_speed < cutin:
             return 0.0

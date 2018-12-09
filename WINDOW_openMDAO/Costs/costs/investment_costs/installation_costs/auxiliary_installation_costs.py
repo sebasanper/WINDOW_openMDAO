@@ -1,8 +1,8 @@
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
-from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
+#from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
 
 
-def auxiliary_installation_costs(NT):
+def auxiliary_installation_costs(NT, P_rated):
     # Installation - Auxiliary
     harbour_per_watt = Cost1(0.02, 'USD', 2002)  # [$/Watt]
     measuring_tower_installation_costs = Cost1(550000.0, 'Euro', 2003)  # [Euro]

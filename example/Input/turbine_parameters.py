@@ -1,10 +1,10 @@
 from numpy import sqrt
 
-turbine_rated_power = 10000000.0  # [W]
-cutin_wind_speed = 4.0 # [m/s]
-cutout_wind_speed = 25.0 # [m/s]
+#turbine_rated_power = 10000000.0  # [W]
+#cutin_wind_speed = 4.0 # [m/s]
+#cutout_wind_speed = 25.0 # [m/s]
 
-rotor_radius = 95.4  # [m]
+#rotor_radius = 95.4  # [m]
 purchase_price = 10000000.0  # [Euro]
 warranty_percentage = 15  # [%]
 generator_voltage = 4000.0  # [V]
@@ -22,4 +22,4 @@ yaw_diameter = 5.5  # [m]
 wind_speed_at_max_thrust = 11.4  # [m/s]
 
 collection_voltage = 66000.0 # [V]
-turbine_rated_current = turbine_rated_power / (collection_voltage  * sqrt(3.0))  # A = Power / sqrt(3) / Voltage. 3 phase current per line.
+turbine_rated_current = 10000000.0 / (collection_voltage  * sqrt(3.0))  # A = Power / sqrt(3) / Voltage. 3 phase current per line.

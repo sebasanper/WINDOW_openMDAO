@@ -26,6 +26,11 @@ class AbstractSupportStructureDesign(ExplicitComponent):
         self.add_input('max_TI', shape=max_n_turbines)
         self.add_input('depth', shape=max_n_turbines)
         self.add_input('n_turbines', val=0)
+        self.add_input('rotor_radius', units='m', desc='radius of the turbine')     
+#         self.add_input('yaw_diameter', units='m', desc='diameter of tower top or yaw')
+#         self.add_input('rated_wind_speed', units = 'm/s', desc='rated wind speed')
+#         self.add_input('rotor_thrust', units = 'N', desc='max rotor thrust')
+#         self.add_input('rna_mass', units='kg', desc='mass of RNA')
 
         self.add_output('cost_support', shape=max_n_turbines)
 
@@ -33,14 +38,14 @@ class AbstractSupportStructureDesign(ExplicitComponent):
         n_turbines = int(inputs['n_turbines'])
         TI = inputs['max_TI'][:n_turbines]
         depth = inputs['depth'][:n_turbines]
-        costs = self.support_design_model(TI, depth)
+        costs = self.support_design_model(TI, depth, inputs['rotor_radius'])
         lendif = max_n_turbines - len(costs)
         if lendif > 0:
             costs = np.concatenate((costs, [0.0 for _ in range(lendif)]))
         costs = costs.reshape(max_n_turbines)
         outputs['cost_support'] = costs
 
-    def support_design_model(self, TIs, depths):
+    def support_design_model(self, TIs, depths, rotor_radius):
         #  Redefine method in subclass of AbstractSupportStructureDesign with specific model that has same inputs and outputs.
         pass
 

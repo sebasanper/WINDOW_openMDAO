@@ -51,8 +51,23 @@ options.samples.wind_sectors_angle = 30.0
 # Define paths to site and turbine defining input files.
 options.input.site.windrose_file = "Input/weibull_windrose_12unique.dat"
 options.input.site.bathymetry_file = "Input/bathymetry_table.dat"
+
 options.input.turbine.power_file = "Input/power_dtu10.dat"
 options.input.turbine.ct_file = "Input/ct_dtu10.dat"
+options.input.turbine.num_pegged = 3
+options.input.turbine.num_airfoils = 8
+options.input.turbine.num_nodes = 20
+options.input.turbine.num_bins = 30
+options.input.turbine.safety_factor = 1.5
+options.input.turbine.gearbox_stages = 3
+options.input.turbine.gear_configuration = 'eep'
+options.input.turbine.mb1_type = 'CARB'
+options.input.turbine.mb2_type = 'SRB'
+options.input.turbine.drivetrain_design = 'geared'
+options.input.turbine.uptower_transformer = True
+options.input.turbine.has_crane = True
+options.input.turbine.reference_turbine = 'Input/reference_turbine.csv'
+options.input.turbine.reference_turbine_cost = 'Input/reference_turbine_cost_mass.csv'
 
 # Instantiate OpenMDAO problemlem class
 problem = Problem()

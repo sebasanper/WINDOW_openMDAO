@@ -1,5 +1,5 @@
-def other_costs(depth_central_platform, n_turbines, infield_length, n_substations):
-    from WINDOW_openMDAO.input_params import turbine_rated_power
+def other_costs(depth_central_platform, n_turbines, infield_length, n_substations, turbine_rated_power, rotor_radius):
+    #from WINDOW_openMDAO.input_params import turbine_rated_power
     from investment_costs.project_development_cost import project_development_cost
     from investment_costs.management_cost import management_costs
     from investment_costs.procurement_costs.auxiliary_costs.auxiliary_costs import auxiliary_procurement
@@ -12,17 +12,17 @@ def other_costs(depth_central_platform, n_turbines, infield_length, n_substation
 
     project_development = project_development_cost(n_turbines, turbine_rated_power)
 
-    procurement_auxiliary = auxiliary_procurement(depth_central_platform, n_substations, n_turbines)
+    procurement_auxiliary = auxiliary_procurement(depth_central_platform, n_substations, n_turbines, turbine_rated_power)
 
     procurement_rna = rna_costs(n_turbines)
 
-    procurement_electrical = electrical_procurement_costs(n_turbines)
+    procurement_electrical = electrical_procurement_costs(n_turbines, turbine_rated_power)
 
-    installation_auxiliary = auxiliary_installation_costs(n_turbines)
+    installation_auxiliary = auxiliary_installation_costs(n_turbines, turbine_rated_power)
 
     installation_electrical = electrical_installation_costs()
 
-    installation_rna = rna_installation_costs(n_turbines)
+    installation_rna = rna_installation_costs(n_turbines, rotor_radius)
 
     decommissioning = decommissioning_costs(infield_length, n_turbines)
 

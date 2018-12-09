@@ -1,12 +1,12 @@
 from area import *
 from numpy import deg2rad, tan, sqrt, cos, sin
 
-from WINDOW_openMDAO.input_params import rotor_radius
+#from WINDOW_openMDAO.input_params import rotor_radius
 from memoize import Memoize
 jensen_k = 0.04
 
 
-def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, wind_direction, radius=rotor_radius, k=jensen_k):  # According to Jensen Model only
+def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, wind_direction, radius, k=jensen_k):  # According to Jensen Model only
     # Eq. of centreline is Y = tan (d) (X - Xt) + Yt
     # Distance from point to line
     wind_direction = deg2rad(wind_direction + 180.0)
@@ -41,14 +41,14 @@ def determine_if_in_wake(x_upstream, y_upstream, x_downstream, y_downstream, win
 # determine_if_in_wake = Memoize(determine_if_in_wake)
 
 
-def wake_deficit(Ct, x, k=jensen_k, r0=rotor_radius):
+def wake_deficit(Ct, x, k=jensen_k, r0=95.4):
     return (1.0 - sqrt(1.0 - Ct)) / (1.0 + (k * x) / r0) ** 2.0
 
 
 # wake_deficit = Memoize(wake_deficit)
 
 
-def wake_radius(x, r0=rotor_radius, k=jensen_k):
+def wake_radius(x, r0, k=jensen_k):
     return r0 + k * x
 
 # wake_radius = Memoize(wake_radius)

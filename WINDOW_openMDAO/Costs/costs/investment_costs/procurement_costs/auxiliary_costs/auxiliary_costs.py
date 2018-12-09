@@ -1,8 +1,8 @@
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
-from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
+#from WINDOW_openMDAO.input_params import turbine_rated_power as P_rated
 
 
-def auxiliary_procurement(depth_central_platform, n_substations, n_turbines):
+def auxiliary_procurement(depth_central_platform, n_substations, n_turbines, P_rated):
     # Procurement-Auxiliary
     measuring_tower_costs = Cost1(2050000.0, 'Euro', 2003)  # [Euro]
     onshore_premises_costs = Cost1(1500000.0, 'Euro', 2003)  # [Euro]

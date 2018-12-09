@@ -1,10 +1,10 @@
 from numpy import exp
-from WINDOW_openMDAO.input_params import cutin_wind_speed, cutout_wind_speed
+#from WINDOW_openMDAO.input_params import cutin_wind_speed, cutout_wind_speed
 
 
 class WeibullWindBins(object):
 
-    def __init__(self, windrose_file):
+    def __init__(self, windrose_file, cutin_wind_speed, cutout_wind_speed):
         self.windrose_file = windrose_file
         self.direction = []
         self.weibull_scale = []

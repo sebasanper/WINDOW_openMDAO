@@ -1,7 +1,7 @@
 # workflow_regular.py only defines the workflow to be built. Class WorkingGroup needs to be imported from another working directory. As an example we provide a working directory in the example folder. Run IEA_borssele_regular.py from the 'example' folder instead
 
-from openmdao.api import IndepVarComp, Group
-from WINDOW_openMDAO.input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency, number_substations
+from openmdao.api import IndepVarComp, Group, ExecComp
+from WINDOW_openMDAO.input_params import max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency, number_substations
 from WINDOW_openMDAO.src.api import AEP, NumberLayout, MinDistance, WithinBoundaries
 from WINDOW_openMDAO.WaterDepth.water_depth_models import RoughClosestNode
 from WINDOW_openMDAO.Finance.LCOE import LCOE
@@ -32,7 +32,7 @@ class WorkingGroup(Group):
 
         indep2.add_output("areas", val=areas)
         indep2.add_output('layout', val=layout)
-        indep2.add_output('turbine_radius', val=turbine_radius)
+        indep2.add_output('turbine_radius', val=95.4)
         indep2.add_output('n_turbines', val=n_turbines)
         indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or one cable type.
         indep2.add_output('substation_coords', val=central_platform)
@@ -41,7 +41,13 @@ class WorkingGroup(Group):
         indep2.add_output('transm_electrical_efficiency', val=transm_electrical_efficiency)
         indep2.add_output('operational_lifetime', val=operational_lifetime)
         indep2.add_output('interest_rate', val=interest_rate)
-
+        indep2.add_output('cut_in_speed', units = 'm/s', desc = 'cut-in wind speed', val=4)
+        indep2.add_output('cut_out_speed', units = 'm/s', desc = 'cut-out wind speed', val=25)
+        indep2.add_output('machine_rating', units='kW', desc='machine rating', val=10e3)
+        
+        self.add_subsystem('rad2dia', ExecComp('rotor_diameter = turbine_radius*2.0', \
+                                               turbine_radius = {'units': 'm'}, \
+                                               rotor_diameter = {'units': 'm'}))
         self.add_subsystem('numbersubstation', NumberLayout(max_n_substations))
         self.add_subsystem('numberlayout', NumberLayout(max_n_turbines))
         self.add_subsystem('depths', RoughClosestNode(max_n_turbines, self.bathymetry_file))
@@ -58,6 +64,11 @@ class WorkingGroup(Group):
         self.add_subsystem('lcoe', LCOE())
         self.add_subsystem('constraint_distance', MinDistance())
         self.add_subsystem('constraint_boundary', WithinBoundaries())
+        
+        self.connect('indep2.turbine_radius', 'AeroAEP.turbine_radius')
+        self.connect('indep2.cut_in_speed', 'AeroAEP.cut_in_speed')
+        self.connect('indep2.cut_out_speed', 'AeroAEP.cut_out_speed')
+        self.connect('indep2.machine_rating', 'AeroAEP.machine_rating')
 
         self.connect("indep2.layout", ["numberlayout.orig_layout", "AeroAEP.layout", "constraint_distance.orig_layout", "constraint_boundary.layout"])
         self.connect("indep2.substation_coords", "numbersubstation.orig_layout")
@@ -75,6 +86,7 @@ class WorkingGroup(Group):
 
         self.connect('depths.water_depths', 'support.depth')
         self.connect('AeroAEP.max_TI', 'support.max_TI')
+        self.connect('indep2.turbine_radius', 'support.rotor_radius')
 
         self.connect('AeroAEP.efficiency', 'OandM.array_efficiency')
         self.connect('AeroAEP.AEP', ['AEP.aeroAEP', 'OandM.AEP'])
@@ -88,6 +100,7 @@ class WorkingGroup(Group):
         self.connect('electrical.length_p_cable_type', 'Costs.length_p_cable_type')
         self.connect('electrical.cost_p_cable_type', 'Costs.cost_p_cable_type')
         self.connect('support.cost_support', 'Costs.support_structure_costs')
+        self.connect('indep2.machine_rating', 'Costs.machine_rating')
 
 
         self.connect('Costs.investment_costs', 'lcoe.investment_costs')
