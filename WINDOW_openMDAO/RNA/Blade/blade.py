@@ -13,6 +13,8 @@ class Blade(Group):
         self.metadata.declare('num_nodes', desc='Number of blade sections')
         self.metadata.declare('num_bins', desc='Number of wind speed samples')
         self.metadata.declare('reference_turbine', desc='CSV file with the definition of the Reference Turbine')
+        self.metadata.declare('power_file', desc='URL of power curve file')
+        self.metadata.declare('ct_file', desc='URL of thrust coefficient curve file')
         self.metadata.declare('rho_air',  desc='Density of air [kg/m**3]', default=1.225)
         self.metadata.declare('E_blade', desc='Youngs modulus of glass fiber [Pa]', default=36.233e9)
         self.metadata.declare('g', desc='acceleration due to gravity [m/s**2]', default=9.8)
@@ -25,6 +27,8 @@ class Blade(Group):
         num_nodes = self.metadata['num_nodes']
         num_bins = self.metadata['num_bins']
         reference_turbine = self.metadata['reference_turbine']
+        power_file = self.metadata['power_file']
+        ct_file = self.metadata['ct_file']
         rho_air = self.metadata['rho_air']
         E_blade = self.metadata['E_blade']
         g = self.metadata['g']
@@ -66,7 +70,7 @@ class Blade(Group):
                            promotes_outputs=['rotor_cp', 'rotor_ct'])
                            
         
-        self.add_subsystem('pc', power_curve.PowerCurve(num_bins=num_bins, rho_air=rho_air), \
+        self.add_subsystem('pc', power_curve.PowerCurve(num_bins=num_bins, rho_air=rho_air, power_file=power_file, ct_file=ct_file), \
                            promotes_inputs=['design_tsr', 'cut_in_speed', 'cut_out_speed', 'machine_rating', 'drive_train_efficiency'], \
                            promotes_outputs=['rated_wind_speed', 'wind_bin', 'elec_power_bin', 'ct_bin'])
                            

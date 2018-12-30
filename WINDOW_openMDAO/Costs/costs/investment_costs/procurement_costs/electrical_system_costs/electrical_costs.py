@@ -1,7 +1,7 @@
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
-from WINDOW_openMDAO.input_params import transmission_voltage, grid_coupling_point_voltage, collection_voltage, distance_to_grid, frequency, number_substations
+from WINDOW_openMDAO.input_params import transmission_voltage, grid_coupling_point_voltage, distance_to_grid, frequency, number_substations
 from numpy import sqrt, pi, exp, log
-from WINDOW_openMDAO.input_params import generator_voltage#, turbine_rated_power as P_rated
+#from WINDOW_openMDAO.input_params import generator_voltage#, turbine_rated_power as P_rated
 
 rho_copper = 8940.0  # [kg/m^3]
 rho_xlpe = 940.0  # [kg/m^3]
@@ -9,7 +9,7 @@ epsilon_0 = 8.85e-12  # [F/m]
 epsilon_r = 2.3  # [-] (XLPE)
 
 
-def electrical_procurement_costs(NT, P_rated, n_substations=number_substations):
+def electrical_procurement_costs(NT, P_rated, generator_voltage, collection_voltage, n_substations=number_substations):
     # Procurement - Electrical system
     transformer_coef_A1 = Cost1(0.00306, 'Euro', 2012)  # [euro/W]
     transformer_coef_B1 = Cost1(810.0, 'Euro', 2012)  # [euro]

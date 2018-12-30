@@ -1,7 +1,7 @@
-from WINDOW_openMDAO.input_params import purchase_price, warranty_percentage
+#from WINDOW_openMDAO.input_params import purchase_price, warranty_percentage
 
 
-def rna_costs(NT):
+def rna_costs(NT, purchase_price, warranty_percentage):
 
     # Investment costs - Procurement - Rotor/nacelle
     inv_procurement_turbines_purchase = NT * purchase_price

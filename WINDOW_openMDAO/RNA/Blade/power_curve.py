@@ -12,6 +12,8 @@ class PowerCurve(AbsPowerCurve):
         # metadata
         num_bins = self.metadata['num_bins']
         rho_air = self.metadata['rho_air']
+        power_file = self.metadata['power_file']
+        ct_file = self.metadata['ct_file']
         
         # inputs
         design_tsr = inputs['design_tsr'] 
@@ -53,8 +55,11 @@ class PowerCurve(AbsPowerCurve):
             cp_bin.append(cp)
             ct_bin.append(ct)        
 
-
-        
+        # generate power curve and thrust coefficient curve files
+        create_curves(power_file, wind_bin, np.array(elec_power_bin)*1000) # kW to W
+        create_curves(ct_file, wind_bin, ct_bin)
+            
+        # outputs
         outputs['rated_wind_speed'] = rated_wind_speed     
         outputs['rated_tip_speed'] = rated_tip_speed   
         outputs['wind_bin'] = wind_bin
@@ -64,8 +69,14 @@ class PowerCurve(AbsPowerCurve):
         outputs['cp_bin'] = cp_bin
         outputs['ct_bin'] = ct_bin   
         
+
+
         
-        
+def create_curves(file, wind_speed, data):
+    f = open(file, 'w')
+    for u,d in zip(wind_speed, data):
+        f.write(str(round(u,1)) + '\t' + str(round(d,4)) + '\n')
+    f.close()           
         
         
         
@@ -89,7 +100,8 @@ if __name__ == "__main__":
             'rotor_ct' : 0.7410045}
     outputs={}
     
-    model = PowerCurve(num_bins=30, rho_air=1.225)
+    model = PowerCurve(num_bins=30, rho_air=1.225, \
+                       power_file='power.dat', ct_file='ct.dat')
       
     model.compute(inputs, outputs)  
     

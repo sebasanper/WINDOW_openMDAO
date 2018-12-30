@@ -11,6 +11,7 @@ class AbstractElectricDesign(ExplicitComponent):
         self.add_input('substation_coords', shape=(max_n_substations, 2))
         self.add_input('n_substations', val=0)
         self.add_input('n_turbines', val=0)
+        self.add_input('turbine_rated_current', units='A', desc='3 phase current per line', val=10000000.0 / (66000.0  * np.sqrt(3.0)))
 
         self.add_output('topology', shape=(max_n_substations, max_n_branches, max_n_turbines_p_branch, 2))
         self.add_output('cost_p_cable_type', shape=3)
@@ -25,7 +26,7 @@ class AbstractElectricDesign(ExplicitComponent):
         n_turbines_p_cable_type = [int(num) for num in inputs['n_turbines_p_cable_type']]
         substation_coords = inputs['substation_coords'][:n_substations]
 
-        cost, topology_dict, cable_lengths = self.topology_design_model(layout, substation_coords, n_turbines_p_cable_type)
+        cost, topology_dict, cable_lengths = self.topology_design_model(layout, substation_coords, n_turbines_p_cable_type, inputs['turbine_rated_current'])
         if type(topology_dict) is dict:
             topology_list = []
             for n in range(1, len(topology_dict) + 1):
@@ -63,6 +64,6 @@ class AbstractElectricDesign(ExplicitComponent):
         outputs['topology'] = topology
         outputs['length_p_cable_type'] = cable_lengths
 
-    def topology_design_model(self, layout, substation_coords, n_turbines_p_cable_type, n_substations):
+    def topology_design_model(self, layout, substation_coords, n_turbines_p_cable_type, turbine_rated_current):
         # Define your own model in a subclass of AbstractElectricDesign and redefining this method.
         pass
