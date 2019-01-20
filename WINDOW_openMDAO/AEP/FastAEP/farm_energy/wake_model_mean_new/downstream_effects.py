@@ -1,25 +1,25 @@
 import jensen
-import larsen
-import ainslie1d
-import ainslie2d
+#import larsen
+#import ainslie1d
+#import ainslie2d
 #from farm_energy.wake_model_mean_new.ainslie2d_cy import ainslie_full
 # ainslie_full = Memoize(ainslie_full)
 from ainslie_common import crosswind_distance, determine_front
 from time import time
-from WINDOW_openMDAO.input_params import rotor_radius
+#from WINDOW_openMDAO.input_params import rotor_radius
 
 
 def constantwake(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity):
     return [0.2 for _ in range(len(coordinates_downstream))]
 
 
-def JensenEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity):
+def JensenEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, rotor_radius):
     angle3 = angle + 180.0
     # coordinates downstream will be an array with coordinates and original index.
     partial_deficits = []
 
     for i in range(len(coordinates_downstream)):
-        determ = jensen.determine_if_in_wake(coordinates_upstream[1], coordinates_upstream[2], coordinates_downstream[i][1], coordinates_downstream[i][2], angle3)
+        determ = jensen.determine_if_in_wake(coordinates_upstream[1], coordinates_upstream[2], coordinates_downstream[i][1], coordinates_downstream[i][2], angle3, rotor_radius)
         # print determ[1], "determ1"
         # print determ[0], "determ0"
 
@@ -49,7 +49,7 @@ def LarsenEffects(coordinates_upstream, thrust_coefficient, coordinates_downstre
     return partial_deficits
 
 
-def Ainslie1DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=rotor_radius * 2.0):
+def Ainslie1DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=190.8):
     angle3 = angle + 180.0
     partial_deficits = []
     normalised_upstream = [coordinates_upstream[i] / diameter for i in range(1, 3)]
@@ -68,7 +68,7 @@ def Ainslie1DEffects(coordinates_upstream, thrust_coefficient, coordinates_downs
 
 
 # from time import time
-def Ainslie2DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=rotor_radius * 2.0):
+def Ainslie2DEffects(coordinates_upstream, thrust_coefficient, coordinates_downstream, angle, wind_speed_upstream, ambient_turbulence_intensity, diameter=190.8):
     angle3 = angle + 180.0
     partial_deficits = []
     normalised_upstream = [coordinates_upstream[i] / diameter for i in range(1, 3)]

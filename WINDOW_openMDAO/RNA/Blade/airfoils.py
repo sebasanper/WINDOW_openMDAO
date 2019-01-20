@@ -2,7 +2,8 @@ import pandas as pd
 import re
 import os 
 
-abs_path = os.path.dirname(os.path.realpath(__file__)).replace('\\', '//') + '//'
+#abs_path = os.path.dirname(os.path.realpath(__file__)).replace('\\', '//') + '//'
+abs_path = 'Input//'
 airfoil_folder = abs_path + 'Airfoils//'
 airfoils_db = ['Cylinder1_10Hz.dat', 'Cylinder2_10Hz.dat', 'DU40_A17_10Hz.dat', 'DU35_A17_10Hz.dat', \
                 'DU30_A17_10Hz.dat', 'DU25_A17_10Hz.dat', 'DU21_A17_10Hz.dat', 'NACA64_A17_10Hz.dat']

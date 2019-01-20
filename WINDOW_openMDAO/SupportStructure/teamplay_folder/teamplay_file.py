@@ -4,11 +4,16 @@ from lib.environment.physical_environment import Site
 from currency import Cost1
 
 
-def teamplay(TI, depth):
+def teamplay(TI, depth, rotor_radius, rated_wind_speed, rotor_thrust, rna_mass, \
+             solidity_rotor, cd_rotor_idle_vane, cd_nacelle, \
+             yaw_diameter, front_area_nacelle, yaw_to_hub_height, mass_eccentricity):
+    
     dimension_team_support = DimensionTeamSupport()
     dimension_team_support.fsf = TI + 1.4 # 1.4 safety factor to account for wave-induced fatigue and the rest is wind-induced.
     # dimension_team_support.fsf = 1.5
-    rna = RNA()
+    rna = RNA(rotor_radius, rated_wind_speed, rotor_thrust, rna_mass, \
+              solidity_rotor, cd_rotor_idle_vane, cd_nacelle, \
+                 yaw_diameter, front_area_nacelle, yaw_to_hub_height, mass_eccentricity)
     site_data = Site()
     site_data.water_depth = depth
 

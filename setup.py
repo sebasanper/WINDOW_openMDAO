@@ -67,8 +67,12 @@ setup(
       'WINDOW_openMDAO.src.AbsRNA',
       'WINDOW_openMDAO.src.AbsRNA.Blade',
       'WINDOW_openMDAO.src.AbsRNA.Cost',
-      'WINDOW_openMDAO.src.AbsRNA.HubNacelle'
+      'WINDOW_openMDAO.src.AbsRNA.HubNacelle',
+      'WINDOW_openMDAO.RNA',
+      'WINDOW_openMDAO.RNA.Blade',
+      'WINDOW_openMDAO.RNA.Blade.Airfoils',
+      'WINDOW_openMDAO.RNA.HubNacelle',
+      'WINDOW_openMDAO.RNA.Cost'
     ],
-    package_data={'WINDOW_openMDAO': ['Input/*.dat', 'Input/*.pkl',
-                                      'WakeModel/*.dat']}
+    package_data={'WINDOW_openMDAO': ['Input/*.*', 'Input/Airfoils/*.dat', 'WakeModel/*.dat']}
 )

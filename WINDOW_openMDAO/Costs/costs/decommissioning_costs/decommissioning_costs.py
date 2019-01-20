@@ -1,8 +1,8 @@
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
-from WINDOW_openMDAO.input_params import mass, hub_height, management_percentage, distance_to_grid
+from WINDOW_openMDAO.input_params import management_percentage, distance_to_grid
 
 
-def decommissioning_costs(infield_cable_length, NT):
+def decommissioning_costs(infield_cable_length, NT, mass, hub_height):
 
     # ----------------- Decommisioning costs/Removal/Disposal - Input  --------------------
     scour_protection_removal_per_volume = Cost1(33.0, 'USD', 2010)  # [$/m^3]

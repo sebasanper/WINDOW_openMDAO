@@ -1,4 +1,5 @@
 # This file must be run from the 'example' folder that has the 'Input' folder.
+import numpy as np
 
 # Imports OpenMDAO API
 from openmdao.api import Problem, view_model
@@ -51,14 +52,46 @@ options.samples.wind_sectors_angle = 30.0
 # Define paths to site and turbine defining input files.
 options.input.site.windrose_file = "Input/weibull_windrose_12unique.dat"
 options.input.site.bathymetry_file = "Input/bathymetry_table.dat"
-options.input.turbine.power_file = "Input/power_dtu10.dat"
-options.input.turbine.ct_file = "Input/ct_dtu10.dat"
 
+options.input.turbine.power_file = "Input/power_rna.dat"
+options.input.turbine.ct_file = "Input/ct_rna.dat"
+options.input.turbine.num_pegged = 3
+options.input.turbine.num_airfoils = 8
+options.input.turbine.num_nodes = 20
+options.input.turbine.num_bins = 31
+options.input.turbine.safety_factor = 1.5
+options.input.turbine.gearbox_stages = 3
+options.input.turbine.gear_configuration = 'eep'
+options.input.turbine.mb1_type = 'CARB'
+options.input.turbine.mb2_type = 'SRB'
+options.input.turbine.drivetrain_design = 'geared'
+options.input.turbine.uptower_transformer = True
+options.input.turbine.has_crane = True
+options.input.turbine.reference_turbine = 'Input/reference_turbine.csv'
+options.input.turbine.reference_turbine_cost = 'Input/reference_turbine_cost_mass.csv'
+        
 # Instantiate OpenMDAO problemlem class
 problem = Problem()
 problem.model = WorkingGroup(options)
 
 problem.setup()
+
+# Default input values of DTU 10 MW Reference Turbine
+problem['indep2.design_tsr'] = 7.6
+problem['indep2.blade_number'] = 3
+problem['indep2.chord_coefficients'] = np.array([3.542, 3.01, 2.313]) * 190.8/126.0
+problem['indep2.twist_coefficients'] = [13.308, 9.0, 3.125]
+problem['indep2.span_airfoil_r'] =  np.array([01.36, 06.83, 10.25, 14.35, 22.55, 26.65, 34.85, 43.05]) * 190.8/126.0
+problem['indep2.span_airfoil_id'] = [0,     1,     2,     3,     4,     5,     6,     7]
+problem['indep2.pitch'] = 0.0
+problem['indep2.thickness_factor'] = 1.0
+problem['indep2.shaft_angle'] = -5.0
+problem['indep2.cut_in_speed'] = 3.0
+problem['indep2.cut_out_speed'] = 25.0
+problem['indep2.machine_rating'] = 10000.0
+problem['indep2.drive_train_efficiency'] = 0.95
+problem['indep2.gear_ratio'] = 96.76
+problem['indep2.Np'] = [3,3,1]
 
 
 ### Uncomment below to plot N2 diagram in a browser.
@@ -70,3 +103,16 @@ aep = problem['AeroAEP.AEP'][0]
 
 print_nice("LCOE", lcoe)
 print_nice("AEP", aep)
+
+# print outputs 
+from WINDOW_openMDAO.src.api import beautify_dict
+var_list = ['rotor_mass', 'nacelle_mass', 'cost_rna', 'tip_deflection', 'span_stress_max', \
+            'rotor_cp', 'rotor_ct', 'rotor_torque', 'rotor_thrust', \
+            'rated_wind_speed', 'wind_bin', 'elec_power_bin', 'ct_bin', \
+            'scale.hub_height', 'scale.turbine_rated_current', 'scale.solidity_rotor', \
+            'rna_mass']
+saved_output = {}
+for v in var_list:
+    saved_output[v] = problem['rna.' + v]   
+beautify_dict(saved_output)
+

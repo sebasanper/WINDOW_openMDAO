@@ -1,7 +1,8 @@
 from order_layout import order
 
 
-def energy_one_angle(original_layout, freestream_wind_speeds, probabilities_speed, wind_angle, ambient_turbulences, WakeModel, PowerModel, table_power, ThrustModel, ct_table, MergingModel):
+def energy_one_angle(original_layout, freestream_wind_speeds, probabilities_speed, wind_angle, ambient_turbulences, WakeModel, PowerModel, table_power, ThrustModel, ct_table, MergingModel, \
+                     cutin, cutout, rated_wind, rotor_radius, rated_power):
     wind_angle = - wind_angle + 90.0  # To conform to windrose convention. Wake model is written to read 0 as positive X and then angles are measured counterclockwise.
     ordered_layout = order(original_layout, wind_angle)
     energy = 0.0
@@ -26,10 +27,10 @@ def energy_one_angle(original_layout, freestream_wind_speeds, probabilities_spee
             # print speed, i, wind_angle
             ct.append(ThrustModel(wind_speeds_array[i], ct_table))
             deficit_matrix[i] = [0.0 for _ in range(i + 1)]
-            deficit_matrix[i] += WakeModel(ordered_layout[i], ct[i], ordered_layout[i + 1:], wind_angle, freestream_wind_speeds[speed], ambient_turbulences[speed])
+            deficit_matrix[i] += WakeModel(ordered_layout[i], ct[i], ordered_layout[i + 1:], wind_angle, freestream_wind_speeds[speed], ambient_turbulences[speed], rotor_radius)
         wind_speeds_array_original = [x for (y, x) in sorted(zip([item[0] for item in ordered_layout], wind_speeds_array), key=first)]
         # print len(wind_speeds_array_original)
-        individual_powers = [PowerModel(wind, table_power) for wind in wind_speeds_array_original]
+        individual_powers = [PowerModel(wind, table_power, cutin, cutout, rated_wind, rotor_radius, rated_power) for wind in wind_speeds_array_original]
         # print individual_powers
         for turb in range(len(individual_powers)):
             weighted_individuals[turb] += individual_powers[turb] * probabilities_speed[speed] / 100.0

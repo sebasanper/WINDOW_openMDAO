@@ -4,7 +4,8 @@ class AbsPowerCurve(ExplicitComponent):
     def initialize(self):
         self.metadata.declare('num_bins', desc='Number of wind speed samples')
         self.metadata.declare('rho_air',  desc='Density of air [kg/m**3]', default=1.225)
-        
+        self.metadata.declare('power_file', desc='URL of power curve file')
+        self.metadata.declare('ct_file', desc='URL of thrust coefficient curve file')
         
     def setup(self):
         # metadata

@@ -1,8 +1,8 @@
-from WINDOW_openMDAO.input_params import rotor_radius, hub_height, onshore_transport_distance
+from WINDOW_openMDAO.input_params import onshore_transport_distance
 from WINDOW_openMDAO.Costs.costs.currency import Cost1
 
 
-def rna_installation_costs(NT):
+def rna_installation_costs(NT, rotor_radius, hub_height):
     r0 = rotor_radius
     # Installation - Rotor-nacelle assembly
     onshore_transport_coef_a = Cost1(5.84e-3, 'Euro', 2001)  # [Euro]

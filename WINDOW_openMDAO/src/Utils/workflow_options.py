@@ -20,7 +20,7 @@ class Samples():
 class Input():
 	def __init__(self):		
 		self.site = Site()
-		self.turbine = Site()
+		self.turbine = Turbine()
 
 
 class Site():
@@ -33,6 +33,20 @@ class Turbine():
 	def __init__(self):
 		self.power_file = None
 		self.ct_file = None
+		self.num_pegged = None
+		self.num_airfoils = None
+		self.num_nodes = None
+		self.num_bins= None
+		self.safety_factor = None
+		self.gearbox_stages = None
+		self.gear_configuration = None
+		self.mb1_type = None
+		self.mb2_type = None
+		self.drivetrain_design = None
+		self.uptower_transformer = None
+		self.has_crane = None
+		self.reference_turbine = None
+		self.reference_turbine_cost = None
 
 
 class WorkflowOptions():

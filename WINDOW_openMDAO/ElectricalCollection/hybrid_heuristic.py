@@ -1,8 +1,8 @@
-from WINDOW_openMDAO.input_params import cable_types, turbine_rated_current
+from WINDOW_openMDAO.input_params import cable_types
 import numpy as np
 
 
-def choose_cables(number_turbines_per_cable):
+def choose_cables(number_turbines_per_cable, turbine_rated_current):
     cables_info = cable_types
     cable_list = []
     for number in number_turbines_per_cable:
