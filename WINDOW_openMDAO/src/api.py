@@ -17,6 +17,7 @@ from Utils.transform_quadrilateral import AreaMapping
 from Utils.read_files import read_layout, read_windrose
 from Utils.workflow_options import WorkflowOptions
 
+
 ## Added for RNA
 from Utils.print_utilities import beautify_dict
 from AbsRNA.Blade.aerodynamic_design import AbsAerodynamicDesign
