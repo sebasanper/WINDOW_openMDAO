@@ -10,35 +10,23 @@ from WINDOW_openMDAO.input_params import TI_ambient
 
 
 class Workflow(object):
-    def __init__(self, inflow_model, windrose_file, wake_turbulence_model, thrust_coefficient_model, thrust_lookup_file,
-                 wake_mean_model, wake_merging_model, power_model, power_lookup_file):
+    def __init__(self, inflow_model, options):
 
         self.print_output = False
-
         self.inflow_model = inflow_model
-        self.wake_turbulence_model = wake_turbulence_model
-        self.thrust_coefficient_model = thrust_coefficient_model
-        self.wake_mean_model = wake_mean_model
-        self.wake_merging_model = wake_merging_model
-        self.power_model = power_model
-        self.windrose = self.inflow_model(windrose_file)
-        self.thrust_lookup_file = thrust_lookup_file
-        self.power_lookup_file = power_lookup_file
+        self.wake_turbulence_model = options.models.turbulence
+        self.wake_mean_model = options.models.wake
+        self.wake_merging_model = options.models.merge
+        self.windrose = self.inflow_model(options.input.site.windrose_file)
+        self.thrust_lookup_file = options.turbine.ct_curve_file
+        self.power_lookup_file = options.turbine.power_curve_file
         self.ctx = []
         self.cty = []
         self.px = []
         self.py = []
 
-        with open(self.thrust_lookup_file, "r") as data:
-            for line in data:
-                col = line.split()
-                self.ctx.append(float(col[0]))
-                self.cty.append(float(col[1]))
-        with open(self.power_lookup_file, "r") as data:
-            for line in data:
-                col = line.split()
-                self.px.append(float(col[0]))
-                self.py.append(float(col[1]))
+        power_curve = np.loadtxt(self.power_lookup_file)
+        ct_curve = np.loadtxt(self.thrust_lookup_file)
 
         self.table_power = AeroLookup(self.px, self.py)
         self.ct_table = AeroLookup(self.ctx, self.cty)
@@ -73,22 +61,8 @@ class Workflow(object):
 
         if self.print_output is True: print("=== CALCULATING ENERGY, TURBULENCE PER WIND DIRECTION ===")
         for i in range(len(self.wind_directions)):
-            self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates,
-                                                                                           self.wind_speeds[i],
-                                                                                           self.wind_speeds_probabilities[
-                                                                                               i],
-                                                                                           self.wind_directions[i],
-                                                                                           self.freestream_turbulence,
-                                                                                           self.wake_mean_model,
-                                                                                           self.power_model,
-                                                                                           self.table_power,
-                                                                                           self.thrust_coefficient_model,
-                                                                                           self.ct_table,
-                                                                                           self.wake_merging_model)
-            self.turbulences = max_turbulence_one_angle(deficits, turbine_coordinates, self.wind_speeds[i],
-                                                        self.wind_directions[i], self.freestream_turbulence, Jensen,
-                                                        self.thrust_coefficient_model, self.ct_table,
-                                                        self.wake_turbulence_model)
+            self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates, self.wind_speeds[i], self.wind_speeds_probabilities[i], self.wind_directions[i], self.freestream_turbulence, self.wake_mean_model, self.power_model, self.table_power, self.thrust_coefficient_model, self.ct_table, self.wake_merging_model)
+            self.turbulences = max_turbulence_one_angle(deficits, turbine_coordinates, self.wind_speeds[i], self.wind_directions[i], self.freestream_turbulence, Jensen, self.thrust_coefficient_model, self.ct_table, self.wake_turbulence_model)
             self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities[i] / 100.0
             self.energies_per_angle.append(self.energy_one_angle_weighted)
             self.array_efficiency = old_div(self.aero_energy_one_angle, (

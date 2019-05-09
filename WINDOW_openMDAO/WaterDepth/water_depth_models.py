@@ -1,13 +1,24 @@
+"""Summary
+"""
 from WINDOW_openMDAO.src.api import AbstractWaterDepth
-from scipy.interpolate import interp2d
-import os
-import pickle
+# from scipy.interpolate import interp2d
 import numpy as np
 
 
 # class RoughInterpolation(AbstractWaterDepth):
 
+#     """Summary
+#     """
+    
 #     def depth_model(self, layout):
+#         """Summary
+        
+#         Args:
+#             layout (TYPE): Description
+        
+#         Returns:
+#             TYPE: Description
+#         """
 #         bathymetry_grid_x = []
 #         bathymetry_grid_y = []
 #         bathymetry_grid_depths = []
@@ -29,27 +40,26 @@ import numpy as np
 #             # water_depths.append(5.8)
 #         return water_depths
 
+
 class RoughClosestNode(AbstractWaterDepth):
 
+    """Summary
+    """
+    @vectorize(float64(float64))
     def depth_model(self, layout):
-        bathymetry = []
+        """Summary
+        
+        Args:
+            layout (TYPE): Description
+        
+        Returns:
+            TYPE: Description
+        """
+        bathymetry = np.loadtxt(self.bathymetry_path)
+        bathymetry_inside = bathymetry[~np.isnan(bathymetry).any(axis=1)]
+        deltas = np.subtract(layout, bathymetry_inside[:,:2][:,np.newaxis])
+        dist_2 = np.sum(deltas ** 2., axis=2)
+        idx_closest_nodes = np.argmin(dist_2, axis=0)
+        water_depths = bathymetry_inside[idx_closest_nodes][:,2]
 
-        with open(self.bathymetry_path, "r") as bathymetry_file:
-            for line in bathymetry_file:
-                cols = line.split()
-                bathymetry.append([float(cols[0]), float(cols[1]), float(cols[2])])
-        bathymetry = np.array(bathymetry)
-        def closest_node(node, nodes):
-            nodes = np.asarray(nodes)
-            dist_2 = np.sum((nodes - node)**2, axis=1)
-            return np.argmin(dist_2)
-
-        def depth(x, y):
-            return bathymetry[closest_node([x, y], bathymetry[:,[0, 1]])][2]
-            # return 20.0
-
-        water_depths = []
-        layout = [[i[1], i[2]] for i in layout]
-        for coordinate in layout:
-            water_depths.append(depth(coordinate[0], coordinate[1]))  # Minimum water depth 6 m.
         return water_depths

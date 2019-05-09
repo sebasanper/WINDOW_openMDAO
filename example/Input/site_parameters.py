@@ -1,8 +1,39 @@
+"""Summary
+
+Attributes:
+    alpha (float): Description
+    angle_wave_current_50_year (float): Description
+    areas (TYPE): Description
+    current_depth_averaged_50_year (float): Description
+    d50_soil (float): Description
+    d90_soil (float): Description
+    friction_angle (float): Description
+    hat (float): Description
+    Hs_1_year (float): Description
+    Hs_50_year (float): Description
+    lat (float): Description
+    n_quadrilaterals (int): Description
+    n_windrose_sectors (TYPE): Description
+    ref_height_wind_speed (float): Description
+    storm_surge_neg (float): Description
+    storm_surge_pos (float): Description
+    submerged_unit_weight (float): Description
+    TI_ambient (float): Description
+    water_density (float): Description
+"""
 from __future__ import division
 from past.utils import old_div
 import numpy as np
 
 def read_windrose(filename):
+    """Summary
+    
+    Args:
+        filename (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     direction = []
     weibull_scale = []
     weibull_shape = []
@@ -51,6 +82,14 @@ areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 573
 # areas = np.array([[[484178.55, 5732482.8], [500129.9, 5737534.4], [497318.1, 5731880.24], [491858.00, 5725044.75]], [[491858.00, 5725044.75], [497318.1, 5731880.24], [503163.37, 5729155.3], [501266.5, 5715990.05]]])  # Areas need to be defined in clockwise order starting on the "bottom left" corner, and grouped per quadrilateral considered.
 
 def separation_equation_y(x):  # values y greater than f(x) use mapping 1, else mapping 0, in the case of two quadrilaterals.
+    """Summary
+    
+    Args:
+        x (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     if len(areas) > 1:
         eps = 1e-9
         m = old_div((areas[1][0][1] - areas[1][1][1]), (areas[1][0][0] - areas[1][1][0] + eps))

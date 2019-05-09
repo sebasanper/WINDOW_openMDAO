@@ -14,8 +14,8 @@ class Models(object):
 
 class Samples(object):
     def __init__(self):
-        self.wind_speeds = 7
-        self.wind_sector_angle = 6.0
+        self.wind_speeds = 0
+        self.wind_sector_angle = 0.0
 
 
 class Input(object):
@@ -32,8 +32,8 @@ class Site(object):
 
 class Turbine(object):
     def __init__(self):
-        self.power_file = None
-        self.ct_file = None
+        self.power_curve_file = None
+        self.ct_curve_file = None
 
 
 class WorkflowOptions(object):

@@ -1,3 +1,5 @@
+"""This module contains a function create_random_layout especifically at the IEA37's reference wind plant site Borssele III and IV. To be extracted out of WINDOW and be made an example function.
+"""
 from __future__ import print_function
 from __future__ import absolute_import
 from builtins import range
@@ -8,21 +10,49 @@ from random import uniform
 import numpy as np
 
 
-class NumberLayout(ExplicitComponent):
-    def __init__(self, n):
-      super(NumberLayout, self).__init__()
-      self.n = n
+# class NumberLayout(ExplicitComponent):    
 
-    def setup(self):
-        self.add_input("orig_layout", shape=(self.n, 2))
-        self.add_output("number_layout", shape=(self.n, 3))
+#     """Deprecated class no longer in use. Will be deleted shortly.
+    
+#     Attributes:
+#         n (TYPE): Description
+#     """
+    
+#     def __init__(self, n):
+#       """Summary
+      
+#       Args:
+#           n (TYPE): Description
+#       """
+#       super(NumberLayout, self).__init__()
+#       self.n = n
 
-    def compute(self, inputs, outputs):
-        orig_layout = inputs["orig_layout"]
-        outputs["number_layout"] = [[n, orig_layout[n][0], orig_layout[n][1]] for n in range(len(orig_layout))]
+#     def setup(self):
+#         """Summary
+#         """
+#         self.add_input("orig_layout", shape=(self.n, 2))
+#         self.add_output("number_layout", shape=(self.n, 3))
+
+#     def compute(self, inputs, outputs):
+#         """Summary
+        
+#         Args:
+#             inputs (TYPE): Description
+#             outputs (TYPE): Description
+#         """
+#         orig_layout = inputs["orig_layout"]
+#         outputs["number_layout"] = [[n, orig_layout[n][0], orig_layout[n][1]] for n in range(len(orig_layout))]
 
 
 def create_random_layout(n_turbs):
+    """Summary
+    
+    Args:
+        n_turbs (TYPE): Description
+    
+    Returns:
+        TYPE: Description
+    """
     squares = []
     for n in range(n_quadrilaterals):
        square = [[1.0 / n_quadrilaterals * n, 0.0], [n * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 1.0], [(n + 1) * 1.0 / n_quadrilaterals, 0.0]]
@@ -30,6 +60,11 @@ def create_random_layout(n_turbs):
     borssele_mapping1 = AreaMapping(areas[0], squares[0])
     borssele_mapping2 = AreaMapping(areas[1], squares[1])
     def create_random():
+       """Summary
+       
+       Returns:
+           TYPE: Description
+       """
        xt, yt = 2.0, 2.0
        while (xt < 0.0 or xt > 1.0) or (yt < 0.0 or yt > 1.0):
           xb, yb = uniform(min(min([item[0] for item in areas[0]]), min([item[0] for item in areas[1]])), max(max([item[0] for item in areas[0]]), max([item[0] for item in areas[1]]))), uniform(min(min([item[1] for item in areas[0]]), min([item[1] for item in areas[1]])), max(max([item[1] for item in areas[0]]), max([item[1] for item in areas[1]])))

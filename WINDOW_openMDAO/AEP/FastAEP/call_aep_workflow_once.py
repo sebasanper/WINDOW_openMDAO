@@ -4,12 +4,12 @@ from .site_conditions.wind_conditions.windrose_new import WeibullWindBins
 from .farm_energy.wake_model_mean_new.aero_power_ct_models.aero_models import power, thrust_coefficient
 
 
-def call_aep(wake_model, turbulence_model, merge_model, power_curve_file, ct_curve_file, windrose_file, layout, nbins, artif_angle):
+def call_aep(options, layout):
 
-    workflow1 = aep_workflow(WeibullWindBins, windrose_file, turbulence_model, thrust_coefficient, ct_curve_file, wake_model, merge_model, power, power_curve_file)
+    workflow1 = aep_workflow(WeibullWindBins, options)
 
-    workflow1.windrose.nbins = nbins
-    workflow1.windrose.artificial_angle = artif_angle
+    workflow1.windrose.nbins = options.samples.wind_speeds
+    workflow1.windrose.artificial_angle = options.samples.wind_sectors_angle
     workflow1.print_output = False
     answer = workflow1.run(layout)
     # power2.reset()
