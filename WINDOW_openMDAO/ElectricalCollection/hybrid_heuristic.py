@@ -31,6 +31,10 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
 
     # ---------------------------------------Main----------------------------------------------
     def set_cable_topology(NT, WT_List, central_platform_locations, cable_list):
+        central_platform_locations = [[central_platform_locations[i,1], central_platform_locations[i,2]] for i in range(len(central_platform_locations))]
+        WT_List = [[int(WT_List[i,0]), WT_List[i,1], WT_List[i,2]] for i in range(len(WT_List))]
+        # print(WT_List)
+        # print(central_platform_locations)
         Wind_turbines = []
         for WT in WT_List:
             Wind_turbines.append([WT[0] + 1, WT[1], WT[2]])
@@ -203,8 +207,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
                     temp3 = [x for x in temp3 if x != []]
         return Routing, Routes
 
-    def Hybrid(Savingsi, Savingsi_finder, Wind_turbinesi, Routing, central_platform_location, Capacityi,
-               Routing_red, Routing_green):
+    def Hybrid(Savingsi, Savingsi_finder, Wind_turbinesi, Routing, central_platform_location, Capacityi, Routing_red, Routing_green):
         Paths = []
         for WT in Wind_turbinesi:
             Paths.append([0, WT[0]])
@@ -244,9 +247,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
             Routes.append(route)
         return Routes, Routing, Routing_red, Routing_green
 
-    def Esau_Williams_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbinesi, Routes, Routing,
-                                   central_platform_location, Capacityi, Routing_red, Routing_green, Costi,
-                                   Cable_Costi):
+    def Esau_Williams_Cable_Choice(Savingsi, Savingsi_finder, Crossingsi_finder, Wind_turbinesi, Routes, Routing, central_platform_location, Capacityi, Routing_red, Routing_green, Costi, Cable_Costi):
         total_update_red = []
         total_update_green = []
         while True:
@@ -444,8 +445,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
                                                                  max_saving[0])
         return Routes, Routing, Routing_red, Routing_green
 
-    def RouteOpt_Hybrid(Routing, central_platform_location, Costi, Capacityi, Routes,
-                        Wind_turbinesi):
+    def RouteOpt_Hybrid(Routing, central_platform_location, Costi, Capacityi, Routes, Wind_turbinesi):
         Paths = []
         temp = []
         for route in Routes:
@@ -730,8 +730,7 @@ def cable_design(WT_List, central_platform_locations, number_turbines_per_cable,
         return intersection, crossings
 
     # Plotting+Cable_length
-    def plotting(central_platform_location1, Wind_turbines1, Routing, Routing_red, Routing_green,
-                 Cable_Costi):
+    def plotting(central_platform_location1, Wind_turbines1, Routing, Routing_red, Routing_green, Cable_Costi):
         central_platform_location1_1 = [[0, central_platform_location1[0], central_platform_location1[1]]]
         Full_List = central_platform_location1_1 + Wind_turbines1
         Routing_blue = [i for i in Routing if i not in Routing_red]

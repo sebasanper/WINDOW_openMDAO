@@ -3,7 +3,7 @@
 from WINDOW_openMDAO.src.api import AbstractWaterDepth
 # from scipy.interpolate import interp2d
 import numpy as np
-
+# from numba import vectorize
 
 # class RoughInterpolation(AbstractWaterDepth):
 
@@ -45,7 +45,7 @@ class RoughClosestNode(AbstractWaterDepth):
 
     """Summary
     """
-    @vectorize(float64(float64))
+    # @vectorize(float64(float64))
     def depth_model(self, layout):
         """Summary
         

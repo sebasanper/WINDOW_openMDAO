@@ -9,7 +9,7 @@ class Models(object):
         self.electrical = None
         self.support = None
         self.opex = None
-        self.apex = None
+        self.capex = None
 
 
 class Samples(object):
@@ -21,7 +21,7 @@ class Samples(object):
 class Input(object):
     def __init__(self):
         self.site = Site()
-        self.turbine = Site()
+        self.turbine = Turbine()
 
 
 class Site(object):

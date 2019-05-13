@@ -1,17 +1,18 @@
 from __future__ import division
 from past.utils import old_div
-from numpy import radians, tan, cos, sqrt
+import numpy as numpy
+# import radians, tan, cos, sqrt
 
 
-def distance_to_front(x, y, theta):
-    theta = radians(theta)
-    return old_div(abs(x + tan(theta) * y - old_div(100000000.0, cos(theta))), sqrt(1.0 + tan(theta) ** 2.0))
+def distances_to_front(layout, theta):
+    theta = np.radians(theta)
+    return old_div(np.abs(x + np.tan(theta) * y - old_div(100000000.0, np.cos(theta))), np.sqrt(1.0 + np.tan(theta) ** 2.0))
 
 
 def order(layout_array, wind_direction):
-    distances = []
-    for turbine in layout_array:
-        distances.append([distance_to_front(turbine[1], turbine[2], wind_direction), turbine[0]])
+    distances = np.empty(len(layout_array))
+    # for turbine in layout_array:
+    distances = distances_to_front(layout_array, wind_direction)
     # print distances
     distances.sort()
     # print distances

@@ -1,9 +1,9 @@
 """Summary
 """
 from openmdao.api import ExplicitComponent
-from WINDOW_openMDAO.input_params import max_n_turbines
+from WINDOW_openMDAO.input_params import max_n_turbines, max_n_substations
 import numpy as np
-from abc import ABC
+from abc import ABC, abstractmethod
 
 
 class AbstractWaterDepth(ExplicitComponent, ABC):
@@ -29,10 +29,15 @@ class AbstractWaterDepth(ExplicitComponent, ABC):
     def setup(self):
         """Summary
         """
-        self.add_input('layout', shape=max_n_turbines)
+        # if self.n_turbines > 4:
+        #     self.add_input('layout', shape=(max_n_turbines, 2))
+        # else:
+        #     self.add_input('layout', shape=(max_n_substations, 2))  
+
+        self.add_input('layout', shape=(self.n_turbines, 2))             
         self.add_input('n_turbines', val=0)
 
-        self.add_output('water_depths', shape=max_n_turbines)
+        self.add_output('water_depths', shape=self.n_turbines)
         #self.declare_partals(of='water_depths', wrt='layout', method='fd')
 
     def compute(self, inputs, outputs):
@@ -43,12 +48,11 @@ class AbstractWaterDepth(ExplicitComponent, ABC):
             outputs (TYPE): Description
         """
         layout = inputs['layout']
-        n_turbines = inputs['n_turbines']
-
+        n_turbines = int(inputs['n_turbines'])
         depths = self.depth_model(layout[:n_turbines])
-        dif = max_n_turbines - len(n_turbines)
-        if dif:
-            depths = np.append(depths, np.empty(dif).fill(np.nan))
+        # dif = max_n_turbines - n_turbines
+        # if dif:
+        #     depths = np.append(depths, np.empty(dif).fill(np.nan))
         # depths = depths.reshape(max_n_turbines)
         outputs['water_depths'] = depths
 

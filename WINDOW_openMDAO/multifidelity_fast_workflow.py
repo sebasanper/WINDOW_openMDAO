@@ -3,8 +3,8 @@
 # workflow_regular.py only defines the workflow to be built. Class WorkingGroup needs to be imported from another working directory. As an example we provide a working directory in the example folder. Run IEA_borssele_regular.py from the 'example' folder instead
 
 from openmdao.api import IndepVarComp, Group
-from WINDOW_openMDAO.input_params import rotor_radius as turbine_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency, number_substations
-from WINDOW_openMDAO.src.api import AEP, NumberLayout, MinDistance, WithinBoundaries
+from WINDOW_openMDAO.input_params import rotor_radius, max_n_turbines, max_n_substations, interest_rate, central_platform, areas, n_quadrilaterals, separation_equation_y, cutin_wind_speed, cutout_wind_speed, operational_lifetime, number_turbines_per_cable, wind_directions, weibull_shapes, weibull_scales, direction_probabilities, layout, n_turbines, TI_ambient, coll_electrical_efficiency, transm_electrical_efficiency, number_substations
+from WINDOW_openMDAO.src.api import AEP, MinDistance, WithinBoundaries
 from WINDOW_openMDAO.WaterDepth.water_depth_models import RoughClosestNode
 from WINDOW_openMDAO.Finance.LCOE import LCOE
 
@@ -63,7 +63,7 @@ class WorkingGroup(Group):
 
         indep2.add_output("areas", val=areas)
         indep2.add_output('layout', val=layout)
-        indep2.add_output('turbine_radius', val=turbine_radius)
+        indep2.add_output('rotor_radius', val=rotor_radius)
         indep2.add_output('n_turbines', val=n_turbines)
         indep2.add_output('n_turbines_p_cable_type', val=number_turbines_per_cable)  # In ascending order, but 0 always at the end. 0 is used for requesting only two or one cable type.
         indep2.add_output('substation_coords', val=central_platform)
@@ -75,25 +75,25 @@ class WorkingGroup(Group):
 
         # self.add_subsystem('numbersubstation', NumberLayout(max_n_substations)) # To be deleted
         # self.add_subsystem('numberlayout', NumberLayout(max_n_turbines)) # To be deleted
-        self.add_subsystem('depths', RoughClosestNode(max_n_turbines, self.bathymetry_file))
-        self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations, self.bathymetry_file))
+        self.add_subsystem('depths', RoughClosestNode(max_n_turbines, self.options.input.site.bathymetry_file))
+        self.add_subsystem('platform_depth', RoughClosestNode(max_n_substations, self.options.input.site.bathymetry_file))
 
-        self.add_subsystem('AeroAEP', self.options.Models.aep(self.options))
+        self.add_subsystem('AeroAEP', self.options.models.aep(self.options))
 
-        self.add_subsystem('electrical', self.options.Models.electrical())
+        self.add_subsystem('electrical', self.options.models.electrical())
 
-        self.add_subsystem('support', self.support_model())
-        self.add_subsystem('OandM', self.opex_model())
+        self.add_subsystem('support', self.options.models.support())
+        self.add_subsystem('OandM', self.options.models.opex())
         self.add_subsystem('AEP', AEP())
-        self.add_subsystem('Costs', self.apex_model())
+        self.add_subsystem('Costs', self.options.models.capex())
         self.add_subsystem('lcoe', LCOE())
-        self.add_subsystem('constraint_distance', MinDistance())
-        self.add_subsystem('constraint_boundary', WithinBoundaries())
+        # self.add_subsystem('constraint_distance', MinDistance())
+        # self.add_subsystem('constraint_boundary', WithinBoundaries())
 
-        self.connect("indep2.layout", "AeroAEP.layout")
+        self.connect("indep2.layout", ["AeroAEP.layout", "electrical.layout", "depths.layout"])
         # self.connect("indep2.substation_coords", "numbersubstation.orig_layout") # To be deleted
-        self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
-        self.connect("indep2.areas", "constraint_boundary.areas")
+        # self.connect("indep2.turbine_radius", "constraint_distance.turbine_radius")
+        # self.connect("indep2.areas", "constraint_boundary.areas")
 
         # self.connect('numberlayout.number_layout', 'depths.layout') # To be deleted
 
@@ -113,6 +113,8 @@ class WorkingGroup(Group):
         self.connect('indep2.coll_electrical_efficiency', 'AEP.electrical_efficiency')
 
         # self.connect('numbersubstation.number_layout', 'platform_depth.layout') # To be deleted
+        self.connect('indep2.substation_coords', 'platform_depth.layout') # To be deleted
+        self.connect('indep2.n_substations', "platform_depth.n_turbines")
         self.connect('platform_depth.water_depths', 'Costs.depth_central_platform', src_indices=[0])
 
         self.connect('indep2.n_substations', 'Costs.n_substations')

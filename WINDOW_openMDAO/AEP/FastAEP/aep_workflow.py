@@ -50,36 +50,39 @@ class Workflow(object):
         self.windrose.cutout = cutout_wind_speed
         self.wind_speeds, self.wind_speeds_probabilities = self.windrose.speed_probabilities()
 
-        self.freestream_turbulence = [TI_ambient for _ in range(len(self.wind_speeds[0]))]
+        self.freestream_turbulence = np.full(len(self.wind_speeds[0]), TI_ambient)
 
-        self.energies_per_angle = []
-        self.turbulences_per_angle = []
+        self.turbulences_per_angle = np.empty(len(self.wind_directions))
         self.cable_efficiencies_per_angle = []
         self.array_efficiencies = []
 
-        self.max_turbulence_per_turbine = [0.0 for _ in range(len(turbine_coordinates))]
+        self.max_turbulence_per_turbine = np.zeros(len(turbine_coordinates))
 
         if self.print_output is True: print("=== CALCULATING ENERGY, TURBULENCE PER WIND DIRECTION ===")
-        for i in range(len(self.wind_directions)):
-            self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates, self.wind_speeds[i], self.wind_speeds_probabilities[i], self.wind_directions[i], self.freestream_turbulence, self.wake_mean_model, self.power_model, self.table_power, self.thrust_coefficient_model, self.ct_table, self.wake_merging_model)
-            self.turbulences = max_turbulence_one_angle(deficits, turbine_coordinates, self.wind_speeds[i], self.wind_directions[i], self.freestream_turbulence, Jensen, self.thrust_coefficient_model, self.ct_table, self.wake_turbulence_model)
-            self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities[i] / 100.0
-            self.energies_per_angle.append(self.energy_one_angle_weighted)
-            self.array_efficiency = old_div(self.aero_energy_one_angle, (
-                float(self.number_turbines) * max(self.powers_one_angle) * 8760.0))
-            self.array_efficiencies_weighted = self.array_efficiency * self.direction_probabilities[i] / 100.0
+        # for i in range(len(self.wind_directions)):
+        self.aero_energy_one_angle, self.powers_one_angle, deficits = energy_one_angle(turbine_coordinates, self.wind_speeds, self.wind_speeds_probabilities, self.wind_directions, self.freestream_turbulence, self.wake_mean_model, self.power_model, self.table_power, self.thrust_coefficient_model, self.ct_table, self.wake_merging_model)
 
-            self.array_efficiencies.append(self.array_efficiencies_weighted)
-            self.turbulences_per_angle.append(self.turbulences)
+        self.turbulences = max_turbulence_one_angle(deficits, turbine_coordinates, self.wind_speeds[i], self.wind_directions[i], self.freestream_turbulence, Jensen, self.thrust_coefficient_model, self.ct_table, self.wake_turbulence_model)
 
-            for j in range(len(turbine_coordinates)):
-                if self.turbulences[j] > self.max_turbulence_per_turbine[j]:
-                    self.max_turbulence_per_turbine[j] = self.turbulences[j]
+        self.energy_one_angle_weighted = self.aero_energy_one_angle * self.direction_probabilities / 100.0
+        
+        self.array_efficiency = old_div(self.aero_energy_one_angle, (
+            float(self.number_turbines) * np.max(self.powers_one_angle) * 8760.0))
+
+        self.array_efficiencies_weighted = self.array_efficiency * self.direction_probabilities[i] / 100.0
+
+        np.append(self.array_efficiencies, self.array_efficiencies_weighted)
+        np.append(self.turbulences_per_angle, self.turbulences)
+
+        # for j in range(len(turbine_coordinates)):
+        if self.turbulences[j] > self.max_turbulence_per_turbine[j]:
+            self.max_turbulence_per_turbine[j] = self.turbulences[j]
 
         if self.print_output is True: print(str(self.array_efficiency * 100.0) + " %\n")
         if self.print_output is True: print(" --- Farm annual energy without losses---")
-        self.array_efficiency = sum(self.array_efficiencies)
-        self.farm_annual_energy = sum(self.energies_per_angle)
+
+        self.array_efficiency = self.array_efficiencies.sum()
+        self.farm_annual_energy = self.energy_one_angle_weighted.sum()
 
         if self.print_output is True: print(str(self.farm_annual_energy / 1000000.0) + " MWh\n")
         if self.print_output is True: print(" --- Maximum wind turbulence intensity ---")

@@ -72,7 +72,7 @@ class AEPFast(ExplicitComponent):
         diff = max_n_turbines - n_turbines
         AEP, max_TI, efficiency = function_aep_fast(self.options, layout)
         if diff:
-            np.append(max_TI, np.empty(diff).fill(np.nan))
+            np.append(max_TI, np.full(diff, np.nan))
         outputs['AEP'], outputs['max_TI'], outputs['efficiency'] = AEP, max_TI, efficiency
 
 

@@ -1,0 +1,19 @@
+Metadata-Version: 1.0
+Name: WINDOW-openMDAO
+Version: 0.0.0
+Summary: WINDOW is an MDAO workflow to design offshore wind farms
+Home-page: https://github.com/sebasanper/WINDOW_openMDAO
+Author: Sebastian Sanchez Perez-Moreno
+Author-email: s.sanchezperezmoreno@tudelft.nl
+License: UNKNOWN
+Description-Content-Type: UNKNOWN
+Description: 
+            WINDOW is an MDAO workflow to design offshore wind farms. It is written in
+            NASA's openMDAO framework. The following publication shows the Extended
+            Design Structure Matrix of WINDOW_openMDAO:
+        
+            Sebastian Sanchez Perez Moreno and Michiel B. Zaaijer. "How to select MDAO workflows",
+            2018 AIAA/ASCE/AHS/ASC Structures, Structural Dynamics, and Materials Conference,
+            AIAA SciTech Forum, (AIAA 2018-0654) https://doi.org/10.2514/6.2018-0654
+            
+Platform: UNKNOWN

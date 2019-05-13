@@ -8,19 +8,19 @@ def energy_one_angle(original_layout, freestream_wind_speeds, probabilities_spee
     wind_angle = - wind_angle + 90.0  # To conform to windrose convention. Wake model is written to read 0 as positive X and then angles are measured counterclockwise.
     ordered_layout = order(original_layout, wind_angle)
     energy = 0.0
-    weighted_individuals = [0.0 for _ in range(len(original_layout))]
+    weighted_individuals = np.zeros(len(original_layout))
     # print original_layout
     # print ordered_layout
     def first(x):
         return x[0]
     # print len(freestream_wind_speeds)
-    for speed in range(len(freestream_wind_speeds)):
+    # for speed in range(len(freestream_wind_speeds)):
         ct = []
         wind_speeds_array = [freestream_wind_speeds[speed]]
         deficit_matrix = [[] for _ in range(len(ordered_layout))]
         total_deficit = [0.0]
         # print len(ordered_layout)
-        for i in range(len(ordered_layout)):
+        # for i in range(len(ordered_layout)):
             if i == 0:
                 pass
             else:
@@ -34,7 +34,7 @@ def energy_one_angle(original_layout, freestream_wind_speeds, probabilities_spee
         # print len(wind_speeds_array_original)
         individual_powers = [PowerModel(wind, table_power) for wind in wind_speeds_array_original]
         # print individual_powers
-        for turb in range(len(individual_powers)):
+        # for turb in range(len(individual_powers)):
             weighted_individuals[turb] += individual_powers[turb] * probabilities_speed[speed] / 100.0
         farm_power = sum(individual_powers)
         energy += farm_power * probabilities_speed[speed] / 100.0 * 8760.0

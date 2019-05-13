@@ -7,7 +7,7 @@ import numpy as np
 class AbstractElectricDesign(ExplicitComponent):
 
     def setup(self):
-        self.add_input('layout', shape=(max_n_turbines, 3))
+        self.add_input('layout', shape=(max_n_turbines, 2))
         self.add_input('n_turbines_p_cable_type', shape=3)
         self.add_input('substation_coords', shape=(max_n_substations, 2))
         self.add_input('n_substations', val=0)
@@ -21,11 +21,11 @@ class AbstractElectricDesign(ExplicitComponent):
 
     def compute(self, inputs, outputs):
         n_turbines = int(inputs['n_turbines'])
-        layout = [[int(coord[0]), coord[1], coord[2]] for coord in inputs['layout'][:n_turbines]]
+        layout = np.hstack((np.arange(n_turbines).reshape(n_turbines,1), inputs["layout"]))[:n_turbines]
         n_substations = int(inputs['n_substations'])
         n_turbines_p_cable_type = [int(num) for num in inputs['n_turbines_p_cable_type']]
-        substation_coords = inputs['substation_coords'][:n_substations]
-
+        substation_coords = np.hstack((np.arange(n_substations).reshape(n_substations,1), inputs['substation_coords']))[:n_substations]
+        # print(substation_coords)
         cost, topology_dict, cable_lengths = self.topology_design_model(layout, substation_coords, n_turbines_p_cable_type)
         if type(topology_dict) is dict:
             topology_list = []
@@ -44,8 +44,7 @@ class AbstractElectricDesign(ExplicitComponent):
                 except TypeError:
                     return ()
                 shapes = [find_shape(subseq) for subseq in seq]
-                return (len_,) + tuple(max(sizes) for sizes in zip_longest(*shapes,
-                                                                            fillvalue=1))
+                return (len_,) + tuple(max(sizes) for sizes in zip_longest(*shapes, fillvalue=1))
 
             def fill_array(arr, seq):
                 if arr.ndim == 1:
