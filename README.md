@@ -2,7 +2,7 @@ WINDOW_openMDAO
 
 author: Sebastian Sanchez Perez-Moreno
 affiliation: Wind Energy Section, Faculty of Aerospace Engineering, TU Delft, the Netherlands
-email: s.sanchezperezmoreno@tudelft.nl
+email: sebasanper@gmail.com
 
 WINDOW is an MDAO workflow meant to support the design of offshore wind farms. WINDOW can accommodate different models for the same disciplinary modules, and some models are included in the tool.
 It is written in NASA's OpenMDAO framework.
